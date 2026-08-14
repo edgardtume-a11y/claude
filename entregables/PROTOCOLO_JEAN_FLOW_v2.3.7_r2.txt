@@ -1,0 +1,74 @@
+PROTOCOLO JEAN_FLOW 555 META_QUANT - v2.3.7-r2 (14-ago-2026)
+============================================================
+COPIA generada desde SKILL.md de la habilidad jean-flow-555 (fuente unica; sha256 5a4782d8d2090924e9cd0a9851d114a5abc1200ee8a54f83eab161eb098a7cf6).
+
+# JEAN_FLOW 555 META_QUANT — protocolo de trabajo con Jean
+
+**Protocolo v2.3.7-r2 (14-ago-2026).** Fuente única: este SKILL.md de la habilidad `jean-flow-555`. La copia en texto plano del proyecto JOTA se regenera desde aquí; nunca editar las dos por separado.
+
+## Con quién trabajas y cómo comunicar
+
+- Jean escribe en MAYÚSCULAS, en español. No es programador y no debe necesitar serlo.
+- Su equipo: laptop "jeanp", Windows 11 es-ES, disco interno C:, USB TOSHIBA EXT en D: (solo respaldo/evidencia, NUNCA para capturar), Python 3.12.10 en `C:\Users\jeanp\AppData\Local\Programs\Python\Python312\python.exe`, GPU NVIDIA RTX 3050 6 GB, zona horaria Perú (UTC-5).
+- Entregarle TODO como: archivos `.cmd` de doble clic (autocontenidos, ASCII puro + CRLF, patrón `rem ==CARGA==` con payload PowerShell embebido), explicaciones en español simple, pasos de una línea. Él responde con capturas de pantalla y subiendo archivos.
+- NO usar el widget de preguntas con opciones (AskUserQuestion): lo rechazó. Preguntar en texto plano, máximo una pregunta por mensaje.
+- Una cosa a la vez: nunca pedirle correr dos procesos en paralelo (p. ej. INICIAR y VALIDAR a la vez).
+- Estilo: directo, sin filosofía; si algo salió mal por culpa nuestra, reconocerlo sin rodeos.
+
+## Qué es el producto
+
+- Colector Binance fase 1: libro de órdenes L2 + trades de spot y futuros USDⓈ-M, con integridad de grado auditoría — journals causales, sellos SHA-256 por archivo, replay determinista doble, gates de identidad y métricas.
+- Ruta oficial de instalación: `C:\JF\555\binance_phase1_collector`, creada SOLO por el instalador sellado de la versión vigente (hoy `INSTALAR_EN_C_v237.cmd`); instalaciones previas quedan renombradas `555_anterior_<fecha>` — son evidencia, no tocar.
+- OJO con la documentación interna del ZIP: `LEEME_PRIMERO.txt`, `README.md` y `COMANDOS_CERTIFICACION_V2.txt` todavía dicen "extrae el ZIP a mano" — ese flujo quedó SUSTITUIDO por el instalador. `INSTALAR_EN_C_v237.cmd`, `RECOGER_EVIDENCIA_4.cmd` y `VALIDAR_EN_WINDOWS.cmd` se entregan por chat FUERA del ZIP (por eso no aparecen en el manifiesto de 137 archivos). Si Jean cita el LEEME para extraer a mano, explicarle la diferencia sin tratarlo como error suyo.
+- Certificación = doble clic normal a `555\INICIAR.cmd` → opción `3` → Enter (NUNCA "Ejecutar como administrador"). Modo 3 = etapas de 10+30+120 min de tiempo SALUDABLE desde READY (una etapa puede tardar más de reloj sin ser fallo). Símbolo para certificar: **BTCUSDT** en modos 2 y 3 — el predeterminado del paquete es TUTUSDT y un símbolo sin volumen en futuros hace fallar la certificación (el menú ya sugiere BTCUSDT; Enter lo acepta).
+- Condiciones de certificación (evidencia de campo): laptop ENCHUFADA, sin suspender, sin programas pesados abiertos, y la ventana negra VISIBLE (no minimizada).
+- Veredictos: `RESULT.json` se escribe en TODA etapa (queda `pass=false` hasta cerrar el postflight NTP). El marcador `CAPTURA_COMPLETA_AUDITADA.json` solo aparece cuando el modo 3 completo da PASS; un intento completo nuevo archiva el marcador previo. Si algo falla, Jean sube el `RESULT.json` al chat. No declarar certificación porque el dashboard se vea.
+- Umbrales p99 vigentes (fijados en la revisión 2.3.4; sin cambios hasta v2.3.7): `parse`, `book_apply`, `book_pipeline_total` y `writer_cooperative_yield` ≤ 5 ms; `event_loop_lag` ≤ 40 ms.
+- `VALIDAR_EN_WINDOWS.cmd` (validación de red y host): va JUNTO A la carpeta 555 (no dentro), se corre con doble clic DESPUÉS de haber lanzado INICIAR.cmd al menos una vez, y nunca a la vez que INICIAR. Deja la evidencia en `validacion_<fecha>\` junto a 555.
+- Límite honesto de la verificación (SECURITY.md): la integridad del release es INTERNA — manifiestos dentro del ZIP, sin firma externa. Protege contra corrupción accidental; NO prueba autenticidad frente a un atacante. No sobreafirmar ante Jean.
+- Los encabezados de `README.md` ("JEAN_FLOW 2.3.0", motor "2.2.2") y `SECURITY.md` ("2.3.0") muestran versiones viejas por arrastre documental: la versión real se confirma en `INICIAR.cmd`, `CERTIFICACION_FASE1.md` y `LEEME_PRIMERO.txt`. No rediagnosticar una "mezcla de versiones" por esos encabezados.
+
+## Estado vigente — v2.3.7 (actualizado: 14-ago-2026)
+
+- Versión vigente: **v2.3.7**. ZIP sellado sha256 `647f4c3d40e763c84499acee36877f043bca0c7a432b2602025135b0858c9216`, RELEASE_MANIFEST sha256 `cd049213d698d485f19fc1b8bc0040cdc1f709d9c678fb0e204863a7bcccb8d1` (137 archivos), suite offline 238 passed / 2 skipped (los 2 skipped son los tests de red real, `RUN_BINANCE_LIVE=1`).
+- Verificación independiente del 14-ago-2026 (entorno Linux limpio): sello del ZIP EXACTO, sello del manifiesto EXACTO, 137/137 archivos OK uno a uno, `verify_release_tree` PASS con los 5 sellos de versión en 2.3.7, suite reproducida 238 passed / 2 skipped, wheelhouse 20/20 wheels OK contra su manifiesto.
+- Pendiente inmediato: instalar con `INSTALAR_EN_C_v237.cmd` y recertificar modo 3 (INICIAR → 3 → Enter). Tras el veredicto, Jean junta la evidencia con `RECOGER_EVIDENCIA_4.cmd` (busca en TODOS los discos/instalaciones y trae el run más reciente) y sube UN zip.
+- Historia que NO hay que rediagnosticar (cadena de causas ya cerradas):
+  1. v2.3.4 vetó dos certificaciones (sesiones `87fa5a61d019…` D: y `d64fea5560ac…` C:) con `0xE9 position 700/767`: transporte cp1252 del informe en Windows es-ES ('é' de "después"; 'θ̂' crasheaba el examen de métricas). Corregido en v2.3.5 (`-X utf8` + reconfigure UTF-8; contrato en `test_utf8_stdio.py`). Los datos SIEMPRE estuvieron íntegros.
+  2. v2.3.5 (sesión `5ebb3efde620…`, C:, carpeta 4.02): TODOS los gates de datos en verde (commitment, identidad, replays con sellos idénticos, 0 resets, 600.0 s) y solo `metrics` FAIL con p99 clavados en 15/16 ms = tic de 15.625 ms de `GetTickCount64` (reloj de `time.monotonic_ns()` en Windows + Python 3.12) — la máquina real hace 0.136 ms (banco del preflight). Además el auditor cazó `count > count_total` (off-by-one, snapshot 76). Corregido en v2.3.6: duraciones con `perf_counter_ns`, temporizador fino de 1 ms (`fine_timer_resolution`, winmm) durante la captura, y foto de métricas con invariante `count <= count_total` (contrato en `test_metrics_fidelity.py`). Umbrales EXACTAMENTE iguales.
+  3. v2.3.6 (sesión `dda44a52ff1f…`, C:\JF\555): regla de medir probada (decimales reales, off-by-one muerto), datos otra vez todos en verde, y quedaron al filo `writer_yield_p99` (6.9/9.6 vs 5 ms; antes 3.1/3.9) y `book_pipeline` usdm (5.272 vs 5 ms), con `fine_timer_1ms=True` en el log pero `event_loop_lag` igual que siempre (24 ms): Windows 11 ignora el temporizador y degrada a E-cores (EcoQoS) a los procesos con ventana minimizada. Corregido en v2.3.7: opt-out `SetProcessInformation(ProcessPowerThrottling)` (EXECUTION_SPEED | IGNORE_TIMER_RESOLUTION, StateMask=0), restaurado al salir; log `foreground_qos=True/False`. Umbrales intactos.
+- El TOSHIBA (D:) sí fue culpable de 189 `healthy_resets` y una etapa de 10 min estirada a 56 min; en C: fueron 0 resets y 600.0 s exactos. Regla confirmada: capturar SIEMPRE en disco interno.
+- Jean tiene 6 instalaciones vivas entre C: y D: (mapa: evidencia del 14-ago, en JOTA). `C:\JF\4.02\JEAN_FLOW_555_META_QUANT_v2.3.5 (1)\` fue una extracción manual (resultó íntegra: manifest idéntico al sello) y queda como EVIDENCIA: no usarla, no borrarla. Las de D: son evidencia histórica.
+
+## Reglas de oro (no negociables)
+
+1. Los runs fallidos son EVIDENCIA: jamás modificar, "reparar", renombrar ni borrar nada dentro de `runs\` ni en `D:\JF\23`, `D:\JF\2141` o carpetas `555_anterior_*`.
+2. Cero cambios silenciosos de criterio: umbrales, gates o formato solo cambian de forma explícita, documentada y con nueva versión. Los tests de contrato (runtime contract) fijan hasta la forma del comando de los hijos aislados.
+3. NO instalar ni mezclar el paquete de ChatGPT (`JEAN_FLOW_555_OPERATIVO_CAUSAL_R3`, GUI `00_ABRIR_JEAN_FLOW`): se conserva solo como referencia visual. Su panel/servidor debe estar APAGADO durante certificaciones. ChatGPT no debe "reparar" ni reescribir CSVs jamás.
+4. Cualquier cambio de código — aunque lo sugiera otra IA — pasa por el proceso completo: tests + `tools/build_release.py` + RELEASE_MANIFEST.sha256 + sello del ZIP + nueva versión (5 sellos de versión verificados por `verify_release_tree`). Nunca ediciones a mano sobre la instalación. Esto incluye la copia `SKILL_QUANT_DEV_SENIOR.md` que viaja sellada dentro del release.
+5. Verificar antes de afirmar: ante un fallo nuevo, pedir `RESULT.json` y los `audit_*.json` y razonar con evidencia de campo. No culpar al hardware sin descartar primero el software (lección aprendida: el 0xE9 parecía disco y era nuestro bug).
+6. UNA sola instalación oficial: `C:\JF\555`, creada solo por el instalador sellado de la versión vigente; jamás extraer el ZIP a mano (el instalador verifica el sello del ZIP y los 137 archivos uno a uno). Todas las demás instalaciones en C: y D: son EVIDENCIA: no usarlas, no borrarlas.
+7. NUNCA ejecutar nada como administrador: el bootstrap consulta TokenElevation y falla cerrado si la consola está elevada. Única excepción: el `/resync` puntual del preflight NTP, que puede pedir UAC tras autorización de Jean.
+
+## Triage rápido (diagnósticos ya cerrados — responder sin rediagnosticar)
+
+- `STATUS_LOCALE_UNSUPPORTED`: w32tm en un idioma no reconocido; NO es fallo del reloj. Pedir el `clock_preflight.json` de `runs\` para añadir el idioma.
+- `HEALTHY_DURATION_INCOMPLETE`: se interrumpió la etapa antes de completar la ventana saludable; nunca se convierte en PASS. Repetir la etapa completa.
+- `ALREADY_RUNNING`: otro proceso tiene el mutex (INICIAR duplicado, o el panel de ChatGPT encendido). Cerrar el otro proceso; no "reparar" nada.
+- Etapa que "dura de más" en el reloj: las etapas miden tiempo SALUDABLE desde READY, no tiempo de pared. Por sí solo no es fallo.
+- p99 clavados en 15/16 ms, o writer 2-3x más lento con la ventana minimizada: causas ya corregidas en v2.3.6/v2.3.7. Si reaparecen, PRIMERO confirmar qué versión está instalada.
+- `UAC_CANCELLED` / `UAC_FAILED` en el resync NTP: Jean canceló o falló el UAC del `/resync`; repetir aceptando el aviso. No es fallo de datos.
+
+## Fases prometidas (después de certificar)
+
+- Panel GUI de botones para operar todo sin CMDs.
+- Fase ML/bot: LightGBM/CUDA aprovechando la RTX 3050 6 GB — objetivo 70–90 % de uso de GPU en análisis/entrenamiento. La captura en sí es I/O y debe seguir ligera; el consumo fuerte de GPU va en la fase de análisis, no en la de captura. Puerta de entrada: existe `runs\CAPTURA_COMPLETA_AUDITADA.json`; sin ese marcador no se inicia LightGBM.
+
+## Dónde está el contexto largo
+
+- Proyecto **JOTA** en claude.ai: guía de certificación (`claude/guia-certificar-en-c-v2.3.4.md` — escrita para v2.3.4: los pasos INICIAR → 3 → Enter siguen vigentes, pero NO recoge la ventana VISIBLE, el instalador v237 ni `RECOGER_EVIDENCIA_4.cmd`), informes de cierre y auditorías, y la copia de este protocolo. Leerlos antes de rediagnosticar nada.
+
+## Mantenimiento de esta habilidad
+
+- Fuente única: este SKILL.md. Al publicar una revisión: actualizar AQUÍ, regenerar desde aquí la copia TXT de JOTA, subir el ZIP nuevo a claude.ai y ELIMINAR la habilidad anterior — nunca dos versiones instaladas a la vez (comparten `name` y la activación sería ambigua: riesgo de dictar el sello o el instalador equivocado).
+- Nombrar los ZIPs de la habilidad siempre con versión y revisión (p. ej. `HABILIDAD_JEAN_FLOW_555_v237_r2.zip`). Los ZIPs viejos se guardan como evidencia, jamás instalados.
