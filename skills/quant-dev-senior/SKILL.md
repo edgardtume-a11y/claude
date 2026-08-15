@@ -87,4 +87,4 @@ Si falta acceso al proyecto o a datos reales, crear una interfaz y fixtures repr
 
 ## Nota de mantenimiento
 
-Esta skill vive en dos lugares que deben mantenerse IDÉNTICOS: instalable en claude.ai como `quant-dev-senior/SKILL.md`, y una copia sellada dentro del release del colector (`555/SKILL_QUANT_DEV_SENIOR.md`). La copia sellada solo cambia vía el proceso completo de release (regla de oro 4 del protocolo jean-flow-555). Sincronizadas por última vez en la entrega v2.4.0.
+Esta skill vive en dos lugares que deben mantenerse IDÉNTICOS: instalable en claude.ai como `quant-dev-senior/SKILL.md`, y una copia sellada dentro del release del colector (`555/SKILL_QUANT_DEV_SENIOR.md`). La copia sellada solo cambia vía el proceso completo de release (regla de oro 4 del protocolo jean-flow-555). Sincronizadas por última vez en la entrega v2.4.1.

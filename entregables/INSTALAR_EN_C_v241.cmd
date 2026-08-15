@@ -1,18 +1,18 @@
 @echo off
 rem ============================================================
-rem  JEAN_FLOW 555 META_QUANT - INSTALADOR OFICIAL v2.4.0
+rem  JEAN_FLOW 555 META_QUANT - INSTALADOR OFICIAL v2.4.1
 rem  Doble clic NORMAL. NO usar "Ejecutar como administrador".
 rem  Coloque este archivo JUNTO al ZIP:
-rem    JEAN_FLOW_555_META_QUANT_v2.4.0.zip
+rem    JEAN_FLOW_555_META_QUANT_v2.4.1.zip
 rem  Que hace: verifica el sello SHA-256 del ZIP, aparta la
 rem  instalacion previa como 555_anterior_<fecha> (no borra nada),
-rem  extrae, verifica los 142 archivos uno a uno contra el
+rem  extrae, verifica los 144 archivos uno a uno contra el
 rem  manifiesto y deja la instalacion oficial en C:\JF\555.
 rem ============================================================
 setlocal
-title INSTALAR JEAN_FLOW v2.4.0
+title INSTALAR JEAN_FLOW v2.4.1
 set "JF_SELF=%~f0"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$l=[IO.File]::ReadAllLines($env:JF_SELF);$i=[Array]::IndexOf($l,'rem ==CARGA==');$p=$l[($i+1)..($l.Length-1)] | ForEach-Object { $_ -replace '^rem( |$)','' };$t=Join-Path ([IO.Path]::GetTempPath()) 'jf_instalar_v240.ps1';[IO.File]::WriteAllLines($t,$p);powershell -NoProfile -ExecutionPolicy Bypass -File $t;exit $LASTEXITCODE"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$l=[IO.File]::ReadAllLines($env:JF_SELF);$i=[Array]::IndexOf($l,'rem ==CARGA==');$p=$l[($i+1)..($l.Length-1)] | ForEach-Object { $_ -replace '^rem( |$)','' };$t=Join-Path ([IO.Path]::GetTempPath()) 'jf_instalar_v241.ps1';[IO.File]::WriteAllLines($t,$p);powershell -NoProfile -ExecutionPolicy Bypass -File $t;exit $LASTEXITCODE"
 echo.
 if errorlevel 1 (
   echo RESULTADO: FALLO - lea los mensajes de arriba y comparta la foto en el chat.
@@ -25,11 +25,11 @@ endlocal
 exit /b
 rem ==CARGA==
 rem $ErrorActionPreference = 'Stop'
-rem $VERSION = '2.4.0'
-rem $ZIP_NAME = 'JEAN_FLOW_555_META_QUANT_v2.4.0.zip'
-rem $ZIP_SHA = 'faf0ee37dd41ac1bdde49b61cb37965e8ea8f150acb4c248eea2439c7fb62856'
-rem $MANIFEST_SHA = '6a4e38451ea13415d181abad62bf6ca8c4a9cf4b46ffcdb7297dde0c5b7e45db'
-rem $MANIFEST_FILES = 142
+rem $VERSION = '2.4.1'
+rem $ZIP_NAME = 'JEAN_FLOW_555_META_QUANT_v2.4.1.zip'
+rem $ZIP_SHA = 'd378f07653dcfd5e21b88df821ea14753709a4ba3f16f99069fbd23d3380f6ab'
+rem $MANIFEST_SHA = 'ca6156075b45bccd6f237d37c789675d1115b82821479b6df478c5470a704d20'
+rem $MANIFEST_FILES = 144
 rem
 rem function Fallo([string]$code, [string]$msg) {
 rem   Write-Host ''
@@ -149,7 +149,7 @@ rem   $json = $json + '  "archivos_verificados": ' + $n + ',' + [Environment]::N
 rem   $json = $json + '  "destino": "' + ($destino -replace '\\', '\\\\') + '",' + [Environment]::NewLine
 rem   $json = $json + '  "fecha": "' + $fin + '"' + [Environment]::NewLine
 rem   $json = $json + '}'
-rem   $resPath = Join-Path $cmdDir ('INSTALACION_v240_RESULT_' + $ts + '.json')
+rem   $resPath = Join-Path $cmdDir ('INSTALACION_v241_RESULT_' + $ts + '.json')
 rem   [IO.File]::WriteAllText($resPath, $json)
 rem
 rem   Write-Host ''
