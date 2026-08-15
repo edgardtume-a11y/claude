@@ -567,6 +567,19 @@ class TestInformes(PruebaBase):
         self.assertIn("preflight", texto)
         self.assertIn("VEREDICTO: PASS", texto)
 
+    def test_informe_texto_es_representable_en_cp1252(self) -> None:
+        """La consola de Windows en español escribe en cp1252.
+
+        La sesión d64fea5560ac perdió su ``audit_metrics.json`` porque al
+        imprimir el informe apareció una θ que cp1252 no sabe escribir
+        (``UnicodeEncodeError`` en ``audit.py:1180``). Ningún texto de esta
+        herramienta puede repetir ese fallo.
+        """
+
+        for series in (self._series(), [], [_serie_sintetica(sospechoso=True)]):
+            with self.subTest(series=len(series)):
+                informe_texto(series).encode("cp1252")
+
     def test_informe_texto_con_lista_vacia_no_revienta(self) -> None:
         texto = informe_texto([])
 
