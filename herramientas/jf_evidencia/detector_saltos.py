@@ -432,7 +432,7 @@ def veredicto(series: list[Serie]) -> tuple[str, str]:
 
     - ``FAIL`` si alguna serie superó su umbral. Es la única afirmación positiva
       que este detector puede hacer: vio un escalón.
-    - ``UNKNOWN`` si no hubo series, si ninguna fue legible, si todas quedaron
+    - ``UNKNOWN`` si no hubo series, si ninguna fue legible, si **alguna** quedó
       por debajo de la resolución útil (menos de ``FILAS_MINIMAS_UTILES`` filas),
       si alguna quedó ilegible —la cobertura sería incompleta—, si se descartaron
       demasiadas filas, o si hubo deriva acumulada por encima del umbral sin un
@@ -464,15 +464,18 @@ def veredicto(series: list[Serie]) -> tuple[str, str]:
     for serie in series:
         if not serie.medida:
             hallazgos.anotar(f"{serie.ruta.name}: {serie.motivo_ilegible}")
+        elif not serie.suficiente:
+            # Una serie corta NO se puede tapar con las demás. Si contado trae
+            # 400.000 filas y futuros solo 10, la ventana de futuros no se
+            # observó, y un PASS global la daría por observada: eso sería
+            # exactamente fabricar un PASS sobre algo que no se midió.
+            hallazgos.anotar(
+                f"{serie.ruta.name}: solo {serie.filas} filas legibles, "
+                f"por debajo del mínimo de {FILAS_MINIMAS_UTILES} para afirmar nada"
+            )
 
     suficientes = [s for s in series if s.suficiente]
     if not suficientes:
-        for serie in series:
-            if serie.medida:
-                hallazgos.anotar(
-                    f"{serie.ruta.name}: solo {serie.filas} filas legibles, "
-                    f"por debajo del mínimo de {FILAS_MINIMAS_UTILES} para afirmar nada"
-                )
         return DESCONOCIDO, (
             "ninguna serie alcanza la resolución útil: " + hallazgos.texto()
             + ". " + NO_DEMUESTRA
@@ -578,6 +581,13 @@ def informe_texto(series: list[Serie]) -> str:
             lineas.append(
                 "      resultado           : SOSPECHOSO, escalón por encima del umbral"
             )
+        elif not serie.suficiente:
+            # Sin esta línea, Jean leería «sin discontinuidad» junto a un
+            # veredicto UNKNOWN y no entendería de dónde sale la contradicción.
+            lineas.append(
+                f"      resultado           : demasiado pocas filas para afirmar nada "
+                f"(hacen falta {FILAS_MINIMAS_UTILES})"
+            )
         elif serie.deriva_sin_escalon:
             lineas.append(
                 "      resultado           : rango por encima del umbral sin escalón único"
@@ -633,10 +643,13 @@ def informe_json(series: list[Serie]) -> dict[str, Any]:
                 "mediana_muestreada": (serie.paso_muestreo > 1) if medido else None,
                 "paso_muestreo": serie.paso_muestreo if medido else None,
                 "umbral_ms": round(serie.umbral_ms, 6),
-                "sospechoso": serie.sospechoso,
+                # Los tres juicios siguientes salen como ``null`` cuando la serie
+                # no se pudo medir: un ``false`` en "sospechoso" se leería como
+                # «se miró y estaba limpia», y aquí no se miró nada.
+                "sospechoso": serie.sospechoso if medido else None,
                 "filas_minimas_utiles": FILAS_MINIMAS_UTILES,
-                "suficiente": serie.suficiente,
-                "deriva_sin_escalon": serie.deriva_sin_escalon,
+                "suficiente": serie.suficiente if medido else None,
+                "deriva_sin_escalon": serie.deriva_sin_escalon if medido else None,
                 "cobertura_dudosa": serie.cobertura_dudosa if medido else None,
             }
         )
@@ -675,7 +688,22 @@ def _ruta_de_salida_permitida(destino: Path) -> None:
 
 
 def _main(argumentos: Iterable[str] | None = None) -> int:
-    """Punto de entrada de línea de órdenes. Solo lee evidencia."""
+    """Punto de entrada de línea de órdenes. Solo lee evidencia.
+
+    Códigos de salida, con la misma distinción que el resto del proyecto entre
+    «no pude mirar» y «miré y salió mal»:
+
+    ==  =========================================================
+    0   PASS: no se encontró ninguna discontinuidad sobre el umbral
+    1   UNKNOWN: no se pudo afirmar nada, y el motivo va impreso
+    2   error de uso (umbral inválido, destino prohibido, no se pudo escribir)
+    3   FAIL: se vio un escalón por encima del umbral
+    ==  =========================================================
+
+    Ningún error de uso sale como rastro de excepción: este proyecto ya sabe lo
+    que cuesta entregarle a Jean un ``Traceback`` en vez de una frase (el propio
+    ``audit_metrics.json`` de la sesión d64fea5560ac es un rastro de excepción).
+    """
 
     analizador = argparse.ArgumentParser(
         prog="detector_saltos",
@@ -702,16 +730,33 @@ def _main(argumentos: Iterable[str] | None = None) -> int:
     )
     opciones = analizador.parse_args(list(argumentos) if argumentos is not None else None)
 
-    series = analizar_captura(opciones.capture, umbral_ms=opciones.umbral_ms)
+    # El destino se valida ANTES de recorrer cientos de megabytes: si la ruta
+    # está prohibida, Jean se entera en el primer segundo y no al final.
+    if opciones.salida is not None:
+        try:
+            _ruta_de_salida_permitida(opciones.salida)
+        except ValueError as exc:
+            print(f"No escribí nada. {exc}", file=sys.stderr)
+            return 2
+
+    try:
+        series = analizar_captura(opciones.capture, umbral_ms=opciones.umbral_ms)
+    except ValueError as exc:
+        print(f"No puedo usar ese umbral: {exc}", file=sys.stderr)
+        return 2
+
     print(informe_texto(series))
 
     if opciones.salida is not None:
-        _ruta_de_salida_permitida(opciones.salida)
-        escribir_json_atomico(opciones.salida, informe_json(series))
+        try:
+            escribir_json_atomico(opciones.salida, informe_json(series))
+        except OSError as exc:
+            print(f"\nNo se pudo escribir el informe JSON: {exc}", file=sys.stderr)
+            return 2
         print(f"\nInforme JSON escrito en: {opciones.salida}")
 
     estado, _ = veredicto(series)
-    return 0 if estado == PASS else 1
+    return {PASS: 0, DESCONOCIDO: 1, FAIL: 3}[estado]
 
 
 if __name__ == "__main__":  # pragma: no cover - envoltura de línea de órdenes

@@ -12,7 +12,9 @@ está desactivada salvo que se pida expresamente con la variable de entorno
 
 from __future__ import annotations
 
+import contextlib
 import csv
+import io
 import json
 import os
 import sys
@@ -32,6 +34,8 @@ from jf_evidencia.detector_saltos import (
     FILAS_MINIMAS_UTILES,
     UMBRAL_POR_OMISION_MS,
     Serie,
+    _main,
+    _ruta_de_salida_permitida,
     analizar_captura,
     analizar_csv,
     informe_json,
@@ -299,14 +303,19 @@ class TestEntradaMalFormada(PruebaBase):
 
         serie = analizar_csv(ruta)
 
-        if serie is not None:
-            self.assertIsNotNone(serie.motivo_ilegible)
-            assert serie.motivo_ilegible is not None
-            self.assertIn("receive_time_utc_ns", serie.motivo_ilegible)
-            self.assertFalse(
-                serie.sospechoso, "no se midió nada, así que no hay nada que sospechar"
-            )
-            self.assertEqual(veredicto([serie])[0], DESCONOCIDO)
+        # Sin ``if``: un CSV que existe SIEMPRE devuelve una Serie. Envolver
+        # estas comprobaciones en una condición las volvería vacías si algún
+        # día ``analizar_csv`` empezara a devolver None, que es justo el fallo
+        # que esta prueba tiene que cazar.
+        self.assertIsNotNone(serie, "un archivo existente nunca devuelve None")
+        assert serie is not None
+        self.assertIsNotNone(serie.motivo_ilegible)
+        assert serie.motivo_ilegible is not None
+        self.assertIn("receive_time_utc_ns", serie.motivo_ilegible)
+        self.assertFalse(
+            serie.sospechoso, "no se midió nada, así que no hay nada que sospechar"
+        )
+        self.assertEqual(veredicto([serie])[0], DESCONOCIDO)
 
     def test_fila_corrupta_en_medio_se_salta_y_el_recorrido_sigue(self) -> None:
         filas = _filas_constantes()
@@ -549,6 +558,23 @@ class TestVeredicto(unittest.TestCase):
         self.assertEqual(estado, PASS)
         self.assertIn("NO demuestra", motivo)
 
+    def test_una_serie_corta_no_se_tapa_con_una_larga(self) -> None:
+        """Si un mercado apenas tiene filas, su ventana NO se observó.
+
+        Un PASS global la daría por observada, que es fabricar un PASS sobre
+        algo que nadie midió. El veredicto tiene que ser UNKNOWN y nombrar la
+        serie corta.
+        """
+
+        larga = _serie_sintetica(filas=500_000)
+        corta = _serie_sintetica(filas=FILAS_MINIMAS_UTILES - 1, ruta=Path("events-corta.csv"))
+
+        estado, motivo = veredicto([larga, corta])
+
+        self.assertEqual(estado, DESCONOCIDO)
+        self.assertIn("events-corta.csv", motivo)
+        self.assertIn(str(FILAS_MINIMAS_UTILES - 1), motivo)
+
 
 class TestInformes(PruebaBase):
     def _series(self) -> list[Serie]:
@@ -571,14 +597,31 @@ class TestInformes(PruebaBase):
         """La consola de Windows en español escribe en cp1252.
 
         La sesión d64fea5560ac perdió su ``audit_metrics.json`` porque al
-        imprimir el informe apareció una θ que cp1252 no sabe escribir
-        (``UnicodeEncodeError`` en ``audit.py:1180``). Ningún texto de esta
-        herramienta puede repetir ese fallo.
+        imprimir el informe apareció una θ que cp1252 no sabe escribir. El
+        rastro guardado dentro de ese propio archivo lo dice: ``audit.py``,
+        línea 1180 de la copia instalada en ``C:\\JF``, ``print(json.dumps(
+        result, ...))``, ``UnicodeEncodeError: 'charmap' codec can't encode
+        characters in position 538-539``. El texto culpable es la cadena
+        ``"con la banda θ̂±δ/2 publicada en el arranque "`` (``audit.py:1207``
+        en la copia de JF239, donde el ``print`` está en la 1338: los números
+        de línea son de la copia que produjo la evidencia). Ningún texto de
+        esta herramienta puede repetir ese fallo.
         """
 
         for series in (self._series(), [], [_serie_sintetica(sospechoso=True)]):
             with self.subTest(series=len(series)):
                 informe_texto(series).encode("cp1252")
+
+    def test_informe_texto_explica_una_serie_demasiado_corta(self) -> None:
+        """El veredicto y la ficha de la serie no pueden contradecirse."""
+
+        serie = _serie_sintetica(filas=FILAS_MINIMAS_UTILES - 1)
+
+        texto = informe_texto([serie])
+
+        self.assertIn("VEREDICTO: UNKNOWN", texto)
+        self.assertIn("demasiado pocas filas", texto)
+        self.assertNotIn("sin discontinuidad por encima del umbral", texto)
 
     def test_informe_texto_con_lista_vacia_no_revienta(self) -> None:
         texto = informe_texto([])
@@ -612,6 +655,127 @@ class TestInformes(PruebaBase):
                     entrada[campo],
                     "un cero se leería como una medición, y aquí no hubo ninguna",
                 )
+
+    def test_informe_json_no_afirma_juicios_sobre_una_serie_ilegible(self) -> None:
+        """Un ``false`` se leería como «se miró y estaba limpia»."""
+
+        serie = _serie_sintetica(
+            motivo_ilegible="contiene un rastro de excepción de Python", filas=0
+        )
+
+        entrada = informe_json([serie])["series"][0]
+
+        for campo in ("sospechoso", "suficiente", "deriva_sin_escalon", "cobertura_dudosa"):
+            with self.subTest(campo=campo):
+                self.assertIsNone(entrada[campo], "no se miró: no hay juicio que dar")
+        self.assertEqual(entrada["motivo_ilegible"], "contiene un rastro de excepción de Python")
+
+
+class TestLineaDeOrdenes(PruebaBase):
+    """La línea de órdenes es lo único que Jean toca: se prueba entera.
+
+    Ninguna de estas pruebas usa la red ni el reloj real para decidir nada: la
+    marca ``generado_utc`` del informe se escribe, pero no se comprueba su
+    valor, porque una prueba que dependa de la hora del sistema es una prueba
+    que fallará sola algún día.
+    """
+
+    def _capture_con_una_serie(self, *, con_salto: bool = False) -> Path:
+        capture = self.carpeta / "capture"
+        _escribir_csv(
+            capture / "spot" / "events-20260814T081139.311729Z-000001.csv",
+            _filas_constantes(salto_en=200, salto_ns=373_000_000)
+            if con_salto
+            else _filas_constantes(),
+        )
+        return capture
+
+    def _ejecutar(self, *argumentos: str) -> tuple[int, str, str]:
+        salida, error = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(salida), contextlib.redirect_stderr(error):
+            codigo = _main(argumentos)
+        return codigo, salida.getvalue(), error.getvalue()
+
+    def test_la_salida_no_puede_escribirse_dentro_de_runs(self) -> None:
+        """Regla 1: dentro de ``runs/`` no se escribe. Ni el informe propio."""
+
+        capture = self._capture_con_una_serie()
+        prohibida = self.carpeta / "runs" / "20260814T081136_503806Z" / "INFORME.json"
+
+        codigo, _, error = self._ejecutar(str(capture), "--salida", str(prohibida))
+
+        self.assertEqual(codigo, 2)
+        self.assertIn("runs", error)
+        self.assertFalse(prohibida.exists(), "no puede haberse creado el archivo")
+        self.assertFalse(
+            prohibida.parent.exists(), "ni siquiera puede haberse creado la carpeta"
+        )
+
+    def test_la_comprobacion_de_destino_es_independiente_del_analisis(self) -> None:
+        for nombre in ("runs/x.json", "RUNS/x.json", "a/runs/b/x.json"):
+            with self.subTest(destino=nombre):
+                with self.assertRaises(ValueError):
+                    _ruta_de_salida_permitida(self.carpeta / nombre)
+        # Fuera de runs/ no protesta, ni siquiera si la carpeta aún no existe.
+        _ruta_de_salida_permitida(self.carpeta / "informes" / "x.json")
+        _ruta_de_salida_permitida(self.carpeta / "runs_antiguas" / "x.json")
+
+    def test_escribe_el_informe_json_fuera_de_runs_y_sin_restos(self) -> None:
+        """Regla 5: escritura atómica, sin dejar temporales a medias."""
+
+        capture = self._capture_con_una_serie()
+        destino = self.carpeta / "informes" / "SALTOS.json"
+
+        codigo, texto, error = self._ejecutar(str(capture), "--salida", str(destino))
+
+        self.assertEqual(codigo, 0, error)
+        self.assertIn("VEREDICTO: PASS", texto)
+        informe = json.loads(destino.read_text(encoding="utf-8"))
+        self.assertEqual(informe["estado"], PASS)
+        self.assertEqual(informe["series_analizadas"], 1)
+        self.assertIn("no_demuestra", informe)
+        self.assertEqual(
+            [p.name for p in destino.parent.iterdir()],
+            ["SALTOS.json"],
+            "no puede quedar ningún archivo temporal junto al informe",
+        )
+
+    def test_el_codigo_de_salida_distingue_no_pude_mirar_de_salio_mal(self) -> None:
+        con_salto = self._ejecutar(str(self._capture_con_una_serie(con_salto=True)))
+        vacia = self._ejecutar(str(self.carpeta / "no-existe"))
+
+        self.assertEqual(con_salto[0], 3, "un escalón visto es FAIL")
+        self.assertIn("VEREDICTO: FAIL", con_salto[1])
+        self.assertEqual(vacia[0], 1, "no haber podido mirar no es un FAIL")
+        self.assertIn("VEREDICTO: UNKNOWN", vacia[1])
+
+    def test_un_umbral_invalido_no_le_escupe_un_rastro_de_excepcion_a_jean(self) -> None:
+        capture = self._capture_con_una_serie()
+
+        codigo, _, error = self._ejecutar(str(capture), "--umbral-ms", "0")
+
+        self.assertEqual(codigo, 2)
+        self.assertNotIn("Traceback", error)
+        self.assertIn("umbral", error)
+
+    def test_la_linea_de_ordenes_no_modifica_la_evidencia(self) -> None:
+        capture = self._capture_con_una_serie(con_salto=True)
+        csvs = sorted(capture.rglob("*.csv"))
+        antes = {p: (sha256_de(p), p.stat().st_mtime_ns) for p in csvs}
+
+        self._ejecutar(str(capture), "--salida", str(self.carpeta / "fuera.json"))
+
+        self.assertEqual(
+            antes,
+            {p: (sha256_de(p), p.stat().st_mtime_ns) for p in csvs},
+            "la evidencia cambió al ejecutar la herramienta",
+        )
+        self.assertEqual(sorted(capture.rglob("*")), sorted(capture.rglob("*")))
+        self.assertEqual(
+            [p for p in capture.rglob("*") if p.is_file()],
+            csvs,
+            "no puede haber aparecido ningún archivo dentro de capture/",
+        )
 
 
 @unittest.skipUnless(

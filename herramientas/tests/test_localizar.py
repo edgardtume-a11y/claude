@@ -16,9 +16,10 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from jf_evidencia import localizar
-from jf_evidencia.comun import DESCONOCIDO, FAIL, PASS
+from jf_evidencia.comun import DESCONOCIDO, FAIL, PASS, sha256_de
 
 TRACEBACK_FALSO = (
     "Traceback (most recent call last):\n"
@@ -86,18 +87,24 @@ def _crear_corrida(
     return carpeta
 
 
-def _instantanea(raiz: Path) -> dict[str, int]:
-    """Conjunto de rutas relativas y tamaños del árbol, para comparar antes y después."""
+def _instantanea(raiz: Path) -> dict[str, str]:
+    """Rutas relativas, tamaño y SHA-256 del contenido, para comparar antes y después.
 
-    instantanea: dict[str, int] = {}
+    El sello del contenido no es un lujo: comparar solo nombres y tamaños dejaría
+    pasar una reescritura del mismo número de bytes, que es precisamente la
+    corrupción de evidencia más difícil de ver a ojo.
+    """
+
+    instantanea: dict[str, str] = {}
     for actual, subdirectorios, archivos in os.walk(raiz):
         actual_ruta = Path(actual)
         for nombre in subdirectorios:
             relativa = (actual_ruta / nombre).relative_to(raiz).as_posix()
-            instantanea[relativa + "/"] = -1
+            instantanea[relativa + "/"] = "(carpeta)"
         for nombre in archivos:
             ruta = actual_ruta / nombre
-            instantanea[ruta.relative_to(raiz).as_posix()] = ruta.stat().st_size
+            clave = ruta.relative_to(raiz).as_posix()
+            instantanea[clave] = f"{ruta.stat().st_size}:{sha256_de(ruta)}"
     return instantanea
 
 
@@ -224,15 +231,87 @@ class PruebasVeredicto(BaseTemporal):
         self.assertEqual(corrida.clasificacion, FAIL)
         self.assertEqual([c.nombre for c in localizar.fallidas(corridas)], [corrida.nombre])
 
-    def test_pass_verdadero_no_es_candidata(self) -> None:
+    def test_pass_verdadero_con_status_completed_no_es_candidata(self) -> None:
+        # "COMPLETED" es el ÚNICO status que el motor escribe cuando la etapa se
+        # cerró entera (launcher.py:2562-2563). Si esta prueba usara un status
+        # inventado, aprobaría un módulo que marca como FALLO todas las corridas
+        # sanas de verdad, que es exactamente lo que pasaba antes.
         runs = _crear_runs(self.base, "JF")
-        _crear_corrida(runs, "20260814T081136", result={"pass": True, "status": "PASS"})
+        _crear_corrida(
+            runs, "20260814T081136", result={"pass": True, "status": "COMPLETED"}
+        )
 
         corridas = localizar.inventariar(self.base)
         corrida = corridas[0]
         self.assertIs(corrida.passed, True)
+        self.assertEqual(corrida.status, "COMPLETED")
         self.assertEqual(corrida.clasificacion, PASS)
+        self.assertFalse(corrida.es_fallida)
         self.assertEqual(localizar.fallidas(corridas), [])
+
+    def test_el_estado_sano_es_el_que_escribe_el_motor_y_no_otro(self) -> None:
+        # Guarda contra la regresión que ya ocurrió: poner aquí el veredicto
+        # "PASS" del proyecto, que el motor NUNCA escribe en RESULT.json.
+        self.assertEqual(localizar.ESTADO_SANO, "COMPLETED")
+        self.assertEqual(localizar.ESTADOS_SANOS, ("COMPLETED",))
+        self.assertNotIn("PASS", localizar.ESTADOS_SANOS)
+        self.assertNotIn("OK", localizar.ESTADOS_SANOS)
+
+    def test_los_status_reales_de_fallo_del_motor_son_candidatos(self) -> None:
+        # Los cuatro status que launcher.py puede escribir; tres son candidatos.
+        runs = _crear_runs(self.base, "JF")
+        esperado = {
+            "DATA_GATES_FAILED": FAIL,
+            "PENDING_CLOCK_POSTFLIGHT": FAIL,
+            "CLOCK_POSTFLIGHT_FAILED": FAIL,
+            "COMPLETED": PASS,
+        }
+        for indice, (status, clasificacion) in enumerate(esperado.items()):
+            _crear_corrida(
+                runs,
+                f"2026081{indice}T081136",
+                sufijo=f"10m_{indice:012d}",
+                result={"pass": status == "COMPLETED", "status": status},
+            )
+
+        por_status = {c.status: c for c in localizar.inventariar(self.base)}
+        self.assertEqual(set(por_status), set(esperado))
+        for status, clasificacion in esperado.items():
+            with self.subTest(status=status):
+                self.assertEqual(por_status[status].clasificacion, clasificacion)
+                self.assertEqual(por_status[status].es_fallida, clasificacion != PASS)
+
+    def test_status_desconocido_para_el_motor_no_se_da_por_sano(self) -> None:
+        runs = _crear_runs(self.base, "JF")
+        _crear_corrida(runs, "20260814T081136", result={"pass": True, "status": "PASS"})
+
+        corridas = localizar.inventariar(self.base)
+        self.assertEqual(corridas[0].clasificacion, FAIL)
+        self.assertEqual(len(localizar.fallidas(corridas)), 1)
+
+    def test_pass_verdadero_sin_status_es_desconocida_y_candidata(self) -> None:
+        # El motor escribe siempre «pass» y «status» juntos: un «pass: true»
+        # huérfano no es evidencia del motor y no puede declararse sano.
+        runs = _crear_runs(self.base, "JF")
+        _crear_corrida(runs, "20260814T081136", result={"pass": True})
+
+        corridas = localizar.inventariar(self.base)
+        corrida = corridas[0]
+        self.assertIsNone(corrida.passed)
+        self.assertIn("status", corrida.motivo_ilegible or "")
+        self.assertEqual(corrida.clasificacion, DESCONOCIDO)
+        self.assertIn(corrida, localizar.fallidas(corridas))
+
+    def test_pass_falso_sin_status_conserva_el_fallo_declarado(self) -> None:
+        # Simétrico del anterior: un fallo declarado se respeta tal cual, sin
+        # degradarlo a DESCONOCIDA, porque no falta nada por saber.
+        runs = _crear_runs(self.base, "JF")
+        _crear_corrida(runs, "20260814T081136", result={"pass": False})
+
+        corrida = localizar.inventariar(self.base)[0]
+        self.assertIs(corrida.passed, False)
+        self.assertIsNone(corrida.motivo_ilegible)
+        self.assertEqual(corrida.clasificacion, FAIL)
 
     def test_pass_verdadero_con_status_de_fallo_si_es_candidata(self) -> None:
         # Un status terminal que no es sano manda sobre el booleano: si ambos se
@@ -425,7 +504,7 @@ class PruebasInformes(BaseTemporal):
             runs,
             "20260814T084000",
             sufijo="10m_999999999999",
-            result={"pass": True, "status": "PASS"},
+            result={"pass": True, "status": "COMPLETED"},
             postflight=True,
             metrics=True,
             audit=True,
@@ -476,6 +555,87 @@ class PruebasInformes(BaseTemporal):
         primero = json.dumps(localizar.informe_json(corridas), sort_keys=True)
         segundo = json.dumps(localizar.informe_json(localizar.inventariar(self.base)), sort_keys=True)
         self.assertEqual(primero, segundo)
+
+
+class PruebasCarpetaIlegible(BaseTemporal):
+    """Una carpeta que no se puede listar no puede desaparecer en silencio.
+
+    El fallo se simula sustituyendo ``Path.iterdir`` SOLO para esa carpeta, en
+    vez de con permisos del sistema: así la prueba da el mismo resultado en
+    Windows y en Linux, y no depende de con qué usuario se ejecute.
+    """
+
+    def _sin_permiso_en(self, prohibida: Path):
+        real = Path.iterdir
+
+        def falso(self_ruta: Path):
+            if self_ruta == prohibida:
+                raise PermissionError(13, "Permiso denegado")
+            return real(self_ruta)
+
+        return mock.patch.object(Path, "iterdir", falso)
+
+    def test_carpeta_runs_ilegible_se_declara_con_su_motivo(self) -> None:
+        runs = _crear_runs(self.base, "JF")
+        _crear_corrida(runs, "20260814T081136", result={"pass": False})
+
+        with self._sin_permiso_en(runs):
+            corridas, incidencias = localizar.inventariar_con_incidencias(self.base)
+
+        self.assertEqual(corridas, [])
+        self.assertTrue(incidencias, "la carpeta ilegible tiene que dejar rastro")
+        self.assertIn(str(runs), incidencias.texto())
+        self.assertIn("Permiso denegado", incidencias.texto())
+
+    def test_el_informe_avisa_de_que_no_se_pudo_mirar(self) -> None:
+        runs = _crear_runs(self.base, "JF")
+        _crear_corrida(runs, "20260814T081136", result={"pass": False})
+
+        with self._sin_permiso_en(runs):
+            corridas, incidencias = localizar.inventariar_con_incidencias(self.base)
+        texto = localizar.informe_texto(corridas, incidencias)
+
+        self.assertIn("CARPETAS QUE NO SE PUDIERON MIRAR", texto)
+        self.assertIn("NO quiere decir «no había»", texto)
+        texto.encode("cp1252")
+
+    def test_el_informe_json_publica_las_carpetas_no_legibles(self) -> None:
+        runs = _crear_runs(self.base, "JF")
+        _crear_corrida(runs, "20260814T081136", result={"pass": False})
+
+        with self._sin_permiso_en(runs):
+            corridas, incidencias = localizar.inventariar_con_incidencias(self.base)
+        informe = localizar.informe_json(corridas, incidencias)
+
+        self.assertEqual(len(informe["carpetas_no_legibles"]), 1)
+        self.assertIn(str(runs), informe["carpetas_no_legibles"][0])
+        json.dumps(informe, ensure_ascii=False)
+
+    def test_sin_incidencias_el_informe_no_inventa_el_bloque(self) -> None:
+        runs = _crear_runs(self.base, "JF")
+        _crear_corrida(runs, "20260814T081136", result={"pass": False})
+
+        corridas, incidencias = localizar.inventariar_con_incidencias(self.base)
+        self.assertFalse(incidencias)
+        self.assertNotIn(
+            "CARPETAS QUE NO SE PUDIERON MIRAR",
+            localizar.informe_texto(corridas, incidencias),
+        )
+        self.assertEqual(
+            localizar.informe_json(corridas, incidencias)["carpetas_no_legibles"], []
+        )
+
+    def test_una_carpeta_ilegible_no_tumba_el_inventario_de_las_demas(self) -> None:
+        runs_a = _crear_runs(self.base, "JF")
+        runs_b = _crear_runs(self.base, "JF_VIEJO")
+        _crear_corrida(runs_a, "20260814T081136", result={"pass": False})
+        _crear_corrida(runs_b, "20260810T100500", result={"pass": False})
+
+        with self._sin_permiso_en(runs_a):
+            corridas, incidencias = localizar.inventariar_con_incidencias(self.base)
+
+        self.assertEqual([c.marca for c in corridas], ["20260810T100500"])
+        self.assertTrue(incidencias)
 
 
 class PruebasSoloLectura(BaseTemporal):

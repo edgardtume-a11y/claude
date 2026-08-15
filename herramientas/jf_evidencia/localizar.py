@@ -67,6 +67,7 @@ from .comun import (
     DESCONOCIDO,
     FAIL,
     PASS,
+    Hallazgos,
     Lectura,
     buscar_carpetas_runs,
     leer_json,
@@ -90,11 +91,25 @@ ARCHIVOS_CLAVE: tuple[str, ...] = (
     "audit_*.json",
 )
 
-# Estados terminales que el proyecto considera sanos. Cualquier otro valor de
-# ``status`` cuenta como fallo. La comparación es literal a propósito: el motor
-# escribe constantes en mayúsculas, y ser tolerante aquí solo serviría para
-# tapar un fallo, nunca para descubrirlo.
-ESTADOS_SANOS: tuple[str, ...] = (PASS, "OK")
+# Estados terminales que el proyecto considera sanos. Leídos del motor, no
+# inventados: ``RESULT.json`` solo puede llevar cuatro valores de ``status``, y
+# uno solo de ellos significa «etapa cerrada entera»:
+#
+#   "DATA_GATES_FAILED"        -> fallo de datos          (launcher.py:1993-1995)
+#   "PENDING_CLOCK_POSTFLIGHT" -> etapa a medias          (launcher.py:1993-1995)
+#   "CLOCK_POSTFLIGHT_FAILED"  -> fallo de reloj al cierre (launcher.py:2541)
+#   "COMPLETED"                -> etapa cerrada           (launcher.py:2562-2563)
+#
+# El propio lanzador usa el par ``pass is True`` y ``status == "COMPLETED"``
+# como definición de etapa cerrada cuando revalida la evidencia
+# (``launcher.py:2122-2123``). Aquí se exige exactamente eso y nada más.
+#
+# OJO: el motor NUNCA escribe "PASS" ni "OK" en este campo. Poner esas dos
+# cadenas aquí — que es lo que decía la primera versión de este módulo —
+# convertía TODA corrida sana en «FALLO» y la listaba como candidata, es decir,
+# ahogaba la corrida que de verdad falló entre todas las que no fallaron.
+ESTADO_SANO = "COMPLETED"
+ESTADOS_SANOS: tuple[str, ...] = (ESTADO_SANO,)
 
 
 @dataclass(frozen=True, slots=True)
@@ -132,7 +147,10 @@ class Corrida:
             return DESCONOCIDO
         if not self.passed:
             return FAIL
-        if self.status is not None and self.status not in ESTADOS_SANOS:
+        # Sin ``status`` sano no se declara sana, aunque ``pass`` diga true: el
+        # motor escribe siempre los dos campos, y darla por buena con uno solo
+        # sería exactamente el PASS por omisión que la regla 4 prohíbe.
+        if self.status not in ESTADOS_SANOS:
             return FAIL
         return PASS
 
@@ -147,7 +165,7 @@ class Corrida:
 
         if self.passed is False:
             return True
-        if self.status is not None and self.status not in ESTADOS_SANOS:
+        if self.status not in ESTADOS_SANOS:
             return True
         return self.motivo_ilegible is not None
 
@@ -188,7 +206,7 @@ def emparejar_preflight(corrida_marca: str | None, preflights: list[Path]) -> Pa
     return None if mejor is None else mejor[2]
 
 
-def inventariar(raiz: Path) -> list[Corrida]:
+def inventariar_con_incidencias(raiz: Path) -> tuple[list[Corrida], Hallazgos]:
     """Inventaría TODAS las corridas bajo una raíz, no solo la última.
 
     Recorre cada carpeta ``<algo>/binance_phase1_collector/runs`` que encuentre,
@@ -197,12 +215,32 @@ def inventariar(raiz: Path) -> list[Corrida]:
     ejecuciones sobre el mismo árbol den exactamente la misma lista.
 
     Solo lectura: abre `RESULT.json` en modo binario para leerlo y nada más.
+
+    Devuelve además los ``Hallazgos``: las carpetas que NO se pudieron mirar,
+    con su motivo. Una carpeta que el sistema operativo no deja listar no puede
+    desaparecer del informe en silencio, porque entonces «no encontré ninguna
+    corrida fallida» significaría dos cosas distintas — «miré y no había» y «no
+    pude mirar» — y esa confusión es justo la que este proyecto no permite.
     """
 
+    incidencias = Hallazgos()
     corridas: list[Corrida] = []
     for carpeta_runs in buscar_carpetas_runs(raiz):
-        corridas.extend(_inventariar_carpeta_runs(carpeta_runs))
+        corridas.extend(_inventariar_carpeta_runs(carpeta_runs, incidencias))
     corridas.sort(key=lambda c: (c.marca or "", c.nombre, str(c.ruta)))
+    return corridas, incidencias
+
+
+def inventariar(raiz: Path) -> list[Corrida]:
+    """Igual que ``inventariar_con_incidencias`` pero devolviendo solo la lista.
+
+    Se conserva por compatibilidad con quien ya la llama. Si una carpeta resulta
+    ilegible, el motivo se pierde por este camino: para un informe completo hay
+    que usar ``inventariar_con_incidencias`` y pasarle las incidencias a
+    ``informe_texto`` o a ``informe_json``.
+    """
+
+    corridas, _ = inventariar_con_incidencias(raiz)
     return corridas
 
 
@@ -212,21 +250,29 @@ def fallidas(corridas: list[Corrida]) -> list[Corrida]:
     return [corrida for corrida in corridas if corrida.es_fallida]
 
 
-def informe_texto(corridas: list[Corrida]) -> str:
+def informe_texto(corridas: list[Corrida], incidencias: Hallazgos | None = None) -> str:
     """Informe legible para Jean, que no es programador.
 
-    Tres bloques: la tabla de todo lo encontrado, las corridas DESCONOCIDAS
-    aparte y bien visibles, y al final las candidatas con la lista exacta de los
-    archivos de la sección 4.4 que le faltan a cada una.
+    Cuatro bloques: las carpetas que no se pudieron mirar (si las hay), la tabla
+    de todo lo encontrado, las corridas DESCONOCIDAS aparte y bien visibles, y
+    al final las candidatas con la lista exacta de los archivos de la sección
+    4.4 que le faltan a cada una.
     """
 
     lineas: list[str] = []
     lineas.append("INVENTARIO DE CORRIDAS JEAN_FLOW")
     lineas.append("=" * 78)
+    lineas.extend(_bloque_incidencias(incidencias))
 
     if not corridas:
         lineas.append("")
         lineas.append("No se encontró ninguna corrida.")
+        if incidencias:
+            lineas.append(
+                "ATENCIÓN: hubo carpetas que no se pudieron mirar (arriba). "
+                "«No se encontró»"
+            )
+            lineas.append("NO quiere decir «no había»: quiere decir que ahí no se pudo mirar.")
         lineas.append(
             "Comprueba que la ruta contiene una carpeta "
             f"{CARPETA_PROYECTO}\\runs con subcarpetas de corrida."
@@ -268,7 +314,7 @@ def informe_texto(corridas: list[Corrida]) -> str:
 
     if desconocidas:
         lineas.append("")
-        lineas.append("CORRIDAS DESCONOCIDAS: NO se pudo leer su RESULT.json")
+        lineas.append("CORRIDAS DESCONOCIDAS: NO se pudo leer su veredicto")
         lineas.append("-" * 78)
         lineas.append(
             "Una corrida ilegible NO es una corrida sana. No se sabe qué pasó en ella,"
@@ -292,6 +338,10 @@ def informe_texto(corridas: list[Corrida]) -> str:
         lineas.append(
             "no está en este árbol, o que se sobrescribió. Busca en otra instalación."
         )
+        if incidencias:
+            lineas.append(
+                "Y ojo: hubo carpetas que no se pudieron mirar, listadas al principio."
+            )
     else:
         lineas.append("")
         lineas.append(
@@ -342,7 +392,9 @@ def informe_texto(corridas: list[Corrida]) -> str:
     return "\n".join(lineas)
 
 
-def informe_json(corridas: list[Corrida]) -> dict:
+def informe_json(
+    corridas: list[Corrida], incidencias: Hallazgos | None = None
+) -> dict[str, Any]:
     """El mismo inventario en forma de objeto, apto para ``escribir_json_atomico``.
 
     Sin marcas de tiempo de emisión: dos ejecuciones sobre el mismo árbol deben
@@ -351,6 +403,7 @@ def informe_json(corridas: list[Corrida]) -> dict:
 
     candidatas = fallidas(corridas)
     return {
+        "carpetas_no_legibles": list(incidencias.motivos) if incidencias else [],
         "herramienta": "localizar",
         "proposito": "TRANSICION-T0A: localizar la sesión exacta que falló",
         "archivos_pedidos": list(ARCHIVOS_CLAVE),
@@ -377,7 +430,7 @@ def informe_json(corridas: list[Corrida]) -> dict:
 # --------------------------------------------------------------------------- #
 
 
-def _inventariar_carpeta_runs(carpeta_runs: Path) -> list[Corrida]:
+def _inventariar_carpeta_runs(carpeta_runs: Path, incidencias: Hallazgos) -> list[Corrida]:
     """Inventaría una sola carpeta ``runs``, emparejando preflights dentro de ella.
 
     El emparejado es por instalación, igual que la realidad del disco: los
@@ -386,8 +439,12 @@ def _inventariar_carpeta_runs(carpeta_runs: Path) -> list[Corrida]:
 
     try:
         hijos = sorted(p for p in carpeta_runs.iterdir() if p.is_dir())
-    except OSError:
-        # Una carpeta ilegible no puede tumbar el inventario del resto del árbol.
+    except OSError as exc:
+        # Una carpeta ilegible no puede tumbar el inventario del resto del
+        # árbol, pero tampoco puede desaparecer sin dejar rastro: se anota el
+        # motivo y el informe lo enseña. Callarlo convertiría un «no pude
+        # mirar» en un «no había nada», que es una mentira por omisión.
+        incidencias.anotar(f"no se pudo listar la carpeta {carpeta_runs}: {exc}")
         return []
 
     preflights = [
@@ -463,6 +520,20 @@ def _releer_veredicto(
             label,
             capture_session_id,
             f"el RESULT.json no declara «pass» como booleano ({tipo})",
+        )
+    if crudo is True and status is None:
+        # El motor escribe SIEMPRE los dos campos a la vez (``launcher.py:1992``
+        # y ``:1993``), así que un «pass: true» huérfano no es evidencia del
+        # motor: es un archivo incompleto o retocado a mano. Declararlo sano
+        # sería fabricar un PASS. Un «pass: false» sin status, en cambio, sí se
+        # respeta tal cual: el fallo está declarado y no hace falta nada más.
+        return (
+            None,
+            status,
+            label,
+            capture_session_id,
+            "el RESULT.json declara «pass»: true pero no declara «status»; "
+            "sin estado terminal no se puede confirmar que la etapa se cerrara",
         )
     return crudo, status, label, capture_session_id, None
 
@@ -545,6 +616,24 @@ def _corrida_a_json(corrida: Corrida) -> dict[str, Any]:
         "clasificacion": corrida.clasificacion,
         "es_candidata": corrida.es_fallida,
     }
+
+
+def _bloque_incidencias(incidencias: Hallazgos | None) -> list[str]:
+    """Las carpetas que no se pudieron mirar, arriba del todo y sin adornos.
+
+    Va lo primero a propósito: si algo no se pudo leer, Jean tiene que verlo
+    antes que ninguna conclusión, porque afecta a la validez de todas.
+    """
+
+    if not incidencias:
+        return []
+    lineas = ["", "CARPETAS QUE NO SE PUDIERON MIRAR", "-" * 78]
+    lineas.append(
+        "Lo que haya dentro de estas carpetas NO está en este informe. No se sabe."
+    )
+    for motivo in incidencias.motivos:
+        lineas.append(f"  - {motivo}")
+    return lineas
 
 
 def _veredicto_legible(corrida: Corrida) -> str:
