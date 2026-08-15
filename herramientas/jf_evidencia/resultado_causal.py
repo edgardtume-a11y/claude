@@ -25,6 +25,22 @@ que se está corrigiendo, así que reintroducirlo aquí sería reproducirlo.
 
 Especificación: informe v3, sección 6.2.
 
+DOS DESVIACIONES DECLARADAS RESPECTO DE LA TABLA DE 6.2
+-------------------------------------------------------
+La tabla de 6.2 solo exige motivo para ``utc_quality``. Aquí se publican
+también ``causal_integrity_reason`` y ``monotonic_performance_reason``, por la
+misma razón por la que el artefacto existe: quien lo lee no es programador, y
+un veredicto sin motivo le obliga a abrir el ``RESULT.json`` y a saber qué
+mirar dentro. Los motivos NO sustituyen a la evidencia ni la reinterpretan:
+dicen dónde mirar. Son cadenas de texto, nunca un booleano.
+
+``policy`` y ``schema_version`` siguen valiendo ``causal-v1`` y ``1.0.0``
+aunque estos criterios se hayan endurecido durante la revisión previa a la
+primera entrega: ningún artefacto había sido emitido todavía con ellos, de
+modo que ``causal-v1`` no ha designado nunca otra regla distinta de la que
+está escrita en este archivo. A partir de la primera emisión real, cualquier
+cambio de criterio obliga a cambiar ``policy``.
+
 LO QUE ESTE MÓDULO NO HACE, POR DISEÑO
 --------------------------------------
 - No abre ``RESULT.json`` en modo escritura, ni lo renombra, ni lo borra.
@@ -136,13 +152,20 @@ MOTIVO_UTC = (
 
 @dataclass(frozen=True, slots=True)
 class Veredictos:
-    """Los tres veredictos, independientes entre sí.
+    """Los tres veredictos, independientes entre sí, cada uno con su motivo.
 
     No hay aquí ningún campo que los resuma, ni ningún booleano: quien quiera
     un sí o un no debe declarar por escrito su propia combinación.
+
+    Los tres llevan motivo por la misma razón: quien lee esto no es
+    programador. Un ``FAIL`` a secas obliga a abrir el ``RESULT.json`` y a
+    saber qué mirar dentro; un ``FAIL`` con su motivo escrito en castellano se
+    entiende sin abrir nada. El motivo NO sustituye a la evidencia: dice dónde
+    mirar, y la evidencia sigue siendo el ``RESULT.json``, que no se toca.
     """
 
     causal_integrity: str
+    causal_integrity_reason: str
     monotonic_performance: str
     monotonic_performance_reason: str
     utc_quality: str
@@ -221,10 +244,13 @@ def _evaluar_causal(result: dict[str, Any]) -> tuple[str, Hallazgos]:
 
     El check ``metrics`` queda FUERA a propósito: se publica en
     ``monotonic_performance``. Con esa única excepción, este conjunto es más
-    estricto que ``data_gates_pass``, no más laxo. El porqué de un FAIL no se
-    copia al artefacto: vive en el propio ``RESULT.json``
-    (``audit.checks``, ``audit.replay_determinism``), que es donde un auditor
-    debe mirar y que este módulo no reescribe.
+    estricto que ``data_gates_pass``, no más laxo.
+
+    Los motivos acumulados se devuelven al llamante y se publican en el
+    artefacto. No sustituyen a la evidencia — el detalle completo sigue en
+    ``audit.checks`` y ``audit.replay_determinism`` del propio ``RESULT.json``,
+    que este módulo no reescribe —, pero sin ellos un FAIL sería un veredicto
+    mudo, y un veredicto mudo obliga a Jean a leer JSON para saber qué pasó.
     """
 
     hallazgos = Hallazgos()
@@ -319,6 +345,14 @@ def _evaluar_umbral(
     (``fallos``) es un hecho; una métrica que no se pudo medir (``dudas``) no lo
     es; y una discrepancia de política (``avisos``) se declara sin cambiar el
     veredicto. Mezclarlos es el error que este artefacto corrige.
+
+    El campo ``required`` que publica el informe (``audit.py:935-964``) se
+    ignora a propósito. Vale ``false`` para las cinco métricas cuando el motor
+    corrió con ``enforce_thresholds=False``, que es el uso normal, y también
+    para ``writer_yield_p99`` cuando el escritor no cedió el GIL ni una vez.
+    Un informe que declara que no exige nada no puede comprar un PASS aquí; y
+    una métrica no exigida que además no se midió sigue siendo una métrica no
+    medida, es decir, UNKNOWN.
     """
 
     etiqueta = f"{mercado}/{metrica}"
@@ -407,19 +441,73 @@ def _evaluar_rendimiento(informe: Any, motivo_lectura: str | None) -> tuple[str,
             "la base de muestras está incompleta"
         )
 
+    # ``missing_markets`` se exige DECLARADO, no solo vacío: si el informe no
+    # lo publica, no hay forma de saber si faltan mercados, y un PASS sobre un
+    # conjunto de mercados que no se sabe si está completo sería fabricado.
+    # El motor lo escribe siempre (audit.py:1183-1185).
     ausentes = informe.get("missing_markets")
-    if isinstance(ausentes, list) and ausentes:
+    if not isinstance(ausentes, list):
+        dudas.anotar(
+            "el informe no declara missing_markets: no se puede saber si falta "
+            "algún mercado exigido"
+        )
+    elif ausentes:
         dudas.anotar(f"faltan muestras de mercados exigidos: {', '.join(map(str, ausentes))}")
 
     mercados = informe.get("markets")
     if not isinstance(mercados, dict) or not mercados:
         return DESCONOCIDO, "el informe de métricas no publica ningún mercado"
 
+    # Segunda comprobación, independiente de la anterior: que cada mercado
+    # exigido tenga de verdad su sección de muestras. Es la misma pregunta
+    # mirada desde el otro lado, y sirve para cazar un informe recortado en el
+    # que ``missing_markets`` diga [] mientras la sección del mercado no está.
+    exigidos = informe.get("required_markets")
+    if not isinstance(exigidos, list):
+        dudas.anotar("el informe no declara required_markets")
+    else:
+        sin_muestras = [str(nombre) for nombre in exigidos if nombre not in mercados]
+        if sin_muestras:
+            dudas.anotar(
+                "el informe exige mercados de los que no publica muestras: "
+                + ", ".join(sin_muestras)
+            )
+
     for mercado in sorted(mercados):
         bloque = mercados[mercado]
         if not isinstance(bloque, dict):
             dudas.anotar(f"{mercado}: la sección del mercado no es un objeto")
             continue
+
+        # ``metric_errors`` es el canal por el que el propio motor declara que
+        # la base de muestras de ese mercado no es de fiar: resumen incompleto,
+        # valor no finito, cobertura de ventana violada o ventana terminal
+        # ambigua (audit.py:826-831, 1074-1076, 1101-1104). El motor trata la
+        # cobertura violada como error SIEMPRE, incluso sin exigir umbrales.
+        # Con la base en duda no se puede afirmar un PASS; tampoco se puede
+        # condenar, porque no es un exceso medido: por eso es UNKNOWN.
+        errores_metrica = bloque.get("metric_errors")
+        if not isinstance(errores_metrica, list):
+            dudas.anotar(f"{mercado}: el informe no declara metric_errors")
+        elif errores_metrica:
+            detalle = ", ".join(str(error) for error in errores_metrica)
+            dudas.anotar(f"{mercado}: el informe declara errores de métrica ({detalle})")
+
+        # ``eviction_checks`` avisa de muestras que pudieron quedar fuera de
+        # toda ventana emitida; si eso ocurre, el peor p99 no cubre la sesión
+        # entera. Aquí solo se mira cuando el informe lo publica y lo declara
+        # en fallo: no se exige su presencia porque un fallo de cobertura
+        # verificable ya aparece además en ``metric_errors``.
+        desalojos = bloque.get("eviction_checks")
+        if isinstance(desalojos, dict):
+            for gate, (metrica, _limite) in UMBRALES_P99_MS.items():
+                entrada_desalojo = desalojos.get(gate)
+                if isinstance(entrada_desalojo, dict) and entrada_desalojo.get("pass") is False:
+                    dudas.anotar(
+                        f"{mercado}/{metrica}: el informe declara que hubo muestras "
+                        "fuera de toda ventana emitida; el peor p99 no cubre la sesión entera"
+                    )
+
         umbrales = bloque.get("thresholds")
         if not isinstance(umbrales, dict):
             dudas.anotar(f"{mercado}: el informe no publica la sección thresholds")
@@ -468,7 +556,7 @@ def evaluar(run_dir: Path) -> tuple[Veredictos | None, str]:
     if not isinstance(identidad, str) or not identidad:
         return None, f"{NOMBRE_RESULT} no declara capture_session_id"
 
-    causal, _ = _evaluar_causal(result)
+    causal, hallazgos_causal = _evaluar_causal(result)
 
     lectura_metricas = leer_json(run_dir.joinpath(*RUTA_METRICAS))
     rendimiento, motivo_rendimiento = _evaluar_rendimiento(
@@ -478,6 +566,7 @@ def evaluar(run_dir: Path) -> tuple[Veredictos | None, str]:
     return (
         Veredictos(
             causal_integrity=causal,
+            causal_integrity_reason=hallazgos_causal.texto(),
             monotonic_performance=rendimiento,
             monotonic_performance_reason=motivo_rendimiento,
             # El hueco UTC queda preparado y declarado, pero NO relleno.
@@ -536,6 +625,11 @@ def _sello_de_entrada(ruta: Path, relativo: str, obligatorio: bool) -> str | Non
         if obligatorio:
             raise ErrorEvidencia(f"{relativo}: no existe")
         return None
+    if not ruta.is_file():
+        # Existe pero no es un archivo (una carpeta con ese nombre, por
+        # ejemplo). El motivo de la lectura diría «no existe», que aquí sería
+        # falso: hay algo ahí y no se puede sellar.
+        raise ErrorEvidencia(f"{relativo}: existe pero no es un archivo")
     raise ErrorEvidencia(f"{relativo}: {lectura.motivo}")
 
 
@@ -584,6 +678,7 @@ def construir(run_dir: Path, veredictos: Veredictos, *, ahora_ns: int) -> dict[s
         # motor y esta herramienta no está en posición de reescribirla.
         "capture_session_id": identidad,
         "causal_integrity": veredictos.causal_integrity,
+        "causal_integrity_reason": veredictos.causal_integrity_reason,
         "monotonic_performance": veredictos.monotonic_performance,
         "monotonic_performance_reason": veredictos.monotonic_performance_reason,
         "utc_quality": veredictos.utc_quality,

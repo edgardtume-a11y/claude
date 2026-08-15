@@ -23,6 +23,8 @@ en campo con 17,478 ms mientras su propia cadena declaraba unos ±145 ms.
 
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import socket
 import struct
@@ -48,9 +50,12 @@ from jf_evidencia.sonda_reloj import (
     TAMANO_PAQUETE,
     ErrorSonda,
     Muestra,
+    _componer,
+    _main,
     consultar,
     construir_peticion,
     descifrar_respuesta,
+    escribir_informe,
     escribir_muestras_jsonl,
     informe_json,
     informe_texto,
@@ -279,6 +284,34 @@ class PruebasProtocolo(BaseSonda):
         with self.assertRaises(ErrorSonda):
             descifrar_respuesta(bytes(paquete), time.time_ns(), time.time_ns(), "falso")
 
+    def test_version_ntp_desconocida_se_descarta(self) -> None:
+        """Solo se aceptan las versiones 3 y 4; cualquier otra no es una medida."""
+
+        for version in (0, 1, 2, 5, 7):
+            with self.subTest(version=version):
+                paquete = construir_paquete_ntp(version=version)
+                with self.assertRaises(ErrorSonda) as caja:
+                    descifrar_respuesta(paquete, time.time_ns(), time.time_ns(), "falso")
+                self.assertIn(str(version), str(caja.exception))
+
+    def test_respuesta_sin_el_testigo_no_se_acepta(self) -> None:
+        """El campo de origen debe devolver el testigo enviado, o no vale.
+
+        Sin esta comprobación, un paquete retrasado o inyectado por cualquiera
+        de la red sería aceptado como si fuera la respuesta a ESTA petición, y
+        el desvío publicado lo decidiría quien inyectase el paquete. Aquí el
+        servidor falso contesta con el campo de origen a cero: la sonda debe
+        seguir esperando y terminar sin medida, jamás con una muestra.
+        """
+
+        impostor = self.arrancar_servidor(eco=False, desvio_ns=9_000 * _NS_POR_MS)
+        with self.assertRaises(ErrorSonda) as caja:
+            consultar(impostor.direccion, timeout_s=0.4)
+        self.assertIn("sin respuesta", str(caja.exception))
+        # El servidor sí recibió la petición: el rechazo es del cliente, no un
+        # fallo de red que dejaría la prueba sin probar nada.
+        self.assertGreaterEqual(impostor.peticiones, 1)
+
     def test_distancia_de_raiz_es_delay_medio_mas_dispersion(self) -> None:
         """La fórmula, con los números reales del preflight de campo.
 
@@ -408,6 +441,81 @@ class PruebasQuorum(BaseSonda):
             (servidor.direccion, servidor.direccion),
             muestras_por_servidor=2,
             timeout_s=1.0,
+        )
+        self.assertEqual(resultado.veredicto, DESCONOCIDO)
+        self.assertIn("cuórum", resultado.motivo.lower())
+
+    def test_dos_nombres_de_la_misma_maquina_no_hacen_quorum(self) -> None:
+        """Dos nombres que resuelven a la MISMA dirección son una sola opinión.
+
+        Es la forma barata de fabricar un cuórum: escribir el mismo servidor con
+        dos nombres. Se comprueba sin sockets, con muestras construidas a mano,
+        para que la prueba no dependa de cómo resuelva los nombres la máquina
+        donde se ejecute.
+        """
+
+        def muestra(nombre: str, direccion: str) -> Muestra:
+            return Muestra(
+                servidor=nombre,
+                theta_ns=1_000_000,
+                delta_ns=1_000_000,
+                stratum=2,
+                leap=0,
+                root_delay_ns=0,
+                root_dispersion_ns=0,
+                t1_ns=0,
+                t4_ns=1_000_000,
+                direccion=direccion,
+            )
+
+        misma_maquina = [muestra("uno.example", "9.9.9.9:123"), muestra("dos.example", "9.9.9.9:123")]
+        resultado = _componer(
+            muestras=misma_maquina,
+            servidores_ok=["uno.example", "dos.example"],
+            servidores_fallidos={},
+            limite_ms=50.0,
+            pedidos=2,
+        )
+        self.assertEqual(resultado.veredicto, DESCONOCIDO)
+        self.assertIsNone(resultado.theta_ns)
+        self.assertIsNone(resultado.servidor_elegido)
+        self.assertIn("misma", resultado.motivo.lower())
+
+        # Y con dos máquinas de verdad, las mismas cifras sí dan un veredicto.
+        dos_maquinas = [muestra("uno.example", "9.9.9.9:123"), muestra("dos.example", "8.8.8.8:123")]
+        otro = _componer(
+            muestras=dos_maquinas,
+            servidores_ok=["uno.example", "dos.example"],
+            servidores_fallidos={},
+            limite_ms=50.0,
+            pedidos=2,
+        )
+        self.assertEqual(otro.veredicto, PASS)
+        self.assertIn(otro.servidor_elegido, {"uno.example", "dos.example"})
+
+    def test_el_mismo_nombre_con_otras_mayusculas_no_hace_quorum(self) -> None:
+        """«Pool.NTP.org» y «pool.ntp.org» son el mismo servidor, no dos."""
+
+        muestras = [
+            Muestra(
+                servidor=nombre,
+                theta_ns=0,
+                delta_ns=0,
+                stratum=2,
+                leap=0,
+                root_delay_ns=0,
+                root_dispersion_ns=0,
+                t1_ns=0,
+                t4_ns=0,
+            )
+            for nombre in ("Pool.NTP.org", "pool.ntp.org")
+        ]
+        resultado = _componer(
+            muestras=muestras,
+            servidores_ok=["Pool.NTP.org", "pool.ntp.org"],
+            servidores_fallidos={},
+            limite_ms=50.0,
+            pedidos=2,
         )
         self.assertEqual(resultado.veredicto, DESCONOCIDO)
         self.assertIn("cuórum", resultado.motivo.lower())
@@ -583,15 +691,164 @@ class PruebasSalidas(BaseSonda):
         # Coma decimal, como el resto de los textos del proyecto.
         self.assertIn(",", texto)
 
+    def test_informe_se_escribe_de_forma_atomica_y_sin_restos(self) -> None:
+        """El informe JSON: se reescribe entero, es legible y no deja .tmp."""
+
+        resultado = self._resultado_con_muestras(muestras_por_servidor=2)
+        with tempfile.TemporaryDirectory() as carpeta:
+            destino = Path(carpeta) / "informe.json"
+            destino.write_text("{ esto no es JSON", encoding="utf-8")
+            escribir_informe(resultado, destino)
+            datos = json.loads(destino.read_text(encoding="utf-8"))
+            self.assertEqual(datos["herramienta"], "sonda_reloj")
+            self.assertEqual(datos["veredicto"], resultado.veredicto)
+            self.assertEqual(datos["servidor_elegido"], resultado.servidor_elegido)
+            sobrantes = [p.name for p in Path(carpeta).iterdir() if p.name != destino.name]
+            self.assertEqual(sobrantes, [])
+
     def test_no_se_escribe_dentro_de_runs(self) -> None:
         """Regla 1: la evidencia de runs/ es intocable, tampoco para las salidas."""
 
         resultado = self._resultado_con_muestras(muestras_por_servidor=1)
         with tempfile.TemporaryDirectory() as carpeta:
-            destino = Path(carpeta) / "runs" / "muestras.jsonl"
-            with self.assertRaises(ValueError):
-                escribir_muestras_jsonl(resultado, destino)
-            self.assertFalse(destino.exists())
+            for nombre, escritor in (
+                ("muestras.jsonl", escribir_muestras_jsonl),
+                ("informe.json", escribir_informe),
+            ):
+                with self.subTest(salida=nombre):
+                    destino = Path(carpeta) / "runs" / "20260814T081136_x" / nombre
+                    with self.assertRaises(ValueError):
+                        escritor(resultado, destino)
+                    self.assertFalse(destino.exists())
+                    self.assertFalse(destino.parent.exists())
+
+
+class PruebasLineaDeOrdenes(BaseSonda):
+    """La orden completa, que es lo único que Jean llega a escribir."""
+
+    def _ejecutar(self, argumentos: list[str]) -> tuple[int, str, str]:
+        salida, errores = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(salida), contextlib.redirect_stderr(errores):
+            codigo = _main(argumentos)
+        return codigo, salida.getvalue(), errores.getvalue()
+
+    def test_orden_completa_imprime_informe_y_escribe_los_dos_archivos(self) -> None:
+        primero = self.arrancar_servidor(desvio_ns=_NS_POR_MS)
+        segundo = self.arrancar_servidor(desvio_ns=_NS_POR_MS)
+        with tempfile.TemporaryDirectory() as carpeta:
+            informe = Path(carpeta) / "informe.json"
+            crudas = Path(carpeta) / "muestras.jsonl"
+            codigo, texto, errores = self._ejecutar(
+                [
+                    "--servidor", primero.direccion,
+                    "--servidor", segundo.direccion,
+                    "--muestras", "2",
+                    "--timeout-s", "1.0",
+                    "--limite-ms", "50",
+                    "--salida", str(informe),
+                    "--muestras-jsonl", str(crudas),
+                ]
+            )
+            self.assertEqual(errores, "")
+            self.assertEqual(codigo, 0, texto)  # PASS = 0
+            self.assertIn("VEREDICTO: PASS", texto)
+            datos = json.loads(informe.read_text(encoding="utf-8"))
+            self.assertEqual(datos["veredicto"], PASS)
+            lineas = [l for l in crudas.read_text(encoding="utf-8").splitlines() if l.strip()]
+            self.assertEqual(len(lineas), 4)
+
+    def test_sin_medida_el_codigo_de_salida_no_es_cero(self) -> None:
+        """UNKNOWN no puede confundirse con éxito desde un script."""
+
+        mudo = self.arrancar_servidor(mudo=True)
+        codigo, texto, _ = self._ejecutar(
+            ["--servidor", mudo.direccion, "--muestras", "2", "--timeout-s", "0.2"]
+        )
+        self.assertEqual(codigo, 1)
+        self.assertIn("VEREDICTO: UNKNOWN", texto)
+
+    def test_argumento_imposible_explica_en_castellano_y_no_revienta(self) -> None:
+        """Un error de quien escribe la orden no se contesta con un traceback."""
+
+        codigo, texto, errores = self._ejecutar(["--muestras", "0", "--servidor", "127.0.0.1:1"])
+        self.assertEqual(codigo, 2)
+        self.assertIn("No se puede medir", errores)
+        self.assertNotIn("Traceback", errores + texto)
+
+    def test_salida_dentro_de_runs_se_rechaza_sin_traceback(self) -> None:
+        primero = self.arrancar_servidor(desvio_ns=0)
+        segundo = self.arrancar_servidor(desvio_ns=0)
+        with tempfile.TemporaryDirectory() as carpeta:
+            destino = Path(carpeta) / "runs" / "informe.json"
+            codigo, texto, errores = self._ejecutar(
+                [
+                    "--servidor", primero.direccion,
+                    "--servidor", segundo.direccion,
+                    "--muestras", "1",
+                    "--timeout-s", "1.0",
+                    "--salida", str(destino),
+                ]
+            )
+        self.assertEqual(codigo, 2)
+        self.assertIn("No se pudo escribir la salida", errores)
+        self.assertNotIn("Traceback", errores + texto)
+        self.assertFalse(destino.exists())
+
+    def test_salida_json_de_la_orden_es_json_valido(self) -> None:
+        primero = self.arrancar_servidor(desvio_ns=0)
+        segundo = self.arrancar_servidor(desvio_ns=0)
+        codigo, texto, _ = self._ejecutar(
+            [
+                "--servidor", primero.direccion,
+                "--servidor", segundo.direccion,
+                "--muestras", "1",
+                "--timeout-s", "1.0",
+                "--json",
+            ]
+        )
+        datos = json.loads(texto)
+        self.assertIn(datos["veredicto"], ESTADOS_VALIDOS)
+        self.assertEqual(codigo, {PASS: 0, DESCONOCIDO: 1, FAIL: 3}[datos["veredicto"]])
+
+
+class PruebasCoherenciaDelInforme(BaseSonda):
+    def test_el_texto_no_puede_contradecir_al_veredicto_en_el_borde(self) -> None:
+        """PASS y «NO cabe en el límite» no pueden salir en el mismo informe.
+
+        Con un límite de 2,01 ms, ``2.01 * 1e6`` en coma flotante vale
+        2.009.999,9999999998 mientras que el veredicto compara contra
+        2.010.000 ns redondeados. Una suma de exactamente 2.010.000 ns daba
+        PASS arriba y «NO cabe» tres líneas más abajo. Se comprueba el borde
+        exacto, sin sockets, para que no dependa de ninguna medición.
+        """
+
+        muestras = [
+            Muestra(
+                servidor=nombre,
+                theta_ns=2_010_000,
+                delta_ns=0,
+                stratum=2,
+                leap=0,
+                root_delay_ns=0,
+                root_dispersion_ns=0,
+                t1_ns=0,
+                t4_ns=0,
+                direccion=direccion,
+            )
+            for nombre, direccion in (("uno", "9.9.9.9:123"), ("dos", "8.8.8.8:123"))
+        ]
+        resultado = _componer(
+            muestras=muestras,
+            servidores_ok=["uno", "dos"],
+            servidores_fallidos={},
+            limite_ms=2.01,
+            pedidos=2,
+        )
+        self.assertEqual(resultado.veredicto, PASS, resultado.motivo)
+        texto = informe_texto(resultado)
+        self.assertIn("(cabe en el límite)", texto)
+        self.assertNotIn("NO cabe", texto)
+        self.assertEqual(informe_json(resultado)["limite_ns"], 2_010_000)
 
 
 class PruebasConstantes(unittest.TestCase):

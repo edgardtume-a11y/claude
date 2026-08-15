@@ -40,16 +40,28 @@ def _cmd_localizar(args: argparse.Namespace) -> int:
     if not raiz.is_dir():
         print(f"No existe la carpeta {raiz}", file=sys.stderr)
         return 2
-    corridas = localizar.inventariar(raiz)
-    if not corridas:
+
+    # Se usa la variante con incidencias, y no `inventariar`, porque una carpeta
+    # que no se pudo leer TIENE que llegar hasta Jean. Salir aquí con «no
+    # encontré ninguna corrida» cuando en realidad no se pudo mirar sería
+    # presentar un «no pude ver» como un «no había nada», que es exactamente la
+    # confusión que este proyecto prohíbe.
+    corridas, incidencias = localizar.inventariar_con_incidencias(raiz)
+
+    if not corridas and not incidencias:
         print(f"No encontré ninguna corrida de JEAN_FLOW bajo {raiz}.")
         print("Comprueba que la ruta contiene una carpeta binance_phase1_collector\\runs.")
         return 1
+
     _salida(
-        localizar.informe_json(corridas) if args.json else localizar.informe_texto(corridas),
+        localizar.informe_json(corridas, incidencias)
+        if args.json
+        else localizar.informe_texto(corridas, incidencias),
         como_json=args.json,
     )
-    return 0
+    # Sin corridas pero con carpetas ilegibles el resultado no es «todo en
+    # orden»: es «no se pudo mirar», y el código de salida lo refleja.
+    return 1 if not corridas else 0
 
 
 def _cmd_saltos(args: argparse.Namespace) -> int:

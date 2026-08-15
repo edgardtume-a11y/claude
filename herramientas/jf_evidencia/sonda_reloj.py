@@ -47,7 +47,7 @@ Los dos sumandos miden cosas distintas y por eso se suman:
   el servidor la publica en el paquete: no hay que suponerla.
 - **delta/2**: la asimetría máxima posible del camino de ida y vuelta de **esta**
   muestra. Es la misma cota que el motor ya usa contra Binance
-  (`rest.py:217-267`, que documenta ``|θ − θ̂| ≤ δ/2``), aplicada aquí sobre el
+  (`rest.py:225`, que documenta ``|θ − θ̂| ≤ δ/2``), aplicada aquí sobre el
   viaje real y no sobre el viaje completo, porque SNTP sí da las cuatro marcas
   de verdad y permite descontar el tiempo que el servidor tardó en contestar.
 
@@ -79,6 +79,15 @@ LIMITACIONES CONOCIDAS, DECLARADAS AQUÍ Y EN LA SALIDA
 4. Un servidor puede mentir. Por eso se exige cuórum de dos y se comprueba que
    las fuentes se solapen dentro de sus bandas; lo que no se puede es detectar
    un error común a todas ellas.
+5. El cuórum se cuenta por **dirección de red resuelta**, no por nombre: dos
+   nombres distintos que apuntan al mismo servidor son una sola opinión. Lo que
+   sigue sin poder detectarse es que dos direcciones distintas pertenezcan al
+   mismo operador y compartan el mismo error.
+6. ``T1`` y ``T4`` se toman del reloj de pared local (``time.time_ns``), que es
+   justamente el reloj bajo examen. Si ese reloj diera un paso entre el envío y
+   la recepción, ``delta`` saldría deformado; el efecto es visible porque
+   ``delta`` se publica en cada muestra, y engorda la banda en vez de
+   estrecharla, de modo que no puede fabricar un PASS.
 """
 
 from __future__ import annotations
@@ -197,6 +206,10 @@ LIMITACIONES = (
     "tiempo de espera de esta sonda.",
     "Se comprueba que las fuentes se solapen dentro de sus bandas, pero un error "
     "común a todas ellas es indetectable desde aquí.",
+    "El cuórum cuenta fuentes por la dirección de red a la que se preguntó, de "
+    "modo que dos nombres del mismo servidor cuentan como uno solo. Lo que no se "
+    "puede saber desde aquí es si dos direcciones distintas son del mismo "
+    "operador y comparten el mismo error.",
 )
 
 
@@ -227,6 +240,12 @@ class Muestra:
     root_dispersion_ns: int
     t1_ns: int
     t4_ns: int
+    # Dirección de red a la que se preguntó de verdad, en forma «ip:puerto».
+    # Se guarda porque el cuórum se cuenta por dirección y no por nombre: dos
+    # nombres que resuelven al mismo servidor son UNA fuente, no dos. Queda
+    # vacía cuando la muestra se construye a mano (pruebas), y entonces el
+    # cuórum vuelve a contar por nombre.
+    direccion: str = ""
 
     @property
     def distancia_raiz_ns(self) -> int:
@@ -272,6 +291,10 @@ class Resultado:
     veredicto: str  # PASS | FAIL | UNKNOWN
     motivo: str
     limite_ms: float
+    # Nombre de la fuente cuya muestra sostiene el veredicto. ``None`` cuando no
+    # hubo veredicto medido. Va en el artefacto para que no haya que leer la
+    # prosa del motivo para saber de dónde salió el número.
+    servidor_elegido: str | None = None
 
 
 # --------------------------------------------------------------------------- #
@@ -322,7 +345,9 @@ def construir_peticion() -> bytes:
     return bytes(paquete)
 
 
-def descifrar_respuesta(datos: bytes, t1_ns: int, t4_ns: int, servidor: str) -> Muestra:
+def descifrar_respuesta(
+    datos: bytes, t1_ns: int, t4_ns: int, servidor: str, *, direccion: str = ""
+) -> Muestra:
     """Valida y traduce una respuesta SNTP a una ``Muestra``.
 
     Lanza ``ErrorSonda`` —nunca ``IndexError`` ni ``struct.error``— ante
@@ -415,6 +440,7 @@ def descifrar_respuesta(datos: bytes, t1_ns: int, t4_ns: int, servidor: str) -> 
         root_dispersion_ns=_fijo_16_16_a_ns(root_dispersion),
         t1_ns=t1_ns,
         t4_ns=t4_ns,
+        direccion=direccion,
     )
 
 
@@ -495,6 +521,9 @@ def consultar(servidor: str, *, timeout_s: float = 2.0, puerto: int = PUERTO_NTP
         raise ErrorSonda(f"{servidor}: la resolución de nombre no devolvió ninguna dirección")
 
     familia, tipo, protocolo, _canonico, direccion = candidatos[0]
+    # Texto «ip:puerto» de la dirección realmente consultada. Es lo que permite
+    # que el cuórum no se deje engañar por dos nombres del mismo servidor.
+    texto_direccion = f"{direccion[0]}:{direccion[1]}"
     peticion = construir_peticion()
     testigo = peticion[40:48]
 
@@ -519,7 +548,9 @@ def consultar(servidor: str, *, timeout_s: float = 2.0, puerto: int = PUERTO_NTP
                 # No es la respuesta a ESTA petición: puede ser un paquete
                 # retrasado o inyectado. Se descarta y se sigue esperando.
                 continue
-            return descifrar_respuesta(datos, t1_ns, t4_ns, servidor)
+            return descifrar_respuesta(
+                datos, t1_ns, t4_ns, servidor, direccion=texto_direccion
+            )
     except socket.timeout as exc:
         raise ErrorSonda(
             f"{servidor}: sin respuesta en {timeout_s:g} s "
@@ -602,9 +633,11 @@ def medir(
 
     Orden exacto de las decisiones, y ninguna se puede saltar:
 
-    1. **Cuórum**: menos de ``QUORUM_MINIMO`` servidores distintos que responden
-       => UNKNOWN. Los nombres repetidos se colapsan: la misma fuente escrita
-       dos veces no son dos opiniones independientes.
+    1. **Cuórum**: menos de ``QUORUM_MINIMO`` fuentes **realmente distintas**
+       que responden => UNKNOWN. Se colapsan los nombres repetidos —sin
+       distinguir mayúsculas, porque un nombre de dominio no las distingue— y
+       también los nombres distintos que resuelven a la misma dirección de red:
+       la misma máquina preguntada dos veces no son dos opiniones.
     2. **Coherencia**: si dos servidores no se solapan dentro de sus bandas,
        alguno miente => UNKNOWN. Nunca PASS.
     3. **Criterio**: ``|theta| + incertidumbre <= límite`` => PASS; si no, FAIL.
@@ -622,8 +655,17 @@ def medir(
     if not (limite_ms > 0):
         raise ValueError("limite_ms debe ser mayor que cero")
 
-    # Nombres repetidos colapsados conservando el orden dado.
-    lista = [nombre for nombre in dict.fromkeys(str(s).strip() for s in servidores) if nombre]
+    # Nombres repetidos colapsados conservando el orden y la grafía dados. La
+    # comparación ignora mayúsculas porque «Pool.NTP.org» y «pool.ntp.org» son
+    # el mismo servidor, y contarlos como dos sería fabricar un cuórum.
+    lista: list[str] = []
+    vistos: set[str] = set()
+    for crudo in servidores:
+        nombre = str(crudo).strip()
+        if not nombre or nombre.casefold() in vistos:
+            continue
+        vistos.add(nombre.casefold())
+        lista.append(nombre)
 
     todas: list[Muestra] = []
     servidores_ok: list[str] = []
@@ -682,6 +724,33 @@ def _sin_prefijo(servidor: str, mensaje: str) -> str:
     return mensaje[len(marca) :] if mensaje.startswith(marca) else mensaje
 
 
+def _clave_de_fuente(muestra: Muestra) -> str:
+    """Identidad de la fuente a efectos de cuórum.
+
+    Se usa la dirección de red realmente consultada, porque dos nombres que
+    resuelven a la misma máquina son UNA opinión y no dos, y contarlos como dos
+    sería fabricar el cuórum que justifica el veredicto. Cuando la muestra no
+    trae dirección —construida a mano en una prueba— se recurre al nombre, sin
+    distinguir mayúsculas.
+    """
+
+    return muestra.direccion or muestra.servidor.casefold()
+
+
+def _limite_ns(limite_ms: float) -> int:
+    """El límite declarado en nanosegundos enteros.
+
+    Existe como función y no como expresión suelta porque el veredicto y el
+    informe de texto deben comparar contra EXACTAMENTE el mismo número. Cuando
+    cada uno hacía su conversión, un límite como 2,01 ms daba
+    ``int(round(2.01 * 1e6)) = 2010000`` para el veredicto y
+    ``2.01 * 1e6 = 2009999,9999999998`` para el texto, y el mismo informe podía
+    declarar PASS y a la vez escribir «NO cabe en el límite».
+    """
+
+    return int(round(limite_ms * _NS_POR_MS))
+
+
 def _componer(
     *,
     muestras: list[Muestra],
@@ -702,16 +771,26 @@ def _componer(
             veredicto=DESCONOCIDO,
             motivo=motivo,
             limite_ms=limite_ms,
+            servidor_elegido=None,
         )
 
     detalle_fallos = "; ".join(f"{nombre}: {motivo}" for nombre, motivo in servidores_fallidos.items())
 
     mejores = mejores_por_servidor(muestras)
-    if len(mejores) < QUORUM_MINIMO:
+    elegidas = sorted(mejores.values(), key=lambda m: m.servidor)
+    fuentes = {_clave_de_fuente(muestra) for muestra in elegidas}
+    if len(fuentes) < QUORUM_MINIMO:
         cuerpo = (
-            f"cuórum insuficiente: respondieron {len(mejores)} de {pedidos} "
-            f"servidores distintos y se exigen {QUORUM_MINIMO}"
+            f"cuórum insuficiente: respondieron {len(fuentes)} de {pedidos} "
+            f"fuentes realmente distintas y se exigen {QUORUM_MINIMO}"
         )
+        if len(mejores) > len(fuentes):
+            cuerpo += (
+                f". Contestaron {len(mejores)} nombres, pero son la misma fuente "
+                "(la misma dirección de red, o el mismo nombre escrito de otra "
+                "forma): es una máquina preguntada varias veces, no varias "
+                "opiniones"
+            )
         if detalle_fallos:
             cuerpo += f". Fallos: {detalle_fallos}"
         cuerpo += (
@@ -720,7 +799,6 @@ def _componer(
         )
         return sin_medida(cuerpo)
 
-    elegidas = sorted(mejores.values(), key=lambda m: m.servidor)
     problemas = _discrepancias(elegidas)
     if problemas:
         return sin_medida(
@@ -733,11 +811,11 @@ def _componer(
     dispersion_ns = max(abs(m.theta_ns - elegida.theta_ns) for m in elegidas)
     incertidumbre_ns = max(elegida.incertidumbre_ns, dispersion_ns)
     theta_ns = elegida.theta_ns
-    limite_ns = int(round(limite_ms * _NS_POR_MS))
+    limite_ns = _limite_ns(limite_ms)
     total_ns = abs(theta_ns) + incertidumbre_ns
 
     base = (
-        f"{len(elegidas)} servidores con cuórum; fuente elegida {elegida.servidor} "
+        f"{len(fuentes)} fuentes distintas con cuórum; fuente elegida {elegida.servidor} "
         f"(estrato {elegida.stratum}, delta {_ms(elegida.delta_ns)} ms, "
         f"distancia de raíz {_ms(elegida.distancia_raiz_ns)} ms). "
         f"|{_ms(theta_ns)}| + {_ms(incertidumbre_ns)} = {_ms(total_ns)} ms "
@@ -768,6 +846,7 @@ def _componer(
         veredicto=veredicto,
         motivo=motivo,
         limite_ms=limite_ms,
+        servidor_elegido=elegida.servidor,
     )
 
 
@@ -815,11 +894,15 @@ def informe_texto(resultado: Resultado) -> str:
         total = abs(resultado.theta_ns) + resultado.incertidumbre_ns
         lineas.append(f"  Desvío estimado : {_ms(resultado.theta_ns)} ms")
         lineas.append(f"  Incertidumbre   : {_ms(resultado.incertidumbre_ns)} ms")
+        # Mismo número exacto que usó el veredicto: si aquí se recalculara con
+        # coma flotante, el informe podría decir «NO cabe» debajo de un PASS.
         lineas.append(
             f"  Suma            : {_ms(total)} ms "
-            f"({'cabe' if total <= resultado.limite_ms * _NS_POR_MS else 'NO cabe'} "
+            f"({'cabe' if total <= _limite_ns(resultado.limite_ms) else 'NO cabe'} "
             "en el límite)"
         )
+    if resultado.servidor_elegido:
+        lineas.append(f"  Fuente elegida  : {resultado.servidor_elegido}")
     lineas.append("")
 
     lineas.append("SERVIDORES QUE RESPONDIERON")
@@ -833,7 +916,7 @@ def informe_texto(resultado: Resultado) -> str:
         lineas.append(f"  {nombre}")
         lineas.append(f"      muestras válidas    : {cuantas}")
         lineas.append(f"      mejor delta (RTT)   : {_ms(muestra.delta_ns)} ms")
-        lineas.append(f"      desvío de esa muestra: {_ms(muestra.theta_ns)} ms")
+        lineas.append(f"      desvío de la muestra: {_ms(muestra.theta_ns)} ms")
         lineas.append(f"      estrato             : {muestra.stratum}")
         lineas.append(f"      indicador de salto  : {muestra.leap}")
         lineas.append(f"      demora de raíz      : {_ms(muestra.root_delay_ns)} ms")
@@ -885,6 +968,8 @@ def informe_json(resultado: Resultado) -> dict[str, Any]:
         "motivo": resultado.motivo,
         "criterio": CRITERIO,
         "limite_ms": resultado.limite_ms,
+        "limite_ns": _limite_ns(resultado.limite_ms),
+        "servidor_elegido": resultado.servidor_elegido,
         "theta_ms": _ms_num(resultado.theta_ns),
         "incertidumbre_ms": _ms_num(resultado.incertidumbre_ns),
         "suma_ms": _ms_num(total_ns),
@@ -901,10 +986,16 @@ def informe_json(resultado: Resultado) -> dict[str, Any]:
 
 
 def _muestra_a_dict(muestra: Muestra, *, elegida: bool) -> dict[str, Any]:
-    """Una muestra en forma de diccionario, con los crudos y los derivados."""
+    """Una muestra en forma de diccionario, con los crudos y los derivados.
+
+    ``elegida`` significa «es la mejor muestra de SU servidor», no «es la que
+    sostiene el veredicto». Esa otra, que es una sola, se publica aparte en
+    ``servidor_elegido`` del informe.
+    """
 
     return {
         "servidor": muestra.servidor,
+        "direccion": muestra.direccion,
         "elegida": elegida,
         "theta_ns": muestra.theta_ns,
         "theta_ms": _ms_num(muestra.theta_ns),
@@ -1020,24 +1111,38 @@ def _main(argumentos: Iterable[str] | None = None) -> int:
     args = analizador.parse_args(list(argumentos) if argumentos is not None else None)
 
     servidores = tuple(args.servidor) if args.servidor else SERVIDORES_POR_DEFECTO
-    resultado = medir(
-        servidores,
-        muestras_por_servidor=args.muestras,
-        limite_ms=args.limite_ms,
-        timeout_s=args.timeout_s,
-    )
+    try:
+        resultado = medir(
+            servidores,
+            muestras_por_servidor=args.muestras,
+            limite_ms=args.limite_ms,
+            timeout_s=args.timeout_s,
+        )
+    except ValueError as exc:
+        # Un argumento imposible es un error de quien escribe la orden, no una
+        # medición. Jean no es programador: se le explica en una línea y no se
+        # le enseña un rastro de excepción de Python.
+        print(f"No se puede medir con esos valores: {exc}", file=sys.stderr)
+        return 2
 
     if args.json:
         print(json.dumps(informe_json(resultado), indent=2, sort_keys=True, ensure_ascii=False))
     else:
         print(informe_texto(resultado))
 
-    if args.salida is not None:
-        escribir_informe(resultado, args.salida)
-        print(f"\nInforme escrito en: {args.salida}")
-    if args.muestras_jsonl is not None:
-        escribir_muestras_jsonl(resultado, args.muestras_jsonl)
-        print(f"Muestras crudas en: {args.muestras_jsonl}")
+    try:
+        if args.salida is not None:
+            escribir_informe(resultado, args.salida)
+            print(f"\nInforme escrito en: {args.salida}")
+        if args.muestras_jsonl is not None:
+            escribir_muestras_jsonl(resultado, args.muestras_jsonl)
+            print(f"Muestras crudas en: {args.muestras_jsonl}")
+    except (ValueError, OSError) as exc:
+        # Un destino prohibido (dentro de runs/) o un disco que no deja escribir
+        # no invalidan la medición ya impresa, pero hay que decirlo con claridad
+        # y salir con código distinto de cero: el archivo NO está.
+        print(f"No se pudo escribir la salida: {exc}", file=sys.stderr)
+        return 2
 
     return {PASS: 0, DESCONOCIDO: 1, FAIL: 3}.get(resultado.veredicto, 1)
 

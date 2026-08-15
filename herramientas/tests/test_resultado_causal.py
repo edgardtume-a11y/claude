@@ -41,6 +41,7 @@ CAMPOS_EXIGIDOS = (
     "policy",
     "capture_session_id",
     "causal_integrity",
+    "causal_integrity_reason",
     "monotonic_performance",
     "monotonic_performance_reason",
     "utc_quality",
@@ -215,7 +216,7 @@ class BaseCorrida(unittest.TestCase):
 
 
 class PruebasEmision(BaseCorrida):
-    def test_emision_correcta_publica_los_doce_campos(self) -> None:
+    def test_emision_correcta_publica_los_trece_campos(self) -> None:
         run_dir = _crear_corrida(self.base)
 
         ruta, motivo = resultado_causal.emitir(run_dir, ahora_ns=AHORA_NS)
@@ -234,6 +235,7 @@ class PruebasEmision(BaseCorrida):
         self.assertEqual(artefacto["policy"], resultado_causal.POLITICA)
         self.assertEqual(artefacto["capture_session_id"], "d64fea5560ac489eac0b5666111cc0cf")
         self.assertEqual(artefacto["causal_integrity"], PASS)
+        self.assertEqual(artefacto["causal_integrity_reason"], "")
         self.assertEqual(artefacto["monotonic_performance"], PASS)
         self.assertEqual(artefacto["utc_quality"], DESCONOCIDO)
         self.assertEqual(artefacto["emitted_utc_ns"], AHORA_NS)
@@ -321,6 +323,73 @@ class PruebasEmision(BaseCorrida):
         self.assertEqual(artefacto["monotonic_performance"], DESCONOCIDO)
         self.assertIn("no existe", artefacto["monotonic_performance_reason"])
 
+    def test_el_informe_ilegible_se_sella_igual_y_entra_en_inputs(self) -> None:
+        # El caso exacto de campo: el archivo ESTÁ y sus bytes se leen, pero su
+        # contenido es un rastro de excepción. El artefacto se emite, y el sello
+        # es el de los bytes que hay, no el de un informe que nunca existió: sin
+        # ese sello nadie podría citar después qué se leyó exactamente.
+        run_dir = _crear_corrida(self.base, metricas=TRACEBACK_FALSO)
+
+        ruta, motivo = resultado_causal.emitir(run_dir, ahora_ns=AHORA_NS)
+
+        self.assertEqual(motivo, "")
+        assert ruta is not None
+        artefacto = json.loads(ruta.read_text(encoding="utf-8"))
+        self.assertEqual(
+            artefacto["inputs_sha256"]["capture/audit_metrics.json"],
+            _sha256(run_dir / "capture" / "audit_metrics.json"),
+        )
+        self.assertEqual(artefacto["monotonic_performance"], DESCONOCIDO)
+
+    def test_un_fail_causal_llega_al_artefacto_con_su_motivo(self) -> None:
+        # Reproduce la sesión real: identidad en false y replay roto por la
+        # codificación. Jean tiene que poder leer POR QUÉ en el propio
+        # artefacto, sin abrir el RESULT.json ni saber qué es un JSON.
+        result = _result_bueno()
+        result["audit"]["checks"]["identity"] = False
+        result["audit"]["checks"]["spot"] = False
+        result["audit"]["replay_determinism"]["spot"]["pass"] = False
+        result["audit"]["replay_determinism"]["spot"]["error"] = (
+            "RuntimeContractError: 'utf-8' codec can't decode byte 0xe9 in position 700"
+        )
+        run_dir = _crear_corrida(self.base, result=result)
+
+        ruta, _motivo = resultado_causal.emitir(run_dir, ahora_ns=AHORA_NS)
+
+        assert ruta is not None
+        artefacto = json.loads(ruta.read_text(encoding="utf-8"))
+        self.assertEqual(artefacto["causal_integrity"], FAIL)
+        razon = artefacto["causal_integrity_reason"]
+        self.assertIn("identity", razon)
+        self.assertIn("replay_determinism.spot", razon)
+        self.assertIsInstance(razon, str)
+
+    def test_no_se_emite_si_el_informe_de_metricas_esta_pero_no_se_puede_sellar(self) -> None:
+        # Hay ALGO en la ruta del informe y no se puede sellar. Emitir sin ese
+        # sello publicaría un artefacto que no se puede verificar después, así
+        # que no se emite y se dice por qué.
+        run_dir = _crear_corrida(self.base, metricas=None)
+        (run_dir / "capture" / "audit_metrics.json").mkdir()
+
+        ruta, motivo = resultado_causal.emitir(run_dir, ahora_ns=AHORA_NS)
+
+        self.assertIsNone(ruta)
+        self.assertIn("capture/audit_metrics.json", motivo)
+        self.assertIn("no es un archivo", motivo)
+        self.assertFalse((run_dir / "RESULTADO_CAUSAL.json").exists())
+
+    def test_construir_rechaza_un_ahora_ns_que_no_es_entero(self) -> None:
+        # Un flotante o un booleano aquí produciría un ``emitted_utc_ns`` que
+        # no es el momento de emisión, y el artefacto quedaría mintiendo.
+        run_dir = _crear_corrida(self.base)
+        veredictos, _motivo = resultado_causal.evaluar(run_dir)
+        assert veredictos is not None
+
+        for malo in (1.5, True, "1786695779206452600", None):
+            with self.subTest(ahora_ns=malo):
+                with self.assertRaises(ValueError):
+                    resultado_causal.construir(run_dir, veredictos, ahora_ns=malo)  # type: ignore[arg-type]
+
 
 class PruebasProhibiciones(BaseCorrida):
     def test_result_json_de_entrada_queda_intacto(self) -> None:
@@ -400,6 +469,21 @@ class PruebasProhibiciones(BaseCorrida):
         self.assertIn("intocable", motivo)
         self.assertEqual(_sha256(run_dir / "RESULT.json"), antes)
 
+    def test_se_niega_a_escribir_con_el_nombre_del_marcador_de_captura(self) -> None:
+        # Ni siquiera pidiéndoselo por parámetro: ese marcador tiene un
+        # significado propio y esta herramienta no está en posición de crearlo.
+        run_dir = _crear_corrida(self.base)
+
+        ruta, motivo = resultado_causal.emitir(
+            run_dir,
+            ahora_ns=AHORA_NS,
+            destino=run_dir / "CAPTURA_COMPLETA_AUDITADA.json",
+        )
+
+        self.assertIsNone(ruta)
+        self.assertIn("intocable", motivo)
+        self.assertFalse((run_dir / "CAPTURA_COMPLETA_AUDITADA.json").exists())
+
     def test_escritura_atomica_no_deja_temporales(self) -> None:
         run_dir = _crear_corrida(self.base)
 
@@ -419,12 +503,21 @@ class PruebasProhibiciones(BaseCorrida):
 
 
 class PruebasIntegridadCausal(BaseCorrida):
-    def _veredicto(self, result: Any) -> str:
-        run_dir = _crear_corrida(self.base, result=result)
+    def _completo(self, result: Any) -> tuple[str, str]:
+        base = Path(tempfile.mkdtemp(dir=self.base))
+        run_dir = _crear_corrida(base, result=result)
         veredictos, motivo = resultado_causal.evaluar(run_dir)
         self.assertIsNotNone(veredictos, motivo)
         assert veredictos is not None
-        return veredictos.causal_integrity
+        return veredictos.causal_integrity, veredictos.causal_integrity_reason
+
+    def _veredicto(self, result: Any) -> str:
+        estado, motivo = self._completo(result)
+        if estado != PASS:
+            # Un FAIL mudo obliga a leer JSON para saber qué pasó, y quien lee
+            # esto no es programador. El motivo es parte del veredicto.
+            self.assertTrue(motivo.strip(), "un FAIL causal tiene que declarar su motivo")
+        return estado
 
     def test_pass_con_todo_en_orden(self) -> None:
         self.assertEqual(self._veredicto(_result_bueno()), PASS)
@@ -475,6 +568,52 @@ class PruebasIntegridadCausal(BaseCorrida):
             "pass": False,
         }
         self.assertEqual(self._veredicto(result), FAIL)
+
+    def test_fail_solo_por_el_replay_aunque_el_check_del_mercado_diga_true(self) -> None:
+        # Aísla la comprobación del replay: el check del diario sigue en true,
+        # así que si el módulo no mirara replay_determinism, esto daría PASS.
+        result = _result_bueno()
+        result["audit"]["replay_determinism"]["usdm_futures"]["pass"] = False
+        result["audit"]["replay_determinism"]["usdm_futures"]["error"] = (
+            "RuntimeContractError: 'utf-8' codec can't decode byte 0xe9 in position 767"
+        )
+        estado, motivo = self._completo(result)
+        self.assertEqual(estado, FAIL)
+        self.assertIn("replay_determinism.usdm_futures", motivo)
+        self.assertIn("0xe9", motivo)
+
+    def test_fail_si_falta_el_replay_de_un_mercado(self) -> None:
+        # Sin replay no se ha comprobado la reconstrucción de ese mercado, y no
+        # se puede afirmar la integridad de lo que no se ha comprobado.
+        result = _result_bueno()
+        del result["audit"]["replay_determinism"]["spot"]
+        estado, motivo = self._completo(result)
+        self.assertEqual(estado, FAIL)
+        self.assertIn("replay_determinism.spot", motivo)
+
+    def test_fail_si_un_check_es_verdadero_al_estilo_python_pero_no_true(self) -> None:
+        # ``1`` y ``"ok"`` son verdaderos en Python. Aquí no aprueban nada.
+        for valor in (1, "ok", "PASS", [1]):
+            with self.subTest(valor=valor):
+                result = _result_bueno()
+                result["audit"]["checks"]["identity"] = valor
+                self.assertEqual(self._veredicto(result), FAIL)
+
+    def test_fail_si_el_compromiso_de_captura_declara_errores(self) -> None:
+        result = _result_bueno()
+        result["audit"]["capture_commitment"]["errors"] = [
+            "spot/events-000001.csv: last_ingest_seq no coincide"
+        ]
+        estado, motivo = self._completo(result)
+        self.assertEqual(estado, FAIL)
+        self.assertIn("capture_commitment", motivo)
+
+    def test_fail_si_falta_el_bloque_audit_entero(self) -> None:
+        result = _result_bueno()
+        del result["audit"]
+        estado, motivo = self._completo(result)
+        self.assertEqual(estado, FAIL)
+        self.assertIn("audit", motivo)
 
     def test_fail_si_quedaron_archivos_parciales(self) -> None:
         result = _result_bueno()
@@ -604,6 +743,77 @@ class PruebasRendimientoMonotonico(BaseCorrida):
         estado, motivo = self._veredicto(informe)
         self.assertEqual(estado, DESCONOCIDO)
         self.assertIn("usdm_futures", motivo)
+
+    def test_unknown_si_el_informe_no_declara_missing_markets(self) -> None:
+        # No declararlo no es declararlo vacío: sin ese campo no se sabe si el
+        # conjunto de mercados medidos está completo, y un PASS sobre un
+        # conjunto que no se sabe completo sería fabricado.
+        informe = _informe_metricas()
+        del informe["missing_markets"]
+        estado, motivo = self._veredicto(informe)
+        self.assertEqual(estado, DESCONOCIDO)
+        self.assertIn("missing_markets", motivo)
+
+    def test_unknown_si_se_exige_un_mercado_del_que_no_hay_muestras(self) -> None:
+        # Informe recortado: dice que no falta nada, pero la sección del
+        # mercado exigido no está.
+        informe = _informe_metricas()
+        informe["required_markets"] = ["spot", "usdm_futures", "coinm_futures"]
+        estado, motivo = self._veredicto(informe)
+        self.assertEqual(estado, DESCONOCIDO)
+        self.assertIn("coinm_futures", motivo)
+
+    def test_unknown_si_el_informe_declara_errores_de_metrica(self) -> None:
+        # El motor usa metric_errors para decir que la base de muestras de ese
+        # mercado no es de fiar (cobertura de ventana violada, resumen
+        # incompleto, ventana terminal ambigua). Con la base en duda no se
+        # puede afirmar un PASS, y tampoco condenar: es UNKNOWN.
+        informe = _informe_metricas()
+        informe["markets"]["spot"]["metric_errors"] = [
+            "event_loop_lag: cobertura de ventana violada (serie decreciente)"
+        ]
+        estado, motivo = self._veredicto(informe)
+        self.assertEqual(estado, DESCONOCIDO)
+        self.assertIn("cobertura de ventana violada", motivo)
+
+    def test_unknown_si_el_informe_no_declara_metric_errors(self) -> None:
+        informe = _informe_metricas()
+        for mercado in MERCADOS:
+            del informe["markets"][mercado]["metric_errors"]
+        estado, motivo = self._veredicto(informe)
+        self.assertEqual(estado, DESCONOCIDO)
+        self.assertIn("metric_errors", motivo)
+
+    def test_unknown_si_hubo_muestras_fuera_de_toda_ventana(self) -> None:
+        # Si alguna muestra no fue visible en ninguna ventana emitida, el peor
+        # p99 no cubre la sesión entera y no certifica lo que dice certificar.
+        informe = _informe_metricas()
+        informe["markets"]["spot"]["eviction_checks"] = {
+            "parse_p99": {
+                "metric": "parse",
+                "evicted_reported": True,
+                "max_evicted": 10,
+                "window_snapshots": 0,
+                "coverage_ok": None,
+                "pass": False,
+            }
+        }
+        estado, motivo = self._veredicto(informe)
+        self.assertEqual(estado, DESCONOCIDO)
+        self.assertIn("fuera de toda ventana", motivo)
+
+    def test_un_eviction_check_aprobado_no_estorba(self) -> None:
+        # La comprobación anterior no puede convertirse en un UNKNOWN
+        # permanente: un informe que publica sus eviction_checks en orden
+        # sigue pudiendo dar PASS.
+        informe = _informe_metricas()
+        for mercado in MERCADOS:
+            informe["markets"][mercado]["eviction_checks"] = {
+                gate: {"metric": metrica, "evicted_reported": False, "pass": True}
+                for gate, (metrica, _l) in resultado_causal.UMBRALES_P99_MS.items()
+            }
+        estado, motivo = self._veredicto(informe)
+        self.assertEqual(estado, PASS, motivo)
 
     def test_motivo_obligatorio_cuando_no_es_pass(self) -> None:
         for metricas in (TRACEBACK_FALSO, _informe_metricas(parse_p99=_umbral(5.0, 9.0))):
