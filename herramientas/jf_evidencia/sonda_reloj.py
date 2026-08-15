@@ -639,7 +639,7 @@ def medir(
             try:
                 muestra = consultar(servidor, timeout_s=timeout_s, puerto=puerto)
             except (ErrorEvidencia, OSError) as exc:
-                fallos.anotar(str(exc))
+                fallos.anotar(_sin_prefijo(servidor, str(exc)))
                 consecutivos += 1
                 if consecutivos >= FALLOS_CONSECUTIVOS_MAXIMOS:
                     break
@@ -647,7 +647,7 @@ def medir(
             except Exception as exc:  # pragma: no cover - defensivo
                 # Nada inesperado puede convertirse en un rastro de excepción en
                 # la cara de Jean. Retirar una muestra jamás fabrica un PASS.
-                fallos.anotar(f"{servidor}: error inesperado ({type(exc).__name__}: {exc})")
+                fallos.anotar(f"error inesperado ({type(exc).__name__}: {exc})")
                 consecutivos += 1
                 if consecutivos >= FALLOS_CONSECUTIVOS_MAXIMOS:
                     break
@@ -668,6 +668,18 @@ def medir(
         limite_ms=limite_ms,
         pedidos=len(lista),
     )
+
+
+def _sin_prefijo(servidor: str, mensaje: str) -> str:
+    """Quita el nombre del servidor del principio del motivo.
+
+    ``consultar`` antepone el nombre porque su excepción puede viajar sola;
+    ``servidores_fallidos`` ya está indexado por servidor, y repetirlo dos veces
+    en la misma línea solo estorba a quien lee el informe.
+    """
+
+    marca = f"{servidor}: "
+    return mensaje[len(marca) :] if mensaje.startswith(marca) else mensaje
 
 
 def _componer(
