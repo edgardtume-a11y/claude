@@ -94,7 +94,7 @@ export function initQA34(exp, ui, opts) {
   addBtn('TOGGLE ATMOSPHERE', () => exp.toggleEarthLayer('atmo'));
   addBtn('TOGGLE HOME MARKER', () => exp.toggleHomeMarker());
   addBtn('SHOW EARTH COVERAGE', () => { read.style.display = read.style.display === 'none' ? '' : 'none'; });
-  addBtn('RELEASE HOLD', () => { target = null; exp._holdCharge = false; exp._qaPin = null; });
+  addBtn('RELEASE HOLD', () => { target = null; exp._holdCharge = false; exp._qaPin = null; exp._qaPinCh = null; });
   document.body.appendChild(panel);
 
   function startJump(key) {
@@ -104,7 +104,10 @@ export function initQA34(exp, ui, opts) {
     holding = false;
     lastKey = key;
     exp._holdCharge = false;
-    exp._qaPin = null;
+    /* el pin queda armado desde YA, anclado al capítulo destino: ni un frame
+       gigante puede disparar eventos posteriores al beat congelado */
+    exp._qaPin = def.pin != null ? def.pin : null;
+    exp._qaPinCh = def.pin != null ? def.phase : null;
     setState();
     try { console.log('[QA34] JUMP →', key); } catch (e) {}
   }
@@ -154,9 +157,6 @@ export function initQA34(exp, ui, opts) {
         }
         return;
       }
-      /* el pin se instala en el RELOJ del capítulo (exp._qaPin) — un frame
-         lento jamás dispara eventos posteriores al beat congelado */
-      if (d.pin != null) exp._qaPin = d.pin;
       if (!target.jumped && d.at != null && exp.mt < d.at) {
         setClock(d.at);
         target.jumped = true;
@@ -173,8 +173,8 @@ export function initQA34(exp, ui, opts) {
       target = null;
       return;
     }
-    /* fase anterior a la objetivo: acelerar el reloj real hasta su final */
-    exp._qaPin = null;                    /* el pin solo vive en la fase destino */
+    /* fase anterior a la objetivo: acelerar el reloj real hasta su final
+       (el pin no interfiere: está anclado al capítulo destino) */
     if (ORDER.indexOf(ch) >= 0 && ORDER.indexOf(d.phase) > ORDER.indexOf(ch)) {
       const e = CH_END[ch];
       if (e && exp.mt < e) setClock(e);

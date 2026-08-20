@@ -1,0 +1,267 @@
+================================================================================
+UNIVERSO SEBAS GRANDA — ENTREGA V3.4
+TRUE EARTH + CINEMATIC LAUNCH + FREE SPACE CAMERA + 3D/"4D" EXPERIENCE PASS
+VERSION 1.4.0 · BUILD 20260820-V34-01 · 2026-08-20
+================================================================================
+
+INFORME FINAL OBLIGATORIO (brief §49 — los 20 puntos)
+
+1) POR QUÉ V3.3 NO MOSTRABA CORRECTAMENTE LA TIERRA
+----------------------------------------------------
+Cuatro causas, verificadas en código y en runtime (AUDIT-V34.md):
+
+a. BUG CRÍTICO DE CÁMARA (el decisivo): `_yawPitchGoal()` recibía como `pos`
+   el MISMO vector temporal (`this._tmpV`) que luego sobrescribía para
+   construir el target del lookAt → lookAt(eye === target) es degenerado en
+   three.js → quaternion identidad → pitch y yaw SIEMPRE 0. Resultado: todas
+   las cámaras "Earth-aware" de V3.3 (TRACK/CHASE/NEARBODY/STRATO, el hero
+   orbital con limb al 55 %, el departure) calculaban su pitch correctamente
+   … y lo IGNORABAN, mirando al frente. La Tierra quedaba bajo el borde
+   inferior del encuadre durante toda la fase espacial. Verificado en vivo:
+   con el bug, coverage 13 % y pitch real 0°; con el fix, coverage 55 % y
+   pitch −24.5° (exactamente el calculado).
+b. SIN TEXTURAS: assets/earth/ no contenía NINGÚN archivo; HIGH/ULTRA usaba
+   el fallback procedural ≤1024 con océanos de albedo 0.01–0.19 que tras
+   ACES + viñeta leen como negro junto a estrellas brillantes.
+c. DEPARTURE SIN DISCO: el path de cámara terminaba a d≈2832 del centro,
+   donde el disco (59°) aún era mayor que fov*0.82 → la rama "full disc" era
+   matemáticamente inalcanzable; toda la pantalla ACTIVAR WARP mostraba
+   espacio vacío.
+d. FREE CAMERA EN CAJA ±70: límites arbitrarios que impedían explorar una
+   esfera de R=1400, sin inicialización mirando al planeta.
+
+Bugs V3.3 extra encontrados y corregidos de paso:
+   · vendor/three.module.js JAMÁS se importaba (URL relativa al módulo js/ →
+     404 silencioso → siempre CDN);
+   · audio.uiSelect() no existía → TypeError en _fairingSep en pleno vuelo;
+   · el heat haze quedaba congelado al pasar a espacio (ver punto 9);
+   · un frame lento podía saltarse la rampa uSpace (cielo diurno pegado en
+     órbita) — ahora _enterOrbit es idempotente.
+
+2) TEXTURAS REALES INCORPORADAS
+--------------------------------
+NASA Blue Marble (día), NASA Black Marble / Earth at Night (noche),
+NASA Blue Marble Clouds (nubes CON canal alfa real), máscara oceánica
+(especular). Originales intactos en assets/earth/source/, derivados
+optimizados en assets/earth/runtime/. TODO dentro del ZIP; cero hotlinking.
+
+3) DIMENSIONES Y TAMAÑO DE CADA TEXTURA
+----------------------------------------
+source/  earth-blue-marble.jpg 4096×2048 (1.43 MB) · earth-night.jpg
+         4096×2048 (0.70 MB) · clouds.png 4096×2048 (4.92 MB, alfa) ·
+         earth-water.png 1600×800 (0.42 MB) · earth-topology.png 2048×1024
+runtime/ day-4096.jpg 1.39 MB · day-2048.jpg 0.36 MB · day-1024.jpg 0.11 MB
+         night-4096.jpg 0.57 MB · night-2048.jpg 0.17 MB · night-1024.jpg 46 KB
+         clouds-alpha-2048.png 1.70 MB · clouds-alpha-1024.png 0.46 MB
+         spec-1024.jpg 66 KB
+Tiers: HIGH/ULTRA→4096 · PERFORMANCE→2048 · MOBILE→1024 (nubes 2048/1024).
+
+4) FUENTE NASA DE CADA UNA
+---------------------------
+· Día: NASA Visible Earth — Blue Marble (Reto Stöckli, NASA GSFC)
+  https://visibleearth.nasa.gov/collection/1484/blue-marble
+· Noche: NASA Earth Observatory — Earth at Night / Black Marble
+  https://earthobservatory.nasa.gov/features/NightLights
+· Nubes: NASA Visible Earth — Blue Marble Clouds
+  https://visibleearth.nasa.gov/images/57747/blue-marble-clouds
+IMPORTANTE (honestidad §45): los hosts NASA estaban BLOQUEADOS por la
+política de egress del entorno (HTTP 403 CONNECT, evidencia en AUDIT-V34.md
+§5). Los archivos se obtuvieron del único canal permitido: el paquete npm
+three-globe@2.45.2 (MIT), que redistribuye estas reproducciones NASA de
+dominio público. SHA-256 y detalle completo en ASSET-CREDITS.md §6. Sin logo
+NASA, sin sugerir afiliación. El usuario puede sustituirlos por descargas
+directas 8K de las URLs oficiales sin tocar código.
+
+5) QUÉ CAMBIÓ EN EL SHADER
+---------------------------
+· EarthSurface: albedo NASA sRGB con respuesta `alb*(0.045+1.14·max(d,0))`
+  (antes 0.030+1.28 — recalibrado para imaginería real), especular + glint
+  SOLO en océanos vía máscara real (blanco=agua), earthshine en lado nocturno.
+· NightLights: mezcla por dot(N,sunDir) con smoothstep del terminador
+  (nightK), NUNCA day+night 50/50; ganancia 1.2.
+· Terminator: banda cálida pow(1−|d|,16) — día → borde dorado → noche sin
+  línea dura.
+· Clouds: shell independiente R+11, alfa REAL del PNG, depthWrite:false,
+  rotación lenta propia (0.0035 rad/s sobre la deriva del planeta).
+· Atmosphere/Airglow: sin cambios de concepto (Fresnel BackSide, fino).
+· NUEVO EarthAurora (HIGH/ULTRA): cinta aditiva polar con bandas animadas y
+  fresnel, alfa ≤0.085 — solo visible en ángulos rasantes.
+· Máscara del heat haze: anisotrópica y SOLO aire por debajo de la tobera.
+
+6) QUÉ CAMBIÓ EN EL ENCUADRE
+-----------------------------
+· Fix del lookAt degenerado (punto 1a) — el pitch calculado POR FIN se aplica.
+· frameSphereDistance(coverage, fov): distancia exacta (con tangentes) para
+  que el disco ocupe una fracción vertical dada — sin valores mágicos.
+· earthScreenCoverage(): % vertical real en vivo (modo DISC o LIMB) — es el
+  criterio de aceptación y se muestra en ?qa=v34.
+· Coverage targets: cloud break .12–.17 · Mach1/Max-Q .26 · strato .34 ·
+  ORBIT HERO limb al 55 % (45–65 % ✓) · departure 55→45→32→26 % hasta que el
+  disco CABE y se encuadra completo con espacio alrededor.
+
+7) QUÉ CAMBIÓ EN FREE CAMERA
+-----------------------------
+· Límites por earthR, no caja: distancia al centro ∈ [R+70, 3.4R] — safe
+  radius que impide entrar en la Tierra o cortar la esfera con el near plane,
+  y máximo razonable de observación.
+· Vuelo real: W/S avanzan a lo largo de la mirada (incluye pitch), A/D
+  strafe, Q/E vertical; velocidad escala con la altitud (24 + alt·0.24 u/s).
+· Al entrar en CAM→FREE en órbita/charge la cámara SIEMPRE nace mirando la
+  Tierra (_aimFreeAtEarth) — nunca hacia la nada.
+· Mouse look + rueda FOV (34–80°) se conservan.
+
+8) CÓMO FUNCIONA FOCUS EARTH
+-----------------------------
+Tecla F (solo en FREE cam orbital; en el resto F sigue siendo el scanner) o
+botón QA: conserva la posición, calcula yaw=atan2(dir.x,−dir.z) y
+pitch=asin(dir.y) hacia el centro terrestre y rota suavemente con un blend
+de cámara de 0.7 s. R = RESET ORBIT VIEW (vuelve al director con aim a cero).
+
+9) QUÉ CAUSABA LA DEFORMACIÓN DE MACH 1
+----------------------------------------
+El heat haze (refracción local de pantalla, uniforms uHeat/uHeatC/uHeatR del
+composite) solo se actualizaba dentro de _surfaceUpdate(). Al pasar a espacio
+(gSurface.visible=false) ese código dejaba de ejecutarse y el disco de
+refracción quedaba CONGELADO con su último valor cerca del centro de la
+pantalla — exactamente donde el mini-cohete cruza en Mach 1. El warp de UVs
+huérfano doblaba el fuselaje (la "S" de la captura).
+
+10) CÓMO SE CORRIGIÓ
+---------------------
+a. Apagado en seco al entrar a espacio (_whiteoutToSpace: uHeat=0).
+b. Amortiguación global fuera de _surfaceUpdate: si la superficie no está
+   visible, uHeat decae a 0 SIEMPRE (_worldUpdate).
+c. Máscara nueva: elipse anisotrópica (x1, y0.62) multiplicada por
+   smoothstep(0.035,−0.01, uv.y−uHeatC.y) → la refracción solo puede tocar
+   el AIRE POR DEBAJO de la tobera; el fuselaje queda geométricamente fuera.
+d. El evento Mach 1 ahora es reconocible SIN deformar: cono de condensación
+   translúcido (malla aditiva sobre la nariz, envolvente sin→pico→out de
+   ~1.2 s), shock collar en expansión, shake (trauma 0.22), carga
+   estructural audible (audio.stress) y banner MACH 1.
+   Max-Q es DISTINTO: sin cono, vibración más grave y sostenida (0.85/1.9 s),
+   throttle-bucket visual del plume (−32 %), telemetría DYNAMIC PRESSURE MAX.
+
+11) CÓMO FUNCIONA EL COUNTDOWN HABLADO
+---------------------------------------
+js/countdown-voice.js — countdownVoice(locale,key) con prioridad:
+  1. clips locales assets/audio/voice/<es|en>/<key>.ogg|mp3 declarados en
+     manifest.json (slots preparados y documentados; vacíos en esta entrega);
+  2. SpeechSynthesisUtterance con selección de voz es-CO → es-419 → es-US →
+     es-MX → es-ES → cualquier es (EN: en-US → cualquier en), pitch 0.92
+     (launch-control feel), re-elección en voiceschanged;
+  3. si no hay voz → false y el llamador conserva beep + texto.
+El clic de INICIAR LANZAMIENTO desbloquea el audio (mecanismo V3.3 ya
+existente). Squelch de radio (radioBlip) antes de cada número. Si la voz
+habló, el beep se silencia; si no, suena el beep clásico. "IGNICIÓN" en T-0
+y "DESPEGUE" en T+0.78 (0.6–1.0 s después, brief §16). Números 5-4-3-2-1
+GIGANTES en el centro (clamp 96px–17vw–230px) con T-0n debajo. Ningún dato
+del visitante sale del navegador; cero TTS externo.
+
+12) SI speechSynthesis NO ESTÁ DISPONIBLE
+------------------------------------------
+createCountdownVoice detecta la ausencia de la API (state.supported) o de
+voces del idioma y devuelve false → say() del countdown mantiene beep +
+número gigante + T-0n. El lanzamiento JAMÁS se bloquea por la voz.
+
+13) CÓMO FUNCIONA STAGE 1 SEPARATION
+-------------------------------------
+Secuencia real V3.3 conservada y verificada: MECO (15.2 s, motor+audio fuera,
+coast breve) → STAGE 1 SEPARATION (15.8 s, mechClack + puff de pBurst) →
+el booster (mStage1, grupo separado desde su construcción) cae hacia atrás
+con y=−t²·10−t·6, deriva lateral, rotación lenta (0.16/0.11 rad/s), conserva
+sus luces, NO explota, y se culls a los 3.4 s cuando ya salió de cámara.
+QA: salto STAGE SEP con el booster congelado a mitad de separación.
+
+14) CÓMO FUNCIONA FAIRING SEPARATION
+-------------------------------------
+Dos mitades reales (media carcasa + media nariz cada una) con impulso lateral
+OPUESTO (x=∓(3+t·16)), caída, contra-rotación lenta (±0.35+0.7t) y culling a
+los 2.6 s. Tras la órbita no queda NINGÚN pedazo blanco alrededor de la nave
+(el upper stage gastado también deriva y se culls a los 4.5 s). El TypeError
+de audio que rompía este beat en V3.3 está corregido (uiSelect).
+
+15) FPS APROXIMADO HIGH/PERF
+-----------------------------
+Entorno de verificación: Chromium headless con SwiftShader (rasterizado 100 %
+CPU — sin GPU real en este contenedor), 1600×900. Bajo SwiftShader la escena
+orbital corre a ~2–5 FPS, lo que NO es representativo de hardware real; en
+una GPU de escritorio (la clase de máquina de las capturas del usuario), el
+presupuesto V3.4 añade sobre V3.3: 3 texturas comprimidas (JPG/PNG → RAM GPU
+~45 MB en 4096), un cono transónico, 2 casquetes de aurora y un sprite-grupo
+HOME — coste marginal frente al post/bloom existente. El auto-quality V3.3
+(DPR → nubes → bloom → post) sigue activo y sin cambios para sostener 55–60
+FPS en HIGH. PERF usa 2048 + sin bloom, MOBILE 1024 (Tierra reconocible
+incluso ahí, brief §35).
+
+16) REPOSITORIOS ESTUDIADOS
+----------------------------
+· vasturiano/three-globe (MIT) — ejemplos Clouds / Day-Night Cycle / Solar
+  Terminator / Satellites como referencia de comportamiento; y su tarball
+  npm como vía de obtención de la imaginería NASA (ver punto 4).
+· bobbyroe/threejs-earth (MIT) — arquitectura de capas day/night/clouds/
+  fresnel (ya estudiada en V3.3, re-verificada).
+· three.js oficial r161 — Sky/Sun (conceptos de transición atmosférica ya
+  aplicados en la rampa de cielo V3.3), UnrealBloomPass/selective bloom como
+  referencia del SGPost propio.
+· pmndrs/postprocessing (Zlib) — evaluado y NO integrado: el SGPost propio
+  ya hace selective bloom por threshold; migrar era peso sin beneficio.
+
+17) CÓDIGO EXTERNO REALMENTE INCORPORADO
+-----------------------------------------
+NINGUNO nuevo. Cero código de three-globe, threejs-earth o postprocessing en
+el proyecto. Lo único externo físicamente añadido es el BUILD OFICIAL de
+three.js 0.161.0 (vendor/three.module.js, sin modificar) y las IMÁGENES del
+punto 2. Todo lo demás (earth.js-pass dentro de experience.js, countdown-
+voice.js, qa34.js, shaders) es código propio nuevo de esta entrega.
+
+18) BAJO QUÉ LICENCIA
+----------------------
+three.js 0.161.0: MIT. Imaginería NASA: dominio público (NASA Media Usage
+Guidelines) redistribuida vía three-globe (repositorio MIT — la licencia MIT
+cubre el código; las imágenes NASA son PD). Web Speech API: API estándar del
+navegador. Código propio del proyecto: obra del proyecto SG. Detalle
+completo: ASSET-CREDITS.md §6 y THIRD-PARTY.md (nota V3.4).
+
+19) ASSETS EXTERNOS AÑADIDOS
+-----------------------------
+assets/earth/source/ (5 archivos NASA originales) · assets/earth/runtime/
+(9 derivados optimizados) · vendor/three.module.js (1.28 MB) ·
+assets/audio/voice/README.txt (slots de clips de voz, vacíos y documentados).
+Nada más. Sin HDRIs, sin modelos externos, sin fuentes web.
+
+20) CAPTURAS QA PRODUCIDAS
+---------------------------
+Ver carpeta qa-captures-v34/ (15 PNG 1600×900, Chromium+SwiftShader real
+via Playwright, navegando ?qa=v34&jump=<beat> por el código de producción):
+01_COUNTDOWN_5 · 02_COUNTDOWN_1 · 03_IGNITION · 04_LIFTOFF · 05_MACH1 ·
+06_MAXQ_EARTH · 07_STAGE_SEPARATION · 08_CLOUD_BREAK ·
+09_STRATOSPHERE_EARTH · 10_EARTH_ORBIT_HERO · 11_FREE_CAMERA_EARTH ·
+12_EARTH_DEPARTURE_50 · 13_EARTH_DEPARTURE_FULL · 14_WARP · 15_GALAXY_HUB
+El overlay QA de cada captura muestra el criterio en vivo (EARTH SCREEN
+COVERAGE + DAY/NIGHT/CLOUDS/SPEC=FILE + capítulo/reloj).
+
+================================================================================
+DEFINICIÓN DE TERMINADO (brief §50) — ESTADO
+================================================================================
+✓ Tierra reconocible en ORBIT HERO (coverage 55 %, océanos/continentes/nubes)
+✓ Tierra visible desde FREE CAMERA (esfera real, inicialización FOCUS EARTH)
+✓ HIGH/ULTRA usa archivos reales (QA marca ERROR si no: DAY/NIGHT/CLOUDS=FILE)
+✓ Océanos, continentes, nubes y atmósfera diferenciados
+✓ Terminador día/noche funcional (dot(N,sun) + smoothstep + banda cálida)
+✓ Salida de la Tierra progresiva por DISTANCIA REAL (no scale): 55→45→32→disco
+✓ Voz "5,4,3,2,1" + IGNICIÓN + DESPEGUE con SOUND activo y voz disponible
+✓ MACH 1 sin deformar el fuselaje (causa raíz eliminada + máscara segura)
+✓ Stage separation visible (booster alejándose, captura 07)
+✓ Fairings con impulso opuesto, rotación y culling limpio
+✓ Earth Departure muestra el planeta alejándose (capturas 12/13)
+✓ Warp funciona (regresión verificada, captura 14)
+✓ Galaxy Hub funciona (regresión verificada, captura 15; lógica táctil intacta)
+✓ Sin errores de consola en el recorrido QA (verificado por Playwright)
+✓ Assets dentro del ZIP (runtime + source + vendor)
+
+NOTA DE HONESTIDAD (§45): la descarga DIRECTA desde visibleearth.nasa.gov
+estaba bloqueada por la red del entorno; se documentó el bloqueo y se usó el
+mirror MIT npm de las mismas imágenes NASA de dominio público. Los archivos
+REALES están en el ZIP y HIGH/ULTRA los usa (QA: FILE). Si se prefiere el
+original de 8K, las rutas exactas y URLs oficiales están en ASSET-CREDITS §6.
+================================================================================

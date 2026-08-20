@@ -5681,8 +5681,9 @@ class Experience {
        stretch a 7 s sequence into minutes (P0 §1) */
     this.mt = this._chBase + (performance.now() - this._chStart) / 1000;
     /* V3.4 QA pin: tope duro ANTES de disparar eventos — un frame lento no
-       puede saltarse el beat congelado (?qa=v34; producción: siempre null) */
-    if (this._qaPin != null && this.mt > this._qaPin) {
+       puede saltarse el beat congelado. Anclado a SU capítulo destino para
+       no frenar los capítulos de tránsito (?qa=v34; producción: null). */
+    if (this._qaPin != null && this._qaPinCh === this.chapter && this.mt > this._qaPin) {
       this.mt = this._qaPin;
       this._chStart = performance.now() - (this._qaPin - this._chBase) * 1000;
     }

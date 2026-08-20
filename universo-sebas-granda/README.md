@@ -1,5 +1,5 @@
 # UNIVERSO SEBAS GRANDA
-VERSION 1.3.0 · BUILD 20260820-V33-01 — ver `DEPLOY.md` para el protocolo de
+VERSION 1.4.0 · BUILD 20260820-V34-01 — ver `DEPLOY.md` para el protocolo de
 despliegue/validación en hosting real, `build.json` como fuente de verdad del
 build, y `vendor/README.txt` para colocar Three.js r161 local (un comando).
 
