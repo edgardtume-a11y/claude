@@ -27,7 +27,10 @@
 
 const http = require('http');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const nucleo = require('./nucleo_terminal');
+const oauth = require('./oauth_terminal');
 
 const argumentos = process.argv.slice(2);
 function opcion(nombre, pordefecto) {
@@ -39,7 +42,38 @@ const PUERTO = Number(opcion('puerto', process.env.MCP_TERMINAL_PUERTO || 8765))
 /* Por defecto solo escucha en loopback: se sale a internet por el tunel,
  * no exponiendo el puerto directamente a la red local. */
 const HOST = opcion('host', process.env.MCP_TERMINAL_HOST || '127.0.0.1');
-const TOKEN = process.env.MCP_TERMINAL_TOKEN || crypto.randomBytes(24).toString('hex');
+
+/*
+ * Token estatico. Orden de preferencia:
+ *   1. MCP_TERMINAL_TOKEN
+ *   2. el archivo .token junto a este script
+ *   3. uno nuevo, que ademas se guarda en .token
+ *
+ * Leer el archivo importa: si cada arranque generase un token distinto,
+ * comprobar.sh y cualquier script guardado dejarian de funcionar en cuanto
+ * se reiniciara el servidor.
+ */
+function resolverToken() {
+  if (process.env.MCP_TERMINAL_TOKEN) return process.env.MCP_TERMINAL_TOKEN;
+
+  const archivo = path.join(__dirname, '.token');
+  try {
+    const guardado = fs.readFileSync(archivo, 'utf8').trim();
+    if (guardado) return guardado;
+  } catch (err) {
+    /* No existe todavia: se crea abajo. */
+  }
+
+  const nuevo = crypto.randomBytes(24).toString('hex');
+  try {
+    fs.writeFileSync(archivo, nuevo + '\n', { mode: 0o600 });
+  } catch (err) {
+    process.stderr.write('[aviso] no se pudo guardar .token: ' + err.message + '\n');
+  }
+  return nuevo;
+}
+
+const TOKEN = resolverToken();
 
 function log(...args) {
   process.stderr.write('[' + nucleo.NOMBRE_SERVIDOR + ':http] ' + args.join(' ') + '\n');
@@ -149,20 +183,36 @@ const servidor = http.createServer(async (req, res) => {
       version: nucleo.VERSION_SERVIDOR,
       transportes: ['POST /mcp', 'GET /sse + POST /mensajes'],
       herramientas: nucleo.HERRAMIENTAS.length,
-      autenticacion: 'token requerido',
+      autenticacion: 'token estatico u OAuth',
     });
     return;
   }
+
+  /* Endpoints de OAuth (descubrimiento, registro, autorizacion, token). Son
+   * publicos por definicion: es el mecanismo con el que claude.ai obtiene sus
+   * credenciales. Si el modulo atiende la peticion, aqui hemos terminado. */
+  if (await oauth.manejar(req, res, url, cabecerasCors, tokenValido)) return;
 
   const cabecera = req.headers.authorization || '';
   const tokenCabecera = cabecera.startsWith('Bearer ') ? cabecera.slice(7).trim() : null;
   const tokenRuta = partes[1] || null;
   const tokenQuery = url.searchParams.get('token');
-  const autorizado = [tokenCabecera, tokenRuta, tokenQuery].some(tokenValido);
+  /* Se acepta el token estatico "de siempre" o un token de acceso emitido por
+   * el flujo OAuth (el que usara claude.ai). */
+  const autorizado =
+    [tokenCabecera, tokenRuta, tokenQuery].some(tokenValido) ||
+    oauth.tokenAccesoValido(tokenCabecera);
 
   if (!autorizado) {
     log('rechazado', req.method, url.pathname, 'desde', req.socket.remoteAddress);
-    res.setHeader('WWW-Authenticate', 'Bearer');
+    /* Apuntar al recurso protegido hace que un cliente MCP arranque el flujo
+     * OAuth en vez de rendirse. */
+    const base = (req.headers['x-forwarded-proto'] || 'http').split(',')[0].trim() +
+      '://' + (req.headers['x-forwarded-host'] || req.headers.host || 'localhost').split(',')[0].trim();
+    res.setHeader(
+      'WWW-Authenticate',
+      'Bearer resource_metadata="' + base + '/.well-known/oauth-protected-resource"'
+    );
     json(res, 401, { error: 'token invalido o ausente' });
     return;
   }

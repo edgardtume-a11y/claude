@@ -41,5 +41,21 @@ SALIDA="$(curl -s --max-time 20 -X POST "$BASE/mcp/$TOKEN" -H 'Content-Type: app
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"run_command","arguments":{"command":"echo prueba-ok"}}}')"
 echo "$SALIDA" | grep -q 'prueba-ok' && echo "OK" || { echo "FALLO"; echo "   ${SALIDA:-(respuesta vacia)}"; }
 
+echo -n "5. flujo de autorizacion .. "
+if command -v python3 >/dev/null 2>&1 && [ -f "$AQUI/prueba_flujo.py" ]; then
+  if python3 "$AQUI/prueba_flujo.py" "$BASE" >/tmp/flujo-oauth.txt 2>&1; then
+    echo "OK"
+  else
+    echo "FALLO (detalle en /tmp/flujo-oauth.txt)"
+    tail -5 /tmp/flujo-oauth.txt | sed 's/^/   /'
+  fi
+else
+  echo "omitido (falta python3)"
+fi
+
 echo
-echo "URL del conector:  $BASE/mcp/$TOKEN"
+echo "URL para el conector de claude.ai (sin token, usa OAuth):"
+echo "   $BASE/mcp"
+echo
+echo "URL con token directo (curl y scripts):"
+echo "   $BASE/mcp/$TOKEN"

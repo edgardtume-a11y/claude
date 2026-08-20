@@ -102,15 +102,22 @@ fi
 cat <<RESUMEN
 
   ==================================================================
-  URL para el conector personalizado (Streamable HTTP):
+  URL para el conector personalizado de claude.ai:
+
+    $PUBLICA/mcp
+
+  Pegala tal cual, SIN token: claude.ai negocia el acceso por OAuth
+  al pulsar "Conectar", y la aprobacion es automatica.
+
+  Para clientes que usan token directo (curl, scripts propios):
 
     $PUBLICA/mcp/$TOKEN
 
-  Si el cliente pide transporte SSE, usa en su lugar:
+  Y si alguno pide transporte SSE:
 
     $PUBLICA/sse/$TOKEN
 
-  Cualquiera que tenga esa URL puede ejecutar comandos en esta
+  Cualquiera que tenga esta URL puede ejecutar comandos en esta
   maquina con tus permisos. No la pegues en sitios publicos.
 
   Deja esta terminal abierta. Ctrl+C cierra el tunel y el servidor.
