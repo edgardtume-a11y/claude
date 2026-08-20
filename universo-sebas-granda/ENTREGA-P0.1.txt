@@ -1,0 +1,85 @@
+UNIVERSO SEBAS GRANDA — ENTREGA P0.1
+VERSION 1.0.1 · BUILD 20260820-P01-01
+=====================================================================
+
+QUÉ CORRIGE ESTA ENTREGA
+  · Jerarquía real de fallos: FULL 3D → efecto desactivado → SAFE 3D →
+    (oferta RESTART) → LITE solo si WebGL no existe o es irrecuperable.
+    Ningún error cosmético (satélites, worker, clima, post, texturas,
+    escáner, audio) puede volver a terminar en LITE.
+  · SALTAR INTRO atómico: siempre termina en SG AEROSPACE LAUNCH FACILITY
+    con SCAN/CAM/FOTO/MAP + INICIAR LANZAMIENTO, incluso si fallan assets.
+  · Contratos mínimos: FACILITY = terreno+pad+cohete+cámara+luz+UI (con
+    stand-ins simplificados si un builder crítico falla). ÓRBITA = Tierra
+    LOD0 + nave (cápsula de respaldo) + cámara. Satélites 100% opcionales.
+  · Targets del escáner perezosos: ningún target toca objetos inexistentes.
+  · Eventos WebGL: contextlost/restored/creationerror detectados,
+    registrados y con ruta de recuperación (RESTART antes que LITE).
+  · Errores clasificados FATAL/RECOVERABLE con ventana temporal de 30 s y
+    deduplicación; window.onerror ya no cuenta hacia LITE tras el arranque.
+  · Pantalla SG RUNTIME ERROR en ?debug=1 con BUILD/CHAPTER/STACK/GPU/etc.
+  · Versionado de despliegue: SG_BUILD_ID único, import map con ?v= en
+    TODOS los módulos, css/favicon versionados, build.json, detección de
+    VERSION MISMATCH con recarga automática única + botón RELOAD LATEST
+    BUILD. El worker re-versiona sus propios imports.
+  · ?diag=1: verificación de red (status, MIME, tamaño, HTML-como-JS) de
+    todos los archivos críticos incluido vendor/three.module.js.
+  · ?safe=1: SAFE 3D (sin post/bloom/sombras/worker/satélites/eventos
+    raros, partículas reducidas) con la MISMA misión completa.
+  · Inyección de fallos verificada: ?autotest=1&fail=worker|weather|
+    satellites|post llegan al HUB; fail=webgl termina correctamente en
+    LITE. ?autotest=skip prueba el botón real de SALTAR INTRO.
+
+ÚNICO PASO PENDIENTE DE DESPLIEGUE (no realizable desde este entorno sin red)
+  1) Descargar three.js 0.161.0 oficial:
+       https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js
+  2) Guardarlo como:  vendor/three.module.js   (≈1.2 MB)
+     (instrucciones también en vendor/README.txt)
+  Sin ese archivo la app sigue funcionando vía CDN pinneado 0.161.0;
+  con él, producción no depende de jsDelivr/unpkg (requisito §10/§41).
+
+CHECKLIST TRAS SUBIR TODO EL ZIP A /pruebas/ (sesión limpia / incógnito)
+  A) /pruebas/?diag=1
+       Todos los archivos OK · vendor/three.module.js OK ~1200kb ·
+       BUILD (index) = BUILD (main.js) = BUILD (manifest) = 20260820-P01-01
+  B) /pruebas/?debug=1
+       Cabecera: UNIVERSO SG v1.0.1 BUILD 20260820-P01-01
+  C) /pruebas/?autotest=1        → consola termina en FULL MISSION PASS
+     /pruebas/?autotest=skip     → [SG TEST] SKIP → FACILITY PASS + FULL MISSION PASS
+     /pruebas/?autotest=1&fail=worker      → FULL MISSION PASS
+     /pruebas/?autotest=1&fail=weather     → FULL MISSION PASS
+     /pruebas/?autotest=1&fail=satellites  → FULL MISSION PASS
+     /pruebas/?autotest=1&fail=post        → FULL MISSION PASS
+     /pruebas/?safe=1&autotest=1           → FULL MISSION PASS (SAFE)
+     /pruebas/?autotest=1&fail=webgl       → [SG TEST] LITE PASS
+     /pruebas/?autotest=mismatch           → VERSION MISMATCH detectado
+  D) Manual (sin tocar nada): INTRO → APPROACH → FACILITY.
+     Manual (SALTAR INTRO a ~2 s): → FACILITY con CTA.
+     Manual: INICIAR LANZAMIENTO → countdown → liftoff → orbit → FTL → HUB.
+     En A–D no debe aparecer LITE en ningún momento.
+
+CACHÉS (Hostinger/LiteSpeed/Cloudflare/Service Workers)
+  El BUILD ID en index + import map + build.json hace imposible mezclar
+  main.js nuevo con experience.js viejo: cualquier mezcla dispara la
+  pantalla VERSION MISMATCH con recarga forzada (1 intento automático).
+  Si el hosting tiene "purge cache", ejecutarlo tras subir; no es
+  imprescindible gracias al versionado, pero acelera la propagación.
+
+VALIDACIÓN EN ESTE ENTORNO (sin acceso de red al hosting real)
+  No fue posible abrir https://sebasgrandamanager.starmarkagencia.com/pruebas/
+  desde aquí; la validación de producción queda definida arriba (A–D) y el
+  ?diag=1 la automatiza. El motor completo fue verificado en un arnés que
+  ejecuta el experience.js REAL (matriz: high/perf/auto/ultra/safe ×
+  fail=worker/weather/satellites/post × skip × stalls de 4 s), con 0 errores
+  y FULL MISSION PASS en todos los escenarios recuperables.
+
+VERIFICACIÓN FINAL (esta entrega, arnés headless sobre el código REAL)
+  full / perf / ultra / safe / skip / fail=worker / fail=post /
+  fail=satellites / fail=weather / stall 4s (×2)  →  11/11 HARNESS PASS
+  · Cada escenario imprime su línea §43: SKIP INTRO PASS, SAFE MODE PASS,
+    WORKER/POST/SATELLITE/WEATHER FAILURE PASS y FULL MISSION PASS.
+  · 0 console.error inesperados, 0 LONG TASK, watchdog en silencio.
+  · Unit tests de boot-diagnostics: clasificación FATAL/RECOVERABLE,
+    ventana temporal con deduplicación, buildMatches (CACHE VERSION PASS)
+    y diagAsset (HTML-como-JS, MIME, 404) — PASS.
+  · Protocolo completo de validación EN EL HOSTING REAL: ver DEPLOY.md.

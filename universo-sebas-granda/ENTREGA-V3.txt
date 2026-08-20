@@ -1,0 +1,111 @@
+UNIVERSO SEBAS GRANDA — ENTREGA V3
+VERSION 1.1.0 · BUILD 20260820-V3-01
+=====================================================================
+
+QUÉ AÑADE ESTA ENTREGA (sobre P0/P0.1, sin reconstruir nada)
+
+GALAXY HUB UX (V3 §34-§45 — prioridad)
+  · lockedIdx eliminado. Estados reales: hoverIdx / selectedIdx / confirming.
+  · Hover SIEMPRE previsualiza cualquier galaxia, aunque otra esté
+    seleccionada. Primer click = SELECT (nunca navega, nunca bloquea);
+    cambiar 01→02→03→01 es inmediato y con blend de cámara (sin snap).
+  · SOLO el CTA del panel confirma: cinemática ~1.1 s (brillo, dim de las
+    otras, empuje de cámara + FOV) saltable con click/tecla/reduced-motion.
+  · Colliders ajustados a la masa visual del disco (esfera 0.68·R aplanada),
+    prioridad DOM-anchor vs raycaster resuelta y visible en ?debug=1
+    (HOVER / SELECTED / RAY / DOM). Gamepad: tap selecciona, mantener 0.55 s
+    confirma. URLs de las 3 galaxias INTACTAS.
+
+LANZAMIENTO CINEMATOGRÁFICO (§15-§23)
+  · Contador T−x compacto integrado al HUD; en T−1 cámara HERO baja y cercana
+    (cuerpo + torre + motores + vapor, handheld sutil).
+  · Lista de planos: PAD HERO → ENGINE LOW → TOWER TRACKING → TELEPHOTO →
+    CLOUD PUNCH → (espacio) TRACK/CHASE/NEARBODY/STRATO.
+  · Ignición sin quemado de imagen (flash 0.30/460 ms); whiteout del cloud
+    punch reducido a ~0.35 s pico con silueta+glow legibles (§21).
+  · Humo v3: rotación por partícula, erosión por ruido de 2 octavas,
+    disolución por vida, rim suave, iluminación modulada — se acabaron los
+    círculos idénticos. PAD SMOKE / STEAM / PLUME siguen separados (§18).
+
+HERO ASSETS (§2/§9/§10/§25-§26, gated HIGH/ULTRA; PERF/SAFE = limpio)
+  · SG-L1 (cohete): raceways con brackets, 6 paneles de acceso + 2 escotillas
+    ámbar, anillos de sujetadores, banda térmica de base, bump de costuras.
+  · Torre: bandejas de cables con travesaños, 3 risers, plataforma extra con
+    barandilla, lámparas de mantenimiento y luces rojas de advertencia.
+  · Nave SG: antenas, pod sensor con lente, anillo de decoloración térmica,
+    paneles de mantenimiento, seams y marcas SG. Diseño 100 % original.
+  · Vehículo renombrado SG-L1 (placa, decal, telemetría) liberando el nombre
+    SG-01 para el personaje guía.
+  · Facility integrada al valle (§6): apron 78 m que se disuelve en losas
+    irregulares, canal de drenaje con rejillas, escaleras+pasamanos, casos de
+    equipo. Terreno (§7): erosión en laderas, parches de tierra, pista de
+    servicio desgastada, micro-variación.
+
+PIPELINE DE ASSETS (§3) — js/sgassets.js
+  · Slots locales assets/models/<slot>/<slot>.glb con parser GLB propio
+    (glTF 2.0 binario) y preferencia automática por GLTFLoader/DRACO/KTX2/
+    Meshopt oficiales si están en vendor/three-addons/. Carga por streaming
+    §50 (Facility→rocket/tower, espacio→ship), swap que conserva refs
+    funcionales, fallo → silencio + procedural. Sin hotlinking.
+
+SG MISSION 001 — CAPA NARRATIVA (addendum completo)
+  · Boot diegético 5 líneas (~2.4 s) tras el big bang + VISITOR DETECTED /
+    AUTORIZACIÓN INVITADO / SESIÓN 001 al iniciar el descenso (ES/EN).
+  · Objetivo ÚNICO por momento: LLEGA A LA INSTALACIÓN → ESTABLECE CONTACTO
+    CON SG-01 → PREPARA EL SISTEMA → INICIA EL LANZAMIENTO (se oculta en la
+    cinemática) → ÓRBITA BAJA (ORBIT ACHIEVED) → MOTOR INTERESTELAR →
+    ELIGE TU DESTINO (se completa al seleccionar galaxia).
+  · SG-01: dron guía físico junto al sendero (bob, mira suavemente al
+    visitante, jamás tapa cámara/cohete §9). Estados GUIDE/SCAN/IDLE/MISSION.
+    Contacto por escáner O por mirada cercana 1.5 s → "SG-01 EN LÍNEA".
+    Reacciona en descubrimientos 3/8/13 y en secretos.
+  · Hotspots = escáner (§21): aviso único "SCAN DISPONIBLE · F" cuando la
+    retícula pasa por un objetivo; tras identificar fuel farm / deflector /
+    mástil meteorológico aparece una media-tarjeta MORE INFO no bloqueante.
+  · Secretos (3): PUERTA CLASIFICADA (ACCESS DENIED), TRANSMISIÓN DESCONOCIDA
+    (evento de radio raro, una vez), FRAGMENTO DE ARCHIVO SG (artefacto
+    oculto tras los tanques). 3/3 → CLASSIFIED ACCESS GRANTED + lore SG.
+    Nunca bloquean el golden path (§49).
+  · HUD primera visita (§28-§33): SCAN + MENU al llegar; MAP a los ~6 s,
+    CAM al arrastrar o ~10 s (con pista "C // CAM"), FOTO ~14 s. Visitante
+    recurrente: HUD completo. Cinemáticas ocultan el objetivo (§34).
+  · Photo Mode v2 (§39-§41): presets NATURAL / MISSION FILM / DEEP SPACE como
+    lente no destructiva + postcard "MISSION 001" mientras la misión está
+    activa. Capturas persistidas (photoCount).
+  · Mission Log v2 (§25): checklist FACILITY VISITED / SG-01 CONTACTED /
+    LAUNCH / LEO / WARP / DESTINATION + secretos 0-3 + capturas.
+  · Persistencia local (§26): sg01Contacted, photoCount, rareEventsSeen,
+    secretsFound[], classifiedUnlocked, hintsShown[] — migración v2 aditiva,
+    esquema previo intacto.
+  · Visitante recurrente (§27): SG NETWORK / EXPLORER IDENTIFIED / WELCOME
+    BACK con CONTINUAR MISIÓN · REPETIR LLEGADA · IR AL GALAXY HUB
+    (auto-continúa a los 8 s; nunca fuerza la intro).
+  · Eventos celestes reales (§45): notas SG.OS de LUNA LLENA / PLANETA
+    VISIBLE una sola vez; separación REAL DATA vs SG WORLD intacta (§46).
+  · FUTURE FLIGHT MODE: docs/FUTURE-FLIGHT-MODE.md (documentado, NO
+    implementado, prioridad §64).
+
+MODO ?shot= (§56)
+  facility | ignition | ascent | orbit | hub — automatiza el camino REAL
+  hasta el encuadre (skip → CTA → …). Cero estados falsos.
+
+DECLARACIÓN HONESTA DE ASSETS (§5/§65)
+  Este entorno de construcción no tiene red: NO fue posible descargar GLB,
+  texturas Poly Haven ni imágenes NASA. Todo lo visible es generado por
+  código propio (ver ASSET-CREDITS.md, sección 1). Los slots externos
+  quedan preparados y documentados (sección 2) y el ZIP no contiene ningún
+  placeholder que afirme lo contrario. vendor/three.module.js: un comando,
+  DEPLOY.md §1.
+
+VERIFICACIÓN (arnés headless sobre el código REAL, reloj monotónico)
+  11/11 escenarios PASS: full · perf · ultra · safe · skip · fail=worker ·
+  fail=post · fail=satellites · fail=weather · stall 4 s ×2.
+  Cada uno termina en [SG TEST] FULL MISSION PASS e incluye la secuencia
+  §63: GALAXY 01 SELECT PASS · GALAXY 02 SWITCH PASS · GALAXY 03 SWITCH
+  PASS · GALAXY 01 RESELECT PASS · GALAXY CTA PASS (navegación suprimida
+  en autotest). SKIP INTRO PASS, SAFE MODE PASS y los FAILURE PASS de
+  P0.1 §43 se mantienen. 0 console.error inesperados, 0 LONG TASK.
+  Unit tests boot-diagnostics: PASS. Cadena INTRO→…→HUB sin cambios.
+  Validación en hosting real: protocolo completo en DEPLOY.md (§36-§38),
+  añade a la lista /pruebas/?shot=… para comparar las cinco escenas clave
+  con las capturas de referencia.
