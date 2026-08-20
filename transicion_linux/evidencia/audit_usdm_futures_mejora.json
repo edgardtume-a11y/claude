@@ -1,0 +1,88 @@
+{
+  "book_statuses": {
+    "INVALIDATED:connection_end": 1,
+    "SYNCED": 1,
+    "SYNCING": 1
+  },
+  "causal_identity": {
+    "capture_session_ids": [
+      "d64fea5560ac489eac0b5666111cc0cf"
+    ],
+    "ingest_seq_max": 38612,
+    "ingest_seq_min": 36,
+    "invalid_causal_ingest_headers": 0,
+    "schema_versions": [
+      "2.0.0"
+    ],
+    "source_socket_ids": [
+      "1d842f8f46aa45e9a19b0a184e68e0e8:usdm_market_trades",
+      "1d842f8f46aa45e9a19b0a184e68e0e8:usdm_public_depth",
+      "collector",
+      "rest:depth"
+    ],
+    "unique_ingest_seq_count": 20577
+  },
+  "certification": {
+    "causal_replay": "PASS",
+    "causal_replay_errors": [],
+    "journal_integrity": "PASS",
+    "note": "valid=false al final es normal después de CONNECTION CLOSED; cada gap/resync debe dibujarse como frontera de epoch. causal_replay solo certifica invariantes evaluables por journal; la contigüidad global K3 exige la unión de mercados (comando identity).",
+    "safe_for_visual_replay": true
+  },
+  "delta_dispositions": {
+    "applied": 5887,
+    "stale": 13
+  },
+  "events": {
+    "AGG_TRADE": 9057,
+    "BOOK_STATUS": 3,
+    "CONNECTION": 2,
+    "L2_DELTA": 5900,
+    "L2_PARTIAL": 5620,
+    "L2_SNAPSHOT": 1
+  },
+  "files": [
+    "/tmp/claude-0/-home-user-claude/89a2aacc-543e-52d7-9d40-fd9108ca5235/scratchpad/ideas/555/555/binance_phase1_collector/runs/20260814T081136_503806Z_10m_d64fea5560ac/capture/usdm_futures/events-20260814T081139.839103Z-000001.csv"
+  ],
+  "incomplete_markers": [],
+  "latency_ms_from_journal_headers": {
+    "exchange_to_receive": {
+      "approximate": false,
+      "count": 20577,
+      "max_sampled": 5024.097,
+      "p50": 95.593,
+      "p95": 3151.824,
+      "p99": 4327.557,
+      "sample_count": 20577
+    },
+    "receive_to_writer_start": {
+      "approximate": false,
+      "count": 20583,
+      "max_sampled": 484.0,
+      "p50": 141.0,
+      "p95": 265.0,
+      "p99": 281.0,
+      "sample_count": 20583
+    }
+  },
+  "markets": [
+    "usdm_futures"
+  ],
+  "replay": {
+    "ask_levels": 6303,
+    "bid_levels": 7017,
+    "canonical_hash_version": 2,
+    "deltas_applied": 5887,
+    "exchange": "binance",
+    "generation": 1,
+    "ingest_conflicts": 0,
+    "ingest_duplicate_identical": 0,
+    "ingest_unique_count": 20577,
+    "last_update_id": 11284545763711,
+    "market": "usdm_futures",
+    "sha256": "beff8f181dbd368f41a7446cebf09c7b120416e768b124c7bd126e18589bda2d",
+    "snapshots": 1,
+    "symbol": "BTCUSDT",
+    "valid_live_state": false
+  }
+}
