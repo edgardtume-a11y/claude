@@ -72,15 +72,31 @@ fi
 
 echo
 echo "== Comprobando de extremo a extremo =="
-RESPUESTA="$(curl -s --max-time 20 -X POST "$PUBLICA/mcp/$TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}')"
 
-if echo "$RESPUESTA" | grep -q 'run_command'; then
-  echo "  el tunel responde y expone las herramientas: OK"
-else
-  echo "  AVISO: el tunel no devolvio la lista de herramientas."
-  echo "  respuesta: $RESPUESTA"
+# El borde de Cloudflare tarda unos segundos en enrutar un tunel recien
+# creado: la URL aparece en el registro antes de estar operativa. Se
+# reintenta en vez de dar por fallida la primera respuesta vacia.
+RESPUESTA=""
+for INTENTO in $(seq 1 12); do
+  RESPUESTA="$(curl -s --max-time 10 -X POST "$PUBLICA/mcp/$TOKEN" \
+    -H 'Content-Type: application/json' \
+    -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' 2>/dev/null)"
+
+  if echo "$RESPUESTA" | grep -q 'run_command'; then
+    echo "  el tunel responde y expone las herramientas: OK (intento $INTENTO)"
+    break
+  fi
+
+  printf '  esperando a que el tunel enrute... (%s/12)\r' "$INTENTO"
+  sleep 3
+done
+echo
+
+if ! echo "$RESPUESTA" | grep -q 'run_command'; then
+  echo "  AVISO: tras 12 intentos el tunel sigue sin devolver las herramientas."
+  echo "  El servidor local si responde? Compruebalo en otra terminal con:"
+  echo "    curl -s http://127.0.0.1:$PUERTO/salud"
+  echo "  Ultima respuesta del tunel: ${RESPUESTA:-(vacia)}"
 fi
 
 cat <<RESUMEN
