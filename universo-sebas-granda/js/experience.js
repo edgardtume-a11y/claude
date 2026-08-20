@@ -2362,8 +2362,8 @@ class Experience {
         ' col+=vec3(0.012,0.026,0.050)*(1.0-day);   /* earthshine floor */',
         ' /* OCEAN RESPONSE: broad specular + tight sun glint, never plastic */',
         ' vec3 H=normalize(S+V);',
-        ' float spec=pow(max(dot(N,H),0.0),42.0)*oc*day*0.55;',
-        ' float glint=pow(max(dot(N,H),0.0),340.0)*oc*day*1.6;',
+        ' float spec=pow(max(dot(N,H),0.0),42.0)*oc*day*0.38;',
+        ' float glint=pow(max(dot(N,H),0.0),340.0)*oc*day*1.25;',
         ' col+=vec3(1.0,0.95,0.85)*(spec+glint);',
         ' /* NIGHT LIGHTS — real cities, only on the night side */',
         ' vec3 nl=texture2D(uNight,vUv).rgb;',
@@ -4299,6 +4299,10 @@ class Experience {
     this._haptic(1, 1, 600);
     this.trauma = Math.max(this.trauma, 0.3);
     this.gWarp.visible = true;
+    /* V3.4: la Tierra NASA es ahora tan visible que fotobombardeaba el
+       corredor FTL (en V3.3 pasaba igual pero era casi negra). El espacio
+       orbital se despide aquí; el hub la re-oculta de todos modos. */
+    this.gSpace.visible = false;
     if (this.ship) {
       this.scene.attach(this.ship);
       this.ship.rotation.set(0.05, 0, 0);

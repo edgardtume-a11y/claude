@@ -15,12 +15,12 @@ const JUMPS = {
   countdown1:   { phase: 'countdown',   at: 5.05,  pin: 5.9 },
   ignition:     { phase: 'countdown',   at: 6.05,  pin: 6.7 },
   liftoff:      { phase: 'ascent',      at: 2.2,   pin: 2.6 },
-  cloudbreak:   { phase: 'ascent',      at: 5.9,   pin: 6.35 },
+  cloudbreak:   { phase: 'ascentSpace', at: 6.9,   pin: 7.35 },
   mach1:        { phase: 'ascentSpace', at: 8.15,  pin: 8.7 },
   maxq:         { phase: 'ascentSpace', at: 10.35, pin: 11.1 },
-  stagesep:     { phase: 'ascentSpace', at: 15.75, pin: 16.6, capSep: 0.85 },
-  stage2:       { phase: 'ascentSpace', at: 16.55, pin: 17.15 },
-  fairing:      { phase: 'ascentSpace', at: 17.35, pin: 18.1, capFair: 0.75 },
+  stagesep:     { phase: 'ascentSpace', at: 15.75, pin: 16.6, capSep: 0.85, rig: 'TRACK' },
+  stage2:       { phase: 'ascentSpace', at: 16.55, pin: 17.15, rig: 'TRACK' },
+  fairing:      { phase: 'ascentSpace', at: 17.35, pin: 18.1, capFair: 0.75, rig: 'TRACK' },
   stratosphere: { phase: 'ascentSpace', at: 13.3,  pin: 14.4 },
   earthhero:    { phase: 'orbit',       at: 1.2,   pin: 2.2 },
   freecam:      { phase: 'orbit',       free: true },
@@ -157,6 +157,7 @@ export function initQA34(exp, ui, opts) {
         }
         return;
       }
+      if (d.rig && exp.camRig !== d.rig) { exp.camRig = d.rig; exp.userCamLock = true; }
       if (!target.jumped && d.at != null && exp.mt < d.at) {
         setClock(d.at);
         target.jumped = true;

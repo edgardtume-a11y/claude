@@ -620,7 +620,7 @@ export function loadOptionalTextures(T, done, opts) {
     'assets/earth/runtime/clouds-alpha-' + cloudRes + '.png' + v,
     'assets/earth/clouds.png' + v,
   ], false);
-  tryLoad('spec', ['assets/earth/runtime/spec-1024.jpg' + v], false);
+  tryLoad('spec', ['assets/earth/runtime/spec-1024.png' + v], false);
   tryLoad('moon', ['assets/moon.jpg' + v], true);
   if (pending === 0) done(out);
 }
