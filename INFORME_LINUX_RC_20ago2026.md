@@ -141,6 +141,23 @@ verde, 147 archivos, sello `8eafe1b9d54591d091650e2001790c9289b65fe4de117c680f3b
 [DECISIÓN DEL PROYECTO pendiente] Instalarla en el Windows de Jean es decisión de Jean; el candidato queda
 en `transicion_linux/candidato/`.
 
+### Ronda 2 — el subsistema de reloj probado con chrony REAL
+
+Se instaló chrony de repositorio en el contenedor y se montó un par de chronyd locales por loopback
+(servidor de estrato 8 + cliente con `-x`, sin tocar el reloj del host), para ejercitar el candidato
+contra el binario de producción. **[HECHO COMPROBADO]** Resultados
+(`transicion_linux/evidencia/laboratorio_chrony_linux2.md`):
+
+- **Camino PASS real:** `clock_linux` como usuario sin privilegios contra el chronyd sincronizado →
+  `PASS` con offset 0,0064 ms, banda ±0,0093 ms, `utc_calificada: DEMOSTRADA`. (Prueba el MECANISMO;
+  la exactitud UTC real es de la Fase 2 en el VPS.)
+- **Tres fallos cerrados reales:** daemon detenido → `CHRONYC_COMMAND_FAILED`; daemon sin fuente →
+  `CHRONY_UNSYNCHRONIZED`; bootstrap como root → `ROOT_PROCESS_FORBIDDEN` sin iniciar nada.
+- **Sidecar en vivo:** JSONL válido con doble marca temporal, `tracking.pass=true`,
+  `informational_only=true` y correlación de sesión correcta (null sin captura activa).
+- **Superficie completa:** `./INICIAR.sh --mode offline` → `OFFLINE_READY` (batería 292/2 dentro de
+  los hijos aislados reales).
+
 ## 5. Qué queda para autorizar de verdad la migración
 
 Sin cambios sobre el plan rector: la Fase 2 en el VPS (chrony real, systemd, red, escalera 10/30/120 con
