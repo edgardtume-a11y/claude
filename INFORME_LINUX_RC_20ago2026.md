@@ -109,7 +109,39 @@ relajar ninguno.
 
 ---
 
-## 4. Qué queda para autorizar de verdad la migración
+## 4. Ronda 1 de mejora continua (mismo día, encargo «no pares»)
+
+El candidato se endureció y re-selló como **2.4.1+linux.2** (sello
+`8432df4844e760411f7dc87da3234ad29204e936d6ec5b9f85a378690f6d267a`), que sustituye al linux.1:
+
+- **Verificación adversarial de tres sospechas de defecto en lo construido — las tres descartadas con
+  evidencia:** [HECHO COMPROBADO] la máquina de estados del manifiesto permite STOPPING→STOPPING
+  (`runtime.py:24-31`), los estados que busca el sidecar son exactamente los de `RUNTIME_STATES`
+  (`runtime.py:21-23`), y el motor hijo hereda el entorno completo del bootstrap
+  (`environment = os.environ.copy()`), con lo que `JEAN_FLOW_RUNTIME_ROOT` llega a los hijos aislados.
+- Recolección de métricas rotadas refactorizada a `_metrics_series_paths()` **unitariamente testeada**
+  (orden causal, symlinks y sufijos espurios excluidos, fallo cerrado con base ausente); `disk_preflight`
+  endurecido (un `OSError` al examinar el disco ya no revienta con traceback: falla cerrado con código);
+  12 pruebas nuevas (gate de disco ×4, envolturas del reloj ×3, serie rotada ×4, lock estable ×1).
+  **Batería: 292 superadas, 2 omitidas, 0 fallos**, también desde el ZIP extraído en frío.
+- **Prueba de punta a punta del camino de un clic, como usuario sin privilegios:** [HECHO COMPROBADO]
+  `python3.12 -X utf8 -I -S -B -u jean_flow_launcher.py --mode offline` desde el ZIP frío construyó el
+  runtime verificado por sellos sin red, aceptó Linux, y emitió `OFFLINE_READY` con `pass: true`
+  (integridad 161 archivos + batería 292/2 + benchmark, todo dentro de los hijos aislados reales;
+  evidencia en `transicion_linux/evidencia/OFFLINE_READY_linux2_endtoend.json`). Ejecutado como root,
+  el bootstrap **se negó** con `ROOT_PROCESS_FORBIDDEN` — el rechazo de privilegios funciona.
+- **Fallo cerrado demostrado en vivo:** `--mode preflight` en este contenedor se detuvo con
+  `DISK_SPACE_INSUFFICIENT: libres=29.3 GiB (11.6%)` — el gate de disco nuevo actuando antes del reloj,
+  con código y números claros. (El VPS decidido, con NVMe ≥100 GB, lo supera.)
+
+**Además: candidato 2.4.2 para Windows.** [HECHO COMPROBADO] El defecto de métricas rotadas afecta a la
+2.4.1 de Windows; se preparó la corrección quirúrgica sobre el árbol sellado (un solo cambio funcional +
+4 pruebas + `CAMBIOS_v2.4.2.md`), construida por el **pipeline oficial original** (win_amd64): 267/2 en
+verde, 147 archivos, sello `8eafe1b9d54591d091650e2001790c9289b65fe4de117c680f3b0da4cb3d84f8`.
+[DECISIÓN DEL PROYECTO pendiente] Instalarla en el Windows de Jean es decisión de Jean; el candidato queda
+en `transicion_linux/candidato/`.
+
+## 5. Qué queda para autorizar de verdad la migración
 
 Sin cambios sobre el plan rector: la Fase 2 en el VPS (chrony real, systemd, red, escalera 10/30/120 con
 umbrales vigentes), el registro de bloqueos si algo falla, y las ocho condiciones de la Fase 4. Este
