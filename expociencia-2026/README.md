@@ -21,21 +21,40 @@ continua. Además:
 
 ## Cómo agregar las imágenes de cada croquis
 
-1. Guarda la imagen dentro de la carpeta `img/` con el nombre `croquis-N.png`
-   (por ejemplo `img/croquis-3.png` para Futsal).
-2. Abre `index.html`, busca el bloque **`UBICACIONES`** cerca del final y
-   escribe la ruta en la línea correspondiente:
+Un solo paso: **copia el archivo dentro de la carpeta `img/`** con el nombre
+`croquis-N`, donde N es el número de la ubicación.
+
+```
+img/croquis-1.png   →  Patio Principal
+img/croquis-2.png   →  Patio Inicial
+img/croquis-3.png   →  Futsal
+img/croquis-4.png   →  Comedor Nuevo
+img/croquis-5.png   →  Zona de Kiosko
+img/croquis-6.png   →  Pabellón 3
+img/croquis-7.png   →  Pabellón 2
+img/croquis-8.png   →  Cancha Sintética
+```
+
+No hay que editar el HTML: la página prueba sola las extensiones `.png`,
+`.jpg`, `.jpeg` y `.webp`. Mientras falte una imagen, esa pantalla muestra un
+marcador punteado indicando qué archivo agregar; nada se rompe.
+
+Si un archivo tiene otro nombre, se puede indicar la ruta explícita en el
+arreglo `UBICACIONES` (dentro de `index.html`):
 
 ```js
 { n:3, nombre:"Futsal", color:"#5aa82b",
-  imagen:"img/croquis-3.png",
-  nota:"Stands de energías renovables" },
+  imagen:"img/futsal-final-v2.jpg",
+  nota:"De 3.º a 6.º grado · Nivel II." },
 ```
 
-`nota` es opcional: si la dejas vacía, no aparece nada bajo el título.
+## Textos de cada ubicación
 
-Mientras una ubicación no tenga imagen, su pantalla muestra un marcador
-punteado que indica exactamente qué archivo falta. Nada se rompe.
+En el mismo arreglo `UBICACIONES` se editan:
+
+- `nombre` — el texto del botón y del título de la pantalla.
+- `nota` — línea descriptiva bajo el título. Acepta `<b>negritas</b>`.
+- `color` — color del número (uno por ubicación).
 
 ## Estructura
 

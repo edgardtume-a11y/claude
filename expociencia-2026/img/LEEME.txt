@@ -1,13 +1,15 @@
-Coloca aqui las imagenes de los croquis con estos nombres:
+Copia aqui las imagenes de los croquis con estos nombres exactos:
 
-  croquis-1.png   Patio Principal
-  croquis-2.png   Patio Inicial
-  croquis-3.png   Futsal
-  croquis-4.png   Comedor Nuevo
-  croquis-5.png   Zona de Kiosko
-  croquis-6.png   Pabellon 3
-  croquis-7.png   Pabellon 2
-  croquis-8.png   Cancha Sintetica
+  croquis-1     Patio Principal
+  croquis-2     Patio Inicial
+  croquis-3     Futsal
+  croquis-4     Comedor Nuevo
+  croquis-5     Zona de Kiosko  (Campana de Salud)
+  croquis-6     Pabellon 3
+  croquis-7     Pabellon 2
+  croquis-8     Cancha Sintetica
 
-Sirven PNG, JPG o WEBP. Despues escribe la ruta en el arreglo
-UBICACIONES, dentro de index.html.
+La extension puede ser .png, .jpg, .jpeg o .webp: la pagina las prueba
+sola. No hay que editar el index.html.
+
+Ejemplo:  img/croquis-1.png   o   img/croquis-1.jpg

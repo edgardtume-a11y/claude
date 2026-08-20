@@ -171,9 +171,10 @@ button{font:inherit;color:inherit;}
 }
 .croquis-titulo:focus{outline:none;}
 .croquis-nota{
-  margin:5px 0 0;color:#5c6f86;font-weight:600;
-  font-size:clamp(11px,1.15vw,15px);line-height:1.4;
+  margin:5px 0 0;color:#5c6f86;font-weight:500;
+  font-size:clamp(11px,1.15vw,15px);line-height:1.45;max-width:105ch;
 }
+.croquis-nota b{color:var(--navy);font-weight:800;}
 
 .lienzo{
   flex:1 1 auto;min-height:0;
@@ -353,15 +354,30 @@ button{font:inherit;color:inherit;}
        imagen:"img/croquis-1.png", nota:"Stands de robotica y biologia" },
    ========================================================================== */
 const UBICACIONES = [
-  { n:1, nombre:"Patio Principal",  color:"#1d4ed8", imagen:"", nota:"" },
-  { n:2, nombre:"Patio Inicial",    color:"#0e9488", imagen:"", nota:"" },
-  { n:3, nombre:"Futsal",           color:"#5aa82b", imagen:"", nota:"" },
-  { n:4, nombre:"Comedor Nuevo",    color:"#7c3aed", imagen:"", nota:"" },
-  { n:5, nombre:"Zona de Kiosko",   color:"#f97316", imagen:"", nota:"" },
-  { n:6, nombre:"Pabellón 3",       color:"#eda110", imagen:"", nota:"" },
-  { n:7, nombre:"Pabellón 2",       color:"#ec4899", imagen:"", nota:"" },
-  { n:8, nombre:"Cancha Sintética", color:"#0ea5e9", imagen:"", nota:"" }
+  { n:1, nombre:"Patio Principal",  color:"#1d4ed8",
+    nota:"Del 7.º al 9.º grado · Nivel III. Estrado junto a los pabellones 1 y 4. Acceso por la Puerta 2." },
+
+  { n:2, nombre:"Patio Inicial",    color:"#0e9488",
+    nota:"Exposición de 1.º y 2.º grado · Nivel I. Piso 1: aulas KA, KB, KC, Nido, PK-A y PK-B." },
+
+  { n:3, nombre:"Futsal",           color:"#5aa82b",
+    nota:"De 3.º a 6.º grado · Nivel II. Exposición en la cancha, con tribunas para el público." },
+
+  { n:4, nombre:"Comedor Nuevo",    color:"#7c3aed",
+    nota:"Bachillerato. <b>1.ª ponencia</b> 10:30–11:00 a. m. — “La salud pospandemia” (11.º A–C). " +
+         "<b>2.ª ponencia</b> 11:30–12:15 a. m. — “Reacción nuclear” (10.º A–B y 11.º B, Física)." },
+
+  { n:5, nombre:"Zona de Kiosko",   color:"#f97316",
+    nota:"Campaña de salud: vacunas, oftalmología, psicología, medicina general y ginecología." },
+
+  { n:6, nombre:"Pabellón 3",       color:"#eda110", nota:"" },
+  { n:7, nombre:"Pabellón 2",       color:"#ec4899", nota:"" },
+  { n:8, nombre:"Cancha Sintética", color:"#0ea5e9", nota:"" }
 ];
+
+/* Extensiones que se prueban automaticamente para img/croquis-N.*
+   Asi basta con copiar los archivos a la carpeta img/ sin editar nada mas. */
+const EXTENSIONES = ["png", "jpg", "jpeg", "webp"];
 
 /* ------------------------------ Iconos ------------------------------ */
 const ICONO_PIN =
@@ -407,10 +423,6 @@ UBICACIONES.forEach(function (u) {
   s.className = "pantalla croquis";
   s.setAttribute("aria-labelledby", "titulo-" + u.n);
 
-  const contenido = u.imagen
-    ? '<img src="' + u.imagen + '" alt="Croquis de ' + u.nombre + '">'
-    : marcador(u.n);
-
   s.innerHTML =
     '<header class="croquis-cabecera">' +
       '<span class="num" style="background:' + u.color + '" aria-hidden="true">' + u.n + '</span>' +
@@ -420,27 +432,45 @@ UBICACIONES.forEach(function (u) {
         (u.nota ? '<p class="croquis-nota">' + u.nota + '</p>' : '') +
       '</div>' +
     '</header>' +
-    '<div class="lienzo">' + contenido + '</div>' +
+    '<div class="lienzo"></div>' +
     '<div class="croquis-pie">' +
       '<button type="button" class="btn-volver" data-volver>' + ICONO_FLECHA + 'Volver a la pantalla principal</button>' +
     '</div>';
 
   document.body.appendChild(s);
-
-  // Si la ruta existe pero el archivo aun no, mostramos el marcador en su lugar.
-  const img = s.querySelector("img");
-  if (img) {
-    img.addEventListener("error", function () {
-      s.querySelector(".lienzo").innerHTML = marcador(u.n);
-    });
-  }
+  cargarCroquis(u, s.querySelector(".lienzo"));
 });
+
+/* Prueba img/croquis-N.png, .jpg, .jpeg y .webp hasta encontrar el archivo.
+   Si no existe ninguno, deja el marcador que dice cual falta. */
+function cargarCroquis(u, lienzo) {
+  const rutas = u.imagen
+    ? [u.imagen]
+    : EXTENSIONES.map(function (ext) { return "img/croquis-" + u.n + "." + ext; });
+
+  lienzo.innerHTML = marcador(u.n);
+
+  let i = 0;
+  const img = new Image();
+  img.alt = "Croquis de " + u.nombre;
+
+  img.onload = function () {
+    lienzo.innerHTML = "";
+    lienzo.appendChild(img);
+  };
+  img.onerror = function () {
+    i += 1;
+    if (i < rutas.length) img.src = rutas[i];
+  };
+
+  img.src = rutas[0];
+}
 
 function marcador(n) {
   return '<div class="marcador">' + ICONO_IMAGEN +
     '<strong>Croquis pendiente</strong>' +
-    '<span>Guarda la imagen como <code>img/croquis-' + n + '.png</code><br>' +
-    'y escribe esa ruta en <code>UBICACIONES</code>.</span></div>';
+    '<span>Copia la imagen en la carpeta <code>img/</code><br>' +
+    'con el nombre <code>croquis-' + n + '.png</code> (o .jpg).</span></div>';
 }
 
 /* ------------- 3. Navegacion ------------- */
