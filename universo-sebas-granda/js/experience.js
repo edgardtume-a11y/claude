@@ -4393,7 +4393,10 @@ class Experience {
     this.audio.uiBeep();
   }
   skipFlight() {
-    if (['ascent', 'ascentSpace', 'orbit', 'charge', 'countdown'].includes(this.chapter)) {
+    /* V3.4 FIX: 'facility' faltaba en la lista — la opción IR AL GALAXY HUB
+       del welcome (main.js) llama skipFlight desde facility y era un no-op
+       silencioso en V3.3. */
+    if (['facility', 'ascent', 'ascentSpace', 'orbit', 'charge', 'countdown'].includes(this.chapter)) {
       this.engineOn = 0;
       this.audio.setEngine(0);
       this.audio.setWater(0);
