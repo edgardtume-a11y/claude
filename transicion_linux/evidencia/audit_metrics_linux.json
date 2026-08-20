@@ -1,0 +1,912 @@
+{
+  "certification": "FAIL",
+  "clock_domains": {
+    "cross_clock": [
+      "exchange_to_receive_depth",
+      "exchange_to_receive_trade",
+      "trade_time_to_receive"
+    ],
+    "monotonic": [
+      "parse",
+      "book_apply",
+      "book_pipeline_total",
+      "event_loop_lag",
+      "writer_cooperative_yield",
+      "receive_to_writer_start",
+      "csv_write",
+      "csv_fsync",
+      "journal_build"
+    ]
+  },
+  "clock_note": "exchange_to_receive usa reloj UTC/NTP (cross_clock): debe leerse con la banda θ̂±δ/2 publicada en el arranque (clock_offset_theta_hat_ns / clock_offset_delta_ns) y NUNCA usarse como gate sin banda; parse, book_apply, writer y event_loop_lag usan duraciones locales monotónicas",
+  "malformed_json_lines": 0,
+  "markets": {
+    "spot": {
+      "activity_counters": {
+        "agg_trade_messages": 5991,
+        "book_syncs": 1,
+        "depth_diff_messages": 6022,
+        "rest_snapshots": 1
+      },
+      "activity_pass": true,
+      "capacity_checks": {
+        "book_queue": {
+          "capacity": 4096,
+          "high_water": 16,
+          "overflows": 0,
+          "pass": true
+        },
+        "partial_queue": {
+          "capacity": 4096,
+          "high_water": 17,
+          "overflows": 0,
+          "pass": true
+        },
+        "raw_bytes": {
+          "capacity": 67108864,
+          "high_water": 68075,
+          "overflows": 0,
+          "pass": true
+        },
+        "raw_queue": {
+          "capacity": 8192,
+          "high_water": 247,
+          "overflows": 0,
+          "pass": true
+        },
+        "trade_queue": {
+          "capacity": 4096,
+          "high_water": 274,
+          "overflows": 0,
+          "pass": true
+        },
+        "writer_queue": {
+          "capacity": 4096,
+          "high_water": 274,
+          "overflows": 0,
+          "pass": true
+        },
+        "writer_rows": {
+          "capacity": 250000,
+          "high_water": 10116,
+          "overflows": 0,
+          "pass": true
+        }
+      },
+      "eviction_checks": {
+        "book_apply_p99": {
+          "coverage_ok": true,
+          "evicted_reported": true,
+          "max_evicted": 0,
+          "metric": "book_apply",
+          "pass": true,
+          "window_snapshots": 121
+        },
+        "book_pipeline_p99": {
+          "coverage_ok": true,
+          "evicted_reported": true,
+          "max_evicted": 0,
+          "metric": "book_pipeline_total",
+          "pass": true,
+          "window_snapshots": 121
+        },
+        "event_loop_lag_p99": {
+          "coverage_ok": true,
+          "evicted_reported": true,
+          "max_evicted": 19592,
+          "metric": "event_loop_lag",
+          "pass": true,
+          "window_snapshots": 121
+        },
+        "parse_p99": {
+          "coverage_ok": true,
+          "evicted_reported": true,
+          "max_evicted": 8035,
+          "metric": "parse",
+          "pass": true,
+          "window_snapshots": 121
+        },
+        "writer_yield_p99": {
+          "coverage_ok": true,
+          "evicted_reported": true,
+          "max_evicted": 0,
+          "metric": "writer_cooperative_yield",
+          "pass": true,
+          "window_snapshots": 121
+        }
+      },
+      "failure_counters": {},
+      "latest": {
+        "counters": {
+          "agg_trade_messages": 5991,
+          "book_apply_offloaded": 18,
+          "book_syncs": 1,
+          "cooperative_yields_book": 5592,
+          "cooperative_yields_dispatcher": 6878,
+          "cooperative_yields_partial": 5584,
+          "cooperative_yields_receiver": 6872,
+          "cooperative_yields_synchronize": 3,
+          "cooperative_yields_trade": 1564,
+          "csv_batches_written": 18041,
+          "csv_flushes": 2209,
+          "csv_periodic_fsyncs": 117,
+          "csv_rotations": 1,
+          "csv_rows_written": 418095,
+          "depth_applied_events": 6019,
+          "depth_diff_messages": 6022,
+          "depth_stale_events": 3,
+          "event_loop_probe_missed_ticks": 507,
+          "partial_depth_messages": 6022,
+          "rest_snapshots": 1,
+          "terminal_metric_snapshots": 1,
+          "websocket_bytes": 15053920,
+          "websocket_messages": 18035,
+          "writer_gil_yields": 1136,
+          "writer_yield_overshoots": 4
+        },
+        "gauges": {
+          "book_ask_levels": 5484,
+          "book_bid_levels": 5018,
+          "book_last_update_id": 98528724910,
+          "book_queue_high_water": 16,
+          "book_queue_size": 0,
+          "clock_offset_delta_ns": 277123800,
+          "clock_offset_theta_hat_ns": 47807700,
+          "last_ingest_seq": 38555,
+          "partial_queue_high_water": 17,
+          "partial_queue_size": 0,
+          "raw_bytes_capacity": 67108864,
+          "raw_bytes_high_water": 68075,
+          "raw_bytes_inflight": 0,
+          "raw_queue_capacity": 8192,
+          "raw_queue_high_water": 247,
+          "raw_queue_size": 0,
+          "rest_used_weight_1m": 21,
+          "route_queue_capacity": 4096,
+          "symbol_admissibility_margin_x100": 9223372,
+          "trade_queue_high_water": 274,
+          "trade_queue_size": 0,
+          "writer_queue_capacity": 4096,
+          "writer_queue_high_water": 274,
+          "writer_queue_size": 0,
+          "writer_queued_rows": 0,
+          "writer_rows_capacity": 250000,
+          "writer_rows_high_water": 10116,
+          "writer_yield_requested_ms": 0.5
+        },
+        "latency_ms": {
+          "book_apply": {
+            "count": 6022,
+            "count_total": 6022,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "book_pipeline_total": {
+            "count": 6022,
+            "count_total": 6022,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 15.0
+          },
+          "csv_flush": {
+            "count": 2209,
+            "count_total": 2209,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "csv_fsync": {
+            "count": 118,
+            "count_total": 118,
+            "evicted": 0,
+            "max": 32.0,
+            "p50": 0.0,
+            "p95": 16.0,
+            "p99": 32.0
+          },
+          "csv_write": {
+            "count": 10000,
+            "count_total": 18041,
+            "evicted": 8041,
+            "max": 47.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 16.0
+          },
+          "dashboard_project": {
+            "count": 6018,
+            "count_total": 6018,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 15.0
+          },
+          "event_loop_lag": {
+            "count": 10000,
+            "count_total": 29592,
+            "evicted": 19592,
+            "max": 58.0,
+            "p50": 0.0,
+            "p95": 16.0,
+            "p99": 22.0
+          },
+          "exchange_to_receive_depth": {
+            "count": 6022,
+            "count_total": 6022,
+            "evicted": 0,
+            "max": 6832.179,
+            "p50": 90.491,
+            "p95": 1444.676,
+            "p99": 5036.63
+          },
+          "exchange_to_receive_trade": {
+            "count": 5991,
+            "count_total": 5991,
+            "evicted": 0,
+            "max": 6852.264,
+            "p50": 91.849,
+            "p95": 3478.117,
+            "p99": 5496.664
+          },
+          "journal_build": {
+            "count": 6022,
+            "count_total": 6022,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "journal_enqueue": {
+            "count": 6022,
+            "count_total": 6022,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "parse": {
+            "count": 10000,
+            "count_total": 18035,
+            "evicted": 8035,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "partial_validation": {
+            "count": 6022,
+            "count_total": 6022,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "receive_to_writer_start": {
+            "count": 10000,
+            "count_total": 18041,
+            "evicted": 8041,
+            "max": 313.0,
+            "p50": 156.0,
+            "p95": 265.0,
+            "p99": 281.0
+          },
+          "rest_snapshot": {
+            "count": 1,
+            "count_total": 1,
+            "evicted": 0,
+            "max": 313.0,
+            "p50": 313.0,
+            "p95": 313.0,
+            "p99": 313.0
+          },
+          "rest_snapshot_decode": {
+            "count": 1,
+            "count_total": 1,
+            "evicted": 0,
+            "max": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "trade_time_to_receive": {
+            "count": 5991,
+            "count_total": 5991,
+            "evicted": 0,
+            "max": 6852.264,
+            "p50": 92.769,
+            "p95": 3479.117,
+            "p99": 5496.664
+          },
+          "writer_cooperative_yield": {
+            "count": 1136,
+            "count_total": 1136,
+            "evicted": 0,
+            "max": 8.095,
+            "p50": 0.651,
+            "p95": 1.704,
+            "p99": 3.147
+          }
+        }
+      },
+      "latest_timestamp": "2026-08-14T08:21:47.473881+00:00",
+      "metric_errors": [],
+      "status": "FAIL",
+      "terminal_metric_snapshots": 1,
+      "terminal_snapshot_ambiguous": 0,
+      "terminal_snapshot_pass": true,
+      "thresholds": {
+        "book_apply_p99": {
+          "basis": "worst_p99_post_warmup",
+          "clock_domain": "monotonic",
+          "latest_value_ms": 0.0,
+          "limit_ms": 5.0,
+          "min_samples": 100,
+          "pass": false,
+          "present": true,
+          "required": true,
+          "sample_count": 6022,
+          "worst_value_ms": 15.0,
+          "worst_value_ms_incl_warmup": 15.0
+        },
+        "book_pipeline_p99": {
+          "basis": "worst_p99_post_warmup",
+          "clock_domain": "monotonic",
+          "latest_value_ms": 15.0,
+          "limit_ms": 5.0,
+          "min_samples": 100,
+          "pass": false,
+          "present": true,
+          "required": true,
+          "sample_count": 6022,
+          "worst_value_ms": 15.0,
+          "worst_value_ms_incl_warmup": 16.0
+        },
+        "event_loop_lag_p99": {
+          "basis": "worst_p99_post_warmup",
+          "clock_domain": "monotonic",
+          "latest_value_ms": 22.0,
+          "limit_ms": 40.0,
+          "min_samples": 100,
+          "pass": true,
+          "present": true,
+          "required": true,
+          "sample_count": 10000,
+          "worst_value_ms": 23.0,
+          "worst_value_ms_incl_warmup": 23.0
+        },
+        "parse_p99": {
+          "basis": "worst_p99_post_warmup",
+          "clock_domain": "monotonic",
+          "latest_value_ms": 0.0,
+          "limit_ms": 5.0,
+          "min_samples": 100,
+          "pass": true,
+          "present": true,
+          "required": true,
+          "sample_count": 10000,
+          "worst_value_ms": 0.0,
+          "worst_value_ms_incl_warmup": 0.0
+        },
+        "writer_yield_p99": {
+          "basis": "worst_p99_post_warmup",
+          "clock_domain": "monotonic",
+          "latest_value_ms": 3.147,
+          "limit_ms": 5.0,
+          "min_samples": 100,
+          "pass": true,
+          "present": true,
+          "required": true,
+          "sample_count": 1136,
+          "worst_value_ms": 3.263,
+          "worst_value_ms_incl_warmup": 3.263
+        }
+      },
+      "warmup_exclusion": {
+        "applied": true,
+        "reference_timestamp": "2026-08-14T08:11:43.540031+00:00",
+        "seconds": 120.0,
+        "windows_evaluated": 97,
+        "windows_excluded": 24,
+        "windows_total": 121
+      },
+      "windows": 121,
+      "worst_p99_ms_across_windows": {
+        "book_apply": 15.0,
+        "book_pipeline_total": 16.0,
+        "csv_flush": 0.0,
+        "csv_fsync": 32.0,
+        "csv_write": 156.0,
+        "dashboard_project": 15.0,
+        "event_loop_lag": 23.0,
+        "exchange_to_receive_depth": 5137.63,
+        "exchange_to_receive_trade": 5658.343,
+        "journal_build": 0.0,
+        "journal_enqueue": 0.0,
+        "parse": 0.0,
+        "partial_validation": 15.0,
+        "receive_to_writer_start": 750.0,
+        "rest_snapshot": 313.0,
+        "rest_snapshot_decode": 0.0,
+        "trade_time_to_receive": 5658.343,
+        "writer_cooperative_yield": 3.263
+      },
+      "worst_p99_ms_post_warmup": {
+        "book_apply": 15.0,
+        "book_pipeline_total": 15.0,
+        "csv_flush": 0.0,
+        "csv_fsync": 32.0,
+        "csv_write": 16.0,
+        "dashboard_project": 15.0,
+        "event_loop_lag": 23.0,
+        "exchange_to_receive_depth": 5137.63,
+        "exchange_to_receive_trade": 5658.343,
+        "journal_build": 0.0,
+        "journal_enqueue": 0.0,
+        "parse": 0.0,
+        "partial_validation": 0.0,
+        "receive_to_writer_start": 281.0,
+        "rest_snapshot": 313.0,
+        "rest_snapshot_decode": 0.0,
+        "trade_time_to_receive": 5658.343,
+        "writer_cooperative_yield": 3.263
+      }
+    },
+    "usdm_futures": {
+      "activity_counters": {
+        "agg_trade_messages": 9057,
+        "book_syncs": 1,
+        "depth_diff_messages": 5900,
+        "rest_snapshots": 1
+      },
+      "activity_pass": true,
+      "capacity_checks": {
+        "book_queue": {
+          "capacity": 4096,
+          "high_water": 22,
+          "overflows": 0,
+          "pass": true
+        },
+        "partial_queue": {
+          "capacity": 4096,
+          "high_water": 19,
+          "overflows": 0,
+          "pass": true
+        },
+        "raw_bytes": {
+          "capacity": 67108864,
+          "high_water": 64483,
+          "overflows": 0,
+          "pass": true
+        },
+        "raw_queue": {
+          "capacity": 8192,
+          "high_water": 316,
+          "overflows": 0,
+          "pass": true
+        },
+        "trade_queue": {
+          "capacity": 4096,
+          "high_water": 316,
+          "overflows": 0,
+          "pass": true
+        },
+        "writer_queue": {
+          "capacity": 4096,
+          "high_water": 301,
+          "overflows": 0,
+          "pass": true
+        },
+        "writer_rows": {
+          "capacity": 250000,
+          "high_water": 4768,
+          "overflows": 0,
+          "pass": true
+        }
+      },
+      "eviction_checks": {
+        "book_apply_p99": {
+          "coverage_ok": true,
+          "evicted_reported": true,
+          "max_evicted": 0,
+          "metric": "book_apply",
+          "pass": true,
+          "window_snapshots": 121
+        },
+        "book_pipeline_p99": {
+          "coverage_ok": true,
+          "evicted_reported": true,
+          "max_evicted": 0,
+          "metric": "book_pipeline_total",
+          "pass": true,
+          "window_snapshots": 121
+        },
+        "event_loop_lag_p99": {
+          "coverage_ok": true,
+          "evicted_reported": true,
+          "max_evicted": 19590,
+          "metric": "event_loop_lag",
+          "pass": true,
+          "window_snapshots": 121
+        },
+        "parse_p99": {
+          "coverage_ok": true,
+          "evicted_reported": true,
+          "max_evicted": 10577,
+          "metric": "parse",
+          "pass": true,
+          "window_snapshots": 121
+        },
+        "writer_yield_p99": {
+          "coverage_ok": true,
+          "evicted_reported": true,
+          "max_evicted": 0,
+          "metric": "writer_cooperative_yield",
+          "pass": true,
+          "window_snapshots": 121
+        }
+      },
+      "failure_counters": {},
+      "latest": {
+        "counters": {
+          "agg_trade_messages": 9057,
+          "book_apply_offloaded": 155,
+          "book_syncs": 1,
+          "cooperative_yields_book": 5366,
+          "cooperative_yields_dispatcher": 11324,
+          "cooperative_yields_partial": 5102,
+          "cooperative_yields_receiver": 12113,
+          "cooperative_yields_synchronize": 4,
+          "cooperative_yields_trade": 3019,
+          "csv_batches_written": 20583,
+          "csv_flushes": 2254,
+          "csv_periodic_fsyncs": 118,
+          "csv_rotations": 1,
+          "csv_rows_written": 799714,
+          "depth_applied_events": 5887,
+          "depth_diff_messages": 5900,
+          "depth_stale_events": 13,
+          "event_loop_probe_missed_ticks": 509,
+          "partial_depth_messages": 5620,
+          "rest_snapshots": 1,
+          "terminal_metric_snapshots": 1,
+          "websocket_bytes": 20524995,
+          "websocket_messages": 20577,
+          "writer_gil_yields": 5470,
+          "writer_yield_overshoots": 13
+        },
+        "gauges": {
+          "book_ask_levels": 6303,
+          "book_bid_levels": 7017,
+          "book_last_update_id": 11284545763711,
+          "book_queue_high_water": 22,
+          "book_queue_size": 0,
+          "clock_offset_delta_ns": 276526800,
+          "clock_offset_theta_hat_ns": 49048800,
+          "last_ingest_seq": 38612,
+          "partial_queue_high_water": 19,
+          "partial_queue_size": 0,
+          "raw_bytes_capacity": 67108864,
+          "raw_bytes_high_water": 64483,
+          "raw_bytes_inflight": 0,
+          "raw_queue_capacity": 8192,
+          "raw_queue_high_water": 316,
+          "raw_queue_size": 0,
+          "rest_used_weight_1m": 2,
+          "route_queue_capacity": 4096,
+          "symbol_admissibility_margin_x100": 2036170,
+          "trade_queue_high_water": 316,
+          "trade_queue_size": 0,
+          "writer_queue_capacity": 4096,
+          "writer_queue_high_water": 301,
+          "writer_queue_size": 0,
+          "writer_queued_rows": 0,
+          "writer_rows_capacity": 250000,
+          "writer_rows_high_water": 4768,
+          "writer_yield_requested_ms": 0.5
+        },
+        "latency_ms": {
+          "book_apply": {
+            "count": 5900,
+            "count_total": 5900,
+            "evicted": 0,
+            "max": 31.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 16.0
+          },
+          "book_pipeline_total": {
+            "count": 5900,
+            "count_total": 5900,
+            "evicted": 0,
+            "max": 31.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 16.0
+          },
+          "csv_flush": {
+            "count": 2254,
+            "count_total": 2254,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "csv_fsync": {
+            "count": 119,
+            "count_total": 119,
+            "evicted": 0,
+            "max": 31.0,
+            "p50": 0.0,
+            "p95": 16.0,
+            "p99": 31.0
+          },
+          "csv_write": {
+            "count": 10000,
+            "count_total": 20583,
+            "evicted": 10583,
+            "max": 62.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 16.0
+          },
+          "dashboard_project": {
+            "count": 5886,
+            "count_total": 5886,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 15.0
+          },
+          "event_loop_lag": {
+            "count": 10000,
+            "count_total": 29590,
+            "evicted": 19590,
+            "max": 58.0,
+            "p50": 0.0,
+            "p95": 16.0,
+            "p99": 22.0
+          },
+          "exchange_to_receive_depth": {
+            "count": 5900,
+            "count_total": 5900,
+            "evicted": 0,
+            "max": 4973.097,
+            "p50": 94.722,
+            "p95": 1600.756,
+            "p99": 3460.068
+          },
+          "exchange_to_receive_trade": {
+            "count": 9057,
+            "count_total": 9057,
+            "evicted": 0,
+            "max": 4431.56,
+            "p50": 107.711,
+            "p95": 3489.414,
+            "p99": 4379.557
+          },
+          "journal_build": {
+            "count": 5900,
+            "count_total": 5900,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "journal_enqueue": {
+            "count": 5900,
+            "count_total": 5900,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "parse": {
+            "count": 10000,
+            "count_total": 20577,
+            "evicted": 10577,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "partial_validation": {
+            "count": 5620,
+            "count_total": 5620,
+            "evicted": 0,
+            "max": 16.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "receive_to_writer_start": {
+            "count": 10000,
+            "count_total": 20583,
+            "evicted": 10583,
+            "max": 329.0,
+            "p50": 156.0,
+            "p95": 265.0,
+            "p99": 281.0
+          },
+          "rest_snapshot": {
+            "count": 1,
+            "count_total": 1,
+            "evicted": 0,
+            "max": 282.0,
+            "p50": 282.0,
+            "p95": 282.0,
+            "p99": 282.0
+          },
+          "rest_snapshot_decode": {
+            "count": 1,
+            "count_total": 1,
+            "evicted": 0,
+            "max": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "trade_time_to_receive": {
+            "count": 9057,
+            "count_total": 9057,
+            "evicted": 0,
+            "max": 4498.56,
+            "p50": 199.348,
+            "p95": 3554.414,
+            "p99": 4468.557
+          },
+          "writer_cooperative_yield": {
+            "count": 5470,
+            "count_total": 5470,
+            "evicted": 0,
+            "max": 17.99,
+            "p50": 0.658,
+            "p95": 1.558,
+            "p99": 2.857
+          }
+        }
+      },
+      "latest_timestamp": "2026-08-14T08:21:47.473881+00:00",
+      "metric_errors": [],
+      "status": "FAIL",
+      "terminal_metric_snapshots": 1,
+      "terminal_snapshot_ambiguous": 0,
+      "terminal_snapshot_pass": true,
+      "thresholds": {
+        "book_apply_p99": {
+          "basis": "worst_p99_post_warmup",
+          "clock_domain": "monotonic",
+          "latest_value_ms": 16.0,
+          "limit_ms": 5.0,
+          "min_samples": 100,
+          "pass": false,
+          "present": true,
+          "required": true,
+          "sample_count": 5900,
+          "worst_value_ms": 16.0,
+          "worst_value_ms_incl_warmup": 16.0
+        },
+        "book_pipeline_p99": {
+          "basis": "worst_p99_post_warmup",
+          "clock_domain": "monotonic",
+          "latest_value_ms": 16.0,
+          "limit_ms": 5.0,
+          "min_samples": 100,
+          "pass": false,
+          "present": true,
+          "required": true,
+          "sample_count": 5900,
+          "worst_value_ms": 16.0,
+          "worst_value_ms_incl_warmup": 16.0
+        },
+        "event_loop_lag_p99": {
+          "basis": "worst_p99_post_warmup",
+          "clock_domain": "monotonic",
+          "latest_value_ms": 22.0,
+          "limit_ms": 40.0,
+          "min_samples": 100,
+          "pass": true,
+          "present": true,
+          "required": true,
+          "sample_count": 10000,
+          "worst_value_ms": 23.0,
+          "worst_value_ms_incl_warmup": 23.0
+        },
+        "parse_p99": {
+          "basis": "worst_p99_post_warmup",
+          "clock_domain": "monotonic",
+          "latest_value_ms": 0.0,
+          "limit_ms": 5.0,
+          "min_samples": 100,
+          "pass": true,
+          "present": true,
+          "required": true,
+          "sample_count": 10000,
+          "worst_value_ms": 0.0,
+          "worst_value_ms_incl_warmup": 16.0
+        },
+        "writer_yield_p99": {
+          "basis": "worst_p99_post_warmup",
+          "clock_domain": "monotonic",
+          "latest_value_ms": 2.857,
+          "limit_ms": 5.0,
+          "min_samples": 100,
+          "pass": true,
+          "present": true,
+          "required": true,
+          "sample_count": 5470,
+          "worst_value_ms": 3.3,
+          "worst_value_ms_incl_warmup": 7.121
+        }
+      },
+      "warmup_exclusion": {
+        "applied": true,
+        "reference_timestamp": "2026-08-14T08:11:43.540031+00:00",
+        "seconds": 120.0,
+        "windows_evaluated": 97,
+        "windows_excluded": 24,
+        "windows_total": 121
+      },
+      "windows": 121,
+      "worst_p99_ms_across_windows": {
+        "book_apply": 16.0,
+        "book_pipeline_total": 16.0,
+        "csv_flush": 16.0,
+        "csv_fsync": 31.0,
+        "csv_write": 31.0,
+        "dashboard_project": 16.0,
+        "event_loop_lag": 23.0,
+        "exchange_to_receive_depth": 3460.068,
+        "exchange_to_receive_trade": 4379.557,
+        "journal_build": 0.0,
+        "journal_enqueue": 0.0,
+        "parse": 16.0,
+        "partial_validation": 16.0,
+        "receive_to_writer_start": 484.0,
+        "rest_snapshot": 282.0,
+        "rest_snapshot_decode": 0.0,
+        "trade_time_to_receive": 4468.557,
+        "writer_cooperative_yield": 7.121
+      },
+      "worst_p99_ms_post_warmup": {
+        "book_apply": 16.0,
+        "book_pipeline_total": 16.0,
+        "csv_flush": 0.0,
+        "csv_fsync": 31.0,
+        "csv_write": 16.0,
+        "dashboard_project": 15.0,
+        "event_loop_lag": 23.0,
+        "exchange_to_receive_depth": 3460.068,
+        "exchange_to_receive_trade": 4379.557,
+        "journal_build": 0.0,
+        "journal_enqueue": 0.0,
+        "parse": 0.0,
+        "partial_validation": 15.0,
+        "receive_to_writer_start": 281.0,
+        "rest_snapshot": 282.0,
+        "rest_snapshot_decode": 0.0,
+        "trade_time_to_receive": 4468.557,
+        "writer_cooperative_yield": 3.3
+      }
+    }
+  },
+  "missing_markets": [],
+  "required_markets": [
+    "spot",
+    "usdm_futures"
+  ]
+}

@@ -1,0 +1,20 @@
+# Entorno de ejecución de la Fase 1 en Linux — 20 de agosto de 2026
+
+## Sistema
+Linux vm 6.18.5-fc-v20 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+
+model name	: Intel(R) Xeon(R) Processor @ 2.80GHz
+nucleos: 4
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       698Mi        13Gi       4.8Mi       1.4Gi        15Gi
+
+## Python
+Python 3.12.3
+venv: 3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]
+
+## Relojes
+monotonic resolution: namespace(implementation='clock_gettime(CLOCK_MONOTONIC)', monotonic=True, adjustable=False, resolution=1e-09)
+time resolution: namespace(implementation='clock_gettime(CLOCK_REALTIME)', monotonic=False, adjustable=True, resolution=1e-09)
+
+## Red
+NTP UDP 123 hacia time.google.com / pool.ntp.org / time.cloudflare.com: BLOQUEADO en este contenedor (timeout 3s los tres). No dice nada sobre la red de Jean.

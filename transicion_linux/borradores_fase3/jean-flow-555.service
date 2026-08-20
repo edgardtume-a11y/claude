@@ -1,0 +1,46 @@
+# BORRADOR FASE 3, NO ACTIVADO — Unidad systemd de JEAN_FLOW 555.
+#
+# Cubre el modo de captura supervisada de larga duración. La certificación
+# modo 3 exige por protocolo ventana VISIBLE y operador consciente: esa se
+# arranca con ./iniciar.sh certificar, no con systemd.
+#
+# Instalación (Fase 3, cuando se autorice):
+#   sudo cp jean-flow-555.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   systemctl start jean-flow-555      # arranque manual; NO se habilita en boot
+#                                      # sin decisión expresa de Jean
+
+[Unit]
+Description=JEAN_FLOW 555 META_QUANT - captura L2 Binance
+Documentation=file:///home/jean/JF/555/LEEME_PRIMERO.txt
+# El reloj tiene que estar disciplinado ANTES de capturar: chrony-wait.service
+# bloquea hasta que chronyd declara sincronización (equivale al preflight de
+# reloj, pero garantizado por el init, no por un script).
+After=network-online.target chronyd.service chrony-wait.service
+Wants=network-online.target chrony-wait.service
+Requires=chronyd.service
+
+[Service]
+Type=simple
+# Ruta de instalación propuesta (equivalente Linux de C:\JF\555, instalación
+# de usuario sin privilegios; ajustar al usuario real):
+WorkingDirectory=/home/jean/JF/555
+ExecStart=/home/jean/JF/555/iniciar.sh certificar BTCUSDT
+# El motor jamás corre como root (equivalente de la regla "cero consolas
+# elevadas" del protocolo):
+User=jean
+Group=jean
+# Si el motor muere, systemd lo registra y NO reintenta en bucle: una
+# certificación interrumpida es un hecho que auditar, no que ocultar.
+Restart=no
+# La evidencia se escribe en runs/: nada de /tmp volátil.
+PrivateTmp=true
+NoNewPrivileges=true
+# Sin throttling de energía: en Linux no existe EcoQoS, pero fijamos la
+# política explícita para que el planificador no denigre el proceso.
+Nice=-5
+IOSchedulingClass=best-effort
+IOSchedulingPriority=2
+
+[Install]
+WantedBy=multi-user.target

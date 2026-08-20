@@ -1,0 +1,46 @@
+{
+ "spot": {
+  "linux_run1_vs_run2_bytes_identicos": true,
+  "sha256_informe_linux_run1": "36ef050d9f546241899204ae0f5b57570e89057e5faf23c733ec40f7fe1c88ad",
+  "sha256_informe_linux_run2": "36ef050d9f546241899204ae0f5b57570e89057e5faf23c733ec40f7fe1c88ad",
+  "replay_sha256_linux": "e9d8a2309eb21ac4e8fa6d22225698099b9d416c8909c165741e8b69cfa6f4af",
+  "replay_sha256_windows": "e9d8a2309eb21ac4e8fa6d22225698099b9d416c8909c165741e8b69cfa6f4af",
+  "replay_sha256_windows_run2": "e9d8a2309eb21ac4e8fa6d22225698099b9d416c8909c165741e8b69cfa6f4af",
+  "REPLAY_HASH_IDENTICO_LINUX_VS_WINDOWS": true,
+  "replay_dict_completo_identico": true,
+  "certification_linux": {
+   "causal_replay": "PASS",
+   "causal_replay_errors": [],
+   "journal_integrity": "PASS",
+   "note": "valid=false al final es normal después de CONNECTION CLOSED; cada gap/resync debe dibujarse como frontera de epoch. causal_replay solo certifica invariantes evaluables por journal; la contigüidad global K3 exige la unión de mercados (comando identity).",
+   "safe_for_visual_replay": true
+  },
+  "certification_windows": {
+   "causal_replay": "PASS",
+   "journal_integrity": "PASS",
+   "causal_replay_errors": []
+  }
+ },
+ "usdm_futures": {
+  "linux_run1_vs_run2_bytes_identicos": true,
+  "sha256_informe_linux_run1": "a6a6844ef9a9a8bbe5489124f91ee32edeae4af9ebd083b1aef3416d2ed6fd40",
+  "sha256_informe_linux_run2": "a6a6844ef9a9a8bbe5489124f91ee32edeae4af9ebd083b1aef3416d2ed6fd40",
+  "replay_sha256_linux": "beff8f181dbd368f41a7446cebf09c7b120416e768b124c7bd126e18589bda2d",
+  "replay_sha256_windows": "beff8f181dbd368f41a7446cebf09c7b120416e768b124c7bd126e18589bda2d",
+  "replay_sha256_windows_run2": "beff8f181dbd368f41a7446cebf09c7b120416e768b124c7bd126e18589bda2d",
+  "REPLAY_HASH_IDENTICO_LINUX_VS_WINDOWS": true,
+  "replay_dict_completo_identico": true,
+  "certification_linux": {
+   "causal_replay": "PASS",
+   "causal_replay_errors": [],
+   "journal_integrity": "PASS",
+   "note": "valid=false al final es normal después de CONNECTION CLOSED; cada gap/resync debe dibujarse como frontera de epoch. causal_replay solo certifica invariantes evaluables por journal; la contigüidad global K3 exige la unión de mercados (comando identity).",
+   "safe_for_visual_replay": true
+  },
+  "certification_windows": {
+   "causal_replay": "PASS",
+   "journal_integrity": "PASS",
+   "causal_replay_errors": []
+  }
+ }
+}

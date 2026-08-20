@@ -1,0 +1,136 @@
+{
+  "attempts": 1,
+  "checks": {
+    "book_apply": true,
+    "book_pipeline": true,
+    "book_suboffload_burst": true,
+    "event_loop_lag": true,
+    "writer_yield": true
+  },
+  "engine_version": "2.4.1",
+  "environment": {
+    "platform": "Linux-6.18.5-fc-v20-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.3"
+  },
+  "measurements": {
+    "book_apply_metric": {
+      "count": 5000,
+      "count_total": 5000,
+      "evicted": 0,
+      "max": 0.154,
+      "p50": 0.012,
+      "p95": 0.021,
+      "p99": 0.037
+    },
+    "book_core": {
+      "count": 5000,
+      "max_ms": 0.3943,
+      "p50_ms": 0.0064,
+      "p95_ms": 0.0121,
+      "p99_ms": 0.027
+    },
+    "book_pipeline_total": {
+      "count": 5000,
+      "max_ms": 0.4307,
+      "p50_ms": 0.1486,
+      "p95_ms": 0.242,
+      "p99_ms": 0.302
+    },
+    "book_suboffload_burst": {
+      "count": 200,
+      "max_ms": 1.2409,
+      "p50_ms": 0.6424,
+      "p95_ms": 0.9467,
+      "p99_ms": 1.1902
+    },
+    "event_loop_lag_during_10001_row_snapshot": {
+      "count": 270,
+      "max_ms": 4.7415,
+      "p50_ms": 0.6577,
+      "p95_ms": 1.3574,
+      "p99_ms": 1.7736
+    },
+    "writer": {
+      "counters": {
+        "csv_batches_written": 1,
+        "csv_flushes": 2,
+        "csv_rotations": 1,
+        "csv_rows_written": 10001,
+        "writer_gil_yields": 156
+      },
+      "gauges": {
+        "writer_queue_high_water": 1,
+        "writer_queue_size": 0,
+        "writer_queued_rows": 0,
+        "writer_rows_high_water": 10001,
+        "writer_yield_requested_ms": 0.5
+      },
+      "latency_ms": {
+        "csv_flush": {
+          "count": 2,
+          "count_total": 2,
+          "evicted": 0,
+          "max": 0.237,
+          "p50": 0.002,
+          "p95": 0.237,
+          "p99": 0.237
+        },
+        "csv_fsync": {
+          "count": 1,
+          "count_total": 1,
+          "evicted": 0,
+          "max": 5.952,
+          "p50": 5.952,
+          "p95": 5.952,
+          "p99": 5.952
+        },
+        "csv_write": {
+          "count": 1,
+          "count_total": 1,
+          "evicted": 0,
+          "max": 220.1,
+          "p50": 220.1,
+          "p95": 220.1,
+          "p99": 220.1
+        },
+        "receive_to_writer_start": {
+          "count": 1,
+          "count_total": 1,
+          "evicted": 0,
+          "max": 1.498,
+          "p50": 1.498,
+          "p95": 1.498,
+          "p99": 1.498
+        },
+        "writer_cooperative_yield": {
+          "count": 156,
+          "count_total": 156,
+          "evicted": 0,
+          "max": 0.679,
+          "p50": 0.609,
+          "p95": 0.642,
+          "p99": 0.673
+        }
+      }
+    }
+  },
+  "note": "Benchmark sintetico local; la prueba live 10m y las etapas posteriores del host Windows siguen siendo obligatorias.",
+  "parameters": {
+    "burst_iterations": 200,
+    "burst_levels": 511,
+    "iterations": 5000,
+    "levels_per_side": 5000,
+    "writer_chunk_rows": 64,
+    "writer_yield_sleep_s": 0.0005
+  },
+  "pass": true,
+  "schema_version": "2.0.0",
+  "thresholds": {
+    "book_apply_p99_ms": 5.0,
+    "book_pipeline_p99_ms": 5.0,
+    "book_suboffload_burst_p99_ms": 5.0,
+    "event_loop_lag_p99_ms": 40.0,
+    "writer_yield_p99_ms": 5.0
+  }
+}

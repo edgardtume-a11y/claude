@@ -1,0 +1,64 @@
+{
+  "capture_session_id": "d64fea5560ac489eac0b5666111cc0cf",
+  "capture_session_ids": [
+    "d64fea5560ac489eac0b5666111cc0cf"
+  ],
+  "certification": "PASS",
+  "completeness": {
+    "complete": true,
+    "denominator_max_ingest": 38612,
+    "numerator_unique_ingest": 38612,
+    "ratio": 1.0
+  },
+  "conflict_count": 0,
+  "conflicts": [],
+  "duplicate_identical_references": 0,
+  "errors": [],
+  "files": [
+    "/tmp/claude-0/-home-user-claude/89a2aacc-543e-52d7-9d40-fd9108ca5235/scratchpad/ideas/555/555/binance_phase1_collector/runs/20260814T081136_503806Z_10m_d64fea5560ac/capture/spot/events-20260814T081139.311729Z-000001.csv",
+    "/tmp/claude-0/-home-user-claude/89a2aacc-543e-52d7-9d40-fd9108ca5235/scratchpad/ideas/555/555/binance_phase1_collector/runs/20260814T081136_503806Z_10m_d64fea5560ac/capture/usdm_futures/events-20260814T081139.839103Z-000001.csv"
+  ],
+  "files_without_event_headers": [],
+  "fingerprint_scope": "header row_index=0 más niveles expandidos; permite referencias repetidas solo si todo el payload normalizado coincide",
+  "ingest_seq": {
+    "max": 38612,
+    "min": 1,
+    "missing_count": 0,
+    "missing_ranges": [],
+    "missing_ranges_truncated": false,
+    "unique_count": 38612
+  },
+  "invalid_capture_session_headers": 0,
+  "invalid_ingest_examples": [],
+  "invalid_ingest_references": 0,
+  "invalid_source_socket_examples": [],
+  "invalid_source_socket_headers": 0,
+  "markets": [
+    "spot",
+    "usdm_futures"
+  ],
+  "missing_capture_session_headers": 0,
+  "missing_source_socket_headers": 0,
+  "partial_files": [],
+  "payload_references": 38612,
+  "payload_references_by_market": {
+    "spot": 18035,
+    "usdm_futures": 20577
+  },
+  "required_markets": [
+    "spot",
+    "usdm_futures"
+  ],
+  "schema_version_required": "2.0.0",
+  "schema_versions": [
+    "2.0.0"
+  ],
+  "source_socket_ids": [
+    "1d842f8f46aa45e9a19b0a184e68e0e8:usdm_market_trades",
+    "1d842f8f46aa45e9a19b0a184e68e0e8:usdm_public_depth",
+    "658f84b8ac734969b647a879d232c4ea:spot_combined",
+    "collector",
+    "rest:depth"
+  ],
+  "unique_payloads": 38612
+}
