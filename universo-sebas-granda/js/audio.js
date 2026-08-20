@@ -153,6 +153,9 @@ export class SGAudio {
 
   uiBeep()  { this._blip(1180, 0.07, 'sine', 0.05); }
   uiHover() { this._blip(760, 0.05, 'sine', 0.03); }
+  /* V3.4 FIX: _fairingSep llamaba a un método inexistente (TypeError en
+     pleno vuelo → escalera de degradación). Confirmación corta y limpia. */
+  uiSelect() { this._blip(980, 0.06, 'sine', 0.04); this._blip(1320, 0.09, 'sine', 0.04, 0.07); }
   countdownTick(n) {
     if (n <= 1) { this._blip(1320, 0.12, 'square', 0.06); this._blip(1320, 0.12, 'square', 0.06, 0.16); }
     else this._blip(880, 0.1, 'square', 0.05);
@@ -204,6 +207,23 @@ export class SGAudio {
     g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.4);
     src.connect(f); f.connect(g); g.connect(this.master);
     src.start(t); src.stop(t + d + 0.6);
+  }
+
+  /* V3.4: carga estructural transónica/Max-Q — rumor grave con swell corto */
+  stress(intensity, dur) {
+    if (!this.unlocked) return;
+    const t = this._now(); const d = dur || 1.2; const v = Math.min(1, intensity || 0.6);
+    const src = this.ctx.createBufferSource();
+    src.buffer = this._noiseBuffer(d + 0.5, true);
+    const f = this.ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.4;
+    f.frequency.setValueAtTime(140, t);
+    f.frequency.exponentialRampToValueAtTime(70, t + d);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.24 * v, t + d * 0.3);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    src.connect(f); f.connect(g); g.connect(this.master);
+    src.start(t); src.stop(t + d + 0.2);
   }
 
   mechClack() {

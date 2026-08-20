@@ -579,26 +579,48 @@ export function makeEarthMapsSliced(size, create, onDone) {
 }
 
 
-/* Optional NASA asset upgrade: resolves canvases OR real textures.
-   Files (see assets/README.txt): assets/earth/day.jpg, night.jpg, clouds.png,
-   assets/moon.jpg. Missing files silently fall back — never a black Earth. */
-export function loadOptionalTextures(T, done) {
+/* REAL NASA imagery loader (V3.4). Files live under assets/earth/runtime/
+   (see ASSET-CREDITS.md): NASA Blue Marble day, Black Marble night, Blue
+   Marble clouds (real alpha), ocean mask for specular. Resolution is
+   tier-aware (opts.dayRes/nightRes/cloudRes). Each key tries a list of
+   candidates in order (runtime tier file → legacy assets/earth/*.jpg) and
+   silently falls back to the procedural canvases — never a black Earth. */
+export function loadOptionalTextures(T, done, opts) {
+  const o = opts || {};
+  const dayRes = o.dayRes || 2048;
+  const nightRes = o.nightRes || dayRes;
+  const cloudRes = o.cloudRes || (dayRes >= 2048 ? 2048 : 1024);
   const out = {};
   const tl = new T.TextureLoader();
   let pending = 0;
   const finish = () => { if (--pending === 0) done(out); };
-  const tryLoad = (key, url, srgb) => {
+  const tryLoad = (key, urls, srgb) => {
     pending++;
-    tl.load(url, (tex) => {
-      if (srgb) tex.colorSpace = T.SRGBColorSpace;
-      tex.anisotropy = 4;
-      out[key] = tex;
-      finish();
-    }, undefined, () => finish());
+    const attempt = (i) => {
+      if (i >= urls.length) { finish(); return; }
+      tl.load(urls[i], (tex) => {
+        if (srgb) tex.colorSpace = T.SRGBColorSpace;
+        tex.anisotropy = o.aniso || 4;
+        out[key] = tex;
+        finish();
+      }, undefined, () => attempt(i + 1));
+    };
+    attempt(0);
   };
-  tryLoad('day', 'assets/earth/day.jpg', true);
-  tryLoad('night', 'assets/earth/night.jpg', true);
-  tryLoad('clouds', 'assets/earth/clouds.png', false);
-  tryLoad('moon', 'assets/moon.jpg', true);
+  const v = o.buildId ? '?v=' + o.buildId : '';
+  tryLoad('day', [
+    'assets/earth/runtime/day-' + dayRes + '.jpg' + v,
+    'assets/earth/day.jpg' + v,
+  ], true);
+  tryLoad('night', [
+    'assets/earth/runtime/night-' + nightRes + '.jpg' + v,
+    'assets/earth/night.jpg' + v,
+  ], true);
+  tryLoad('clouds', [
+    'assets/earth/runtime/clouds-alpha-' + cloudRes + '.png' + v,
+    'assets/earth/clouds.png' + v,
+  ], false);
+  tryLoad('spec', ['assets/earth/runtime/spec-1024.jpg' + v], false);
+  tryLoad('moon', ['assets/moon.jpg' + v], true);
   if (pending === 0) done(out);
 }

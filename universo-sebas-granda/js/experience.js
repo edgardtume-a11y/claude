@@ -18,6 +18,7 @@ import * as ASTRO from './astronomy.js';
 import * as CEL from './celestial.js';
 import { createAssetPipeline } from './sgassets.js';
 import { getWeather, weatherStatusKey } from './weather.js';
+import { createCountdownVoice } from './countdown-voice.js';
 
 let T = null;
 
@@ -469,7 +470,11 @@ class SGPost {
         'void main(){',
         ' vec2 uv=warp(vUv,uDistort);',
         ' if(uHeat>0.0005){',
-        '  float m=1.0-smoothstep(uHeatR*0.35,uHeatR,distance(vUv,uHeatC));',
+        '  /* V3.4: máscara anisotrópica SOLO en el aire por debajo de la',
+        '     tobera — el fuselaje por encima jamás se refracta (brief §11) */',
+        '  vec2 hq=(vUv-uHeatC)*vec2(1.0,0.62);',
+        '  float m=1.0-smoothstep(uHeatR*0.35,uHeatR,length(hq));',
+        '  m*=smoothstep(0.035,-0.01,vUv.y-uHeatC.y);',
         '  if(m>0.001){',
         '   vec2 hp=vUv*vec2(26.0,40.0)+vec2(0.0,-uHeatT*3.2);',
         '   vec2 off=vec2(hn(hp)-0.5,hn(hp+17.3)-0.5)*uHeat*m;',
@@ -645,6 +650,12 @@ class Experience {
     this.exposure = 1; this.exposureT = 1;
     this.ftl = 0;
 
+    /* V3.4: voz de countdown (clips locales → SpeechSynthesis → beep+texto) */
+    this.voice = createCountdownVoice();
+    this._photoTarget = 'ship';        /* photo orbital: 'ship' | 'earth' */
+    this._homeForce = 0;               /* HOME//MEDELLÍN marker manual */
+    this._qa34 = null;
+
     this._initRenderer();
     this._initSceneCore();
     this._bindInput();
@@ -672,10 +683,13 @@ class Experience {
       /* SAFE 3D (P0.1 §25): full mission, reduced GPU surface */
       return { shadow: 0, shadows: false, dprCap: 1.5, bloom: false, iters: 1, earthTex: 256, mwS: 2000, mwG: 60, faint: 1600, clouds: 28, aniso: 2, part: 0.5 };
     }
+    /* V3.4: earthTex ahora es la RESOLUCIÓN DE ARCHIVO NASA (assets/earth/
+       runtime/) — 4096 HIGH/ULTRA, 2048 PERF, 1024 MOBILE. El procedural
+       queda como fallback si los archivos faltan (cap 1024 en worker). */
     const P = {
-      ultra:  { shadow: 2048, shadows: true, dprCap: 2.25, part: 1.0, bloom: true, iters: 3, earthTex: 2048, mwS: 5200, mwG: 150, faint: 3200, clouds: 64, aniso: 8 },
-      high:   { shadow: 1536, shadows: true, dprCap: 2.0,  part: 1.0, bloom: true, iters: 2, earthTex: 2048, mwS: 4200, mwG: 120, faint: 2800, clouds: 50, aniso: 4 },
-      perf:   { shadow: 0,    shadows: false, dprCap: 1.5, part: 0.7, bloom: false, iters: 1, earthTex: 1024, mwS: 2600, mwG: 80,  faint: 2000, clouds: 36, aniso: 2 },
+      ultra:  { shadow: 2048, shadows: true, dprCap: 2.25, part: 1.0, bloom: true, iters: 3, earthTex: 4096, mwS: 5200, mwG: 150, faint: 3200, clouds: 64, aniso: 8 },
+      high:   { shadow: 1536, shadows: true, dprCap: 2.0,  part: 1.0, bloom: true, iters: 2, earthTex: 4096, mwS: 4200, mwG: 120, faint: 2800, clouds: 50, aniso: 4 },
+      perf:   { shadow: 0,    shadows: false, dprCap: 1.5, part: 0.7, bloom: false, iters: 1, earthTex: 2048, mwS: 2600, mwG: 80,  faint: 2000, clouds: 36, aniso: 2 },
       mobile: { shadow: 0,    shadows: false, dprCap: 1.4, part: 0.55, bloom: false, iters: 1, earthTex: 1024, mwS: 2200, mwG: 70, faint: 1500, clouds: 26, aniso: 2 },
     };
     return P[this._tier()] || P.high;
@@ -2343,8 +2357,8 @@ class Experience {
         ' float day=smoothstep(-0.10,0.16,d);',
         ' vec3 alb=texture2D(uDay,vUv).rgb;',
         ' float oc=texture2D(uSpec,vUv).r;',
-        ' /* diffuse surface */',
-        ' vec3 col=alb*(0.030+1.28*max(d,0.0));',
+        ' /* diffuse surface — V3.4: balance para imaginería NASA real */',
+        ' vec3 col=alb*(0.045+1.14*max(d,0.0));',
         ' col+=vec3(0.012,0.026,0.050)*(1.0-day);   /* earthshine floor */',
         ' /* OCEAN RESPONSE: broad specular + tight sun glint, never plastic */',
         ' vec3 H=normalize(S+V);',
@@ -2354,15 +2368,19 @@ class Experience {
         ' /* NIGHT LIGHTS — real cities, only on the night side */',
         ' vec3 nl=texture2D(uNight,vUv).rgb;',
         ' float nightK=1.0-smoothstep(-0.14,0.02,d);',
-        ' col+=nl*nightK*1.35;',
+        ' col+=nl*nightK*1.2;',
         ' /* warm terminator band */',
         ' col+=vec3(0.9,0.42,0.18)*pow(1.0-abs(d),16.0)*0.30;',
         ' gl_FragColor=vec4(col,1.0);',
         '}',
       ].join('\n'),
     });
-    this.earth = new T.Mesh(new T.SphereGeometry(R, 84, 56), mat);
-    this.earth.position.copy(this.earthCenter);
+    /* V3.4 EarthRoot: TODA la Tierra cuelga de un único nodo en coordenadas
+       de mundo — visible desde DIRECTOR/ORBIT/FREE/PHOTO/QA por construcción */
+    this.earthRoot = new T.Group();
+    this.earthRoot.position.copy(this.earthCenter);
+    this.gSpace.add(this.earthRoot);
+    this.earth = new T.Mesh(new T.SphereGeometry(R, 96, 64), mat);
     /* CLOUD SHELL — geographic canvas alpha, independent drift, sun-lit */
     this.earthCloudU = {
       uSun: { value: new T.Vector3(1, 0, 0) },
@@ -2389,7 +2407,6 @@ class Experience {
       ].join('\n'),
     });
     this.earthClouds = new T.Mesh(new T.SphereGeometry(R + 11, 72, 48), cm);
-    this.earthClouds.position.copy(this.earthCenter);
     /* ATMOSPHERE — Rayleigh/Mie-flavoured rim: blue day limb, warm sunset ring,
        forward Mie brightening toward the sun, extinction into night */
     const am = new T.ShaderMaterial({
@@ -2414,7 +2431,6 @@ class Experience {
       ].join('\n'),
     });
     this.earthAtmo = new T.Mesh(new T.SphereGeometry(R + 44, 56, 36), am);
-    this.earthAtmo.position.copy(this.earthCenter);
     /* AIRGLOW — extremely thin cyan-green line just above the limb */
     const gm = new T.ShaderMaterial({
       transparent: true, depthWrite: false, side: T.BackSide, blending: T.AdditiveBlending, fog: false,
@@ -2431,16 +2447,20 @@ class Experience {
       ].join('\n'),
     });
     this.earthGlow = new T.Mesh(new T.SphereGeometry(R + 74, 48, 30), gm);
-    this.earthGlow.position.copy(this.earthCenter);
-    this.gSpace.add(this.earth, this.earthClouds, this.earthAtmo, this.earthGlow);
-    /* optional NASA upgrade — silent, fail-safe (spec §36/§79/§80) */
+    this.earthRoot.add(this.earth, this.earthClouds, this.earthAtmo, this.earthGlow);
+    this._bEarthExtras(R);
+    /* V3.4 TRUE EARTH: imaginería NASA real, resolución por tier
+       (4096 HIGH/ULTRA · 2048 PERF · 1024 MOBILE). El procedural queda
+       únicamente como red de seguridad si el archivo falta. */
     try {
+      const res = pre.earthTex;
       CEL.loadOptionalTextures(T, (out) => {
         if (out.day) { this.earthU.uDay.value = out.day; this._earthTexSrc.day = 'file'; }
         if (out.night) { this.earthU.uNight.value = out.night; this._earthTexSrc.night = 'file'; }
         if (out.clouds) { this.earthCloudU.uMap.value = out.clouds; this._earthTexSrc.clouds = 'file'; }
+        if (out.spec) { this.earthU.uSpec.value = out.spec; this._earthTexSrc.spec = 'file'; }
         if (out.moon) { this.moonU.uMap.value = out.moon; }
-      });
+      }, { dayRes: res, nightRes: res, cloudRes: res >= 2048 ? 2048 : 1024, aniso: pre.aniso, buildId: this.buildId });
     } catch (e) { /* placeholders remain until procedural maps land */ }
     /* sea-of-clouds layer for the punch-through beat */
     this.cloudSea = [];
@@ -2454,6 +2474,142 @@ class Experience {
       this.cloudSea.push(sp);
       this.gSpace.add(sp);
     }
+  }
+  /* dirección local (lat,lon) bajo el mapeo equirectangular de SphereGeometry
+     r161 — la misma convención que _orientEarthHero y los canvas maps */
+  _latLonDir(lat, lon) {
+    const th = Math.PI / 2 - lat * Math.PI / 180;
+    const ph = (lon + 180) / 360 * TAU;
+    return new T.Vector3(-Math.cos(ph) * Math.sin(th), Math.cos(th), Math.sin(ph) * Math.sin(th)).normalize();
+  }
+  /* V3.4: HOME//MEDELLÍN discreto + aurora polar sutil (HIGH/ULTRA).
+     Ambos son HIJOS de this.earth: la orientación hero y la rotación real
+     los llevan consigo — coherencia geográfica gratis. */
+  _bEarthExtras(R) {
+    const dir = this._latLonDir(MEDELLIN.lat, MEDELLIN.lon);
+    this.homeMarker = new T.Group();
+    const dot = new T.Sprite(new T.SpriteMaterial({
+      map: this.texBlob, color: 0x9fe8ff, transparent: true, opacity: 0,
+      blending: T.AdditiveBlending, depthWrite: false,
+    }));
+    dot.scale.setScalar(16);
+    dot.position.copy(dir).multiplyScalar(R + 6);
+    const lbl = new T.Sprite(new T.SpriteMaterial({
+      map: textTex(['HOME // MEDELLÍN'], '#bfe8ff', null, 512, 72, 40),
+      transparent: true, opacity: 0, depthWrite: false,
+    }));
+    lbl.scale.set(150, 21, 1);
+    lbl.position.copy(dir).multiplyScalar(R + 58);
+    this.homeMarker.add(dot, lbl);
+    this.homeMarker.userData = { dot, lbl, k: 0 };
+    this.earth.add(this.homeMarker);
+    /* aurora: cinta aditiva localizada cerca de los polos, muy tenue, solo
+       visible en ángulos rasantes vía fresnel (brief §32) — HIGH/ULTRA */
+    if (!this.safeMode && (this._tier() === 'high' || this._tier() === 'ultra')) {
+      this.auroraU = { uT: { value: 0 } };
+      const am2 = new T.ShaderMaterial({
+        transparent: true, depthWrite: false, side: T.DoubleSide, blending: T.AdditiveBlending, fog: false,
+        uniforms: this.auroraU,
+        vertexShader: [
+          'varying vec3 vN; varying vec3 vW; varying vec2 vUv;',
+          'void main(){ vUv=uv; vN=normalize(mat3(modelMatrix)*normal);',
+          ' vec4 w=modelMatrix*vec4(position,1.0); vW=w.xyz;',
+          ' gl_Position=projectionMatrix*viewMatrix*w; }',
+        ].join('\n'),
+        fragmentShader: [
+          'varying vec3 vN; varying vec3 vW; varying vec2 vUv; uniform float uT;',
+          'float h(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }',
+          'void main(){',
+          ' vec3 V=normalize(cameraPosition-vW);',
+          ' float fr=pow(1.0-abs(dot(vN,V)),1.6);',
+          ' float bands=0.5+0.5*sin(vUv.x*46.0+uT*0.22+sin(vUv.x*13.0+uT*0.13)*2.0);',
+          ' float flick=0.75+0.25*h(vec2(floor(vUv.x*46.0),floor(uT*0.8)));',
+          ' vec3 c=mix(vec3(0.16,0.85,0.45),vec3(0.25,0.55,0.85),vUv.y);',
+          ' gl_FragColor=vec4(c,fr*bands*flick*0.085);',
+          '}',
+        ].join('\n'),
+      });
+      const north = new T.Mesh(new T.SphereGeometry(R + 30, 96, 8, 0, TAU, 0.14, 0.15), am2);
+      const south = new T.Mesh(new T.SphereGeometry(R + 30, 96, 8, 0, TAU, Math.PI - 0.29, 0.15), am2);
+      this.earth.add(north, south);
+    }
+  }
+  /* opacidad del marcador HOME: auto durante el hero orbital, manual desde
+     PHOTO/QA (LOCATE HOME). Nunca un pin gigante. */
+  _homeMarkerTick(dt) {
+    const m = this.homeMarker;
+    if (!m) return;
+    const auto = (this.chapter === 'orbit' && this.mt > 3.8 && this.mt < 9.5) ? 0.5 : 0;
+    const want = this._homeForce ? 0.9 : auto;
+    const u = m.userData;
+    u.k = damp(u.k, want, 3, dt);
+    u.dot.material.opacity = u.k * (0.65 + 0.35 * Math.sin(this.elapsed * 2.2));
+    u.lbl.material.opacity = u.k * 0.85;
+  }
+  toggleHomeMarker(on) {
+    this._homeForce = on == null ? (this._homeForce ? 0 : 1) : (on ? 1 : 0);
+    return !!this._homeForce;
+  }
+  toggleSats(on) {
+    const want = on == null ? !(this.sats && this.sats[0] && this.sats[0].visible) : !!on;
+    for (const s of this.sats || []) s.visible = want && (this.chapter === 'orbit' || this.chapter === 'charge');
+    return want;
+  }
+  /* QA V3.4: aislar capas de la Tierra */
+  toggleEarthLayer(key) {
+    if (key === 'clouds' && this.earthClouds) { this.earthClouds.visible = !this.earthClouds.visible; return this.earthClouds.visible; }
+    if (key === 'atmo' && this.earthAtmo) {
+      const v = !this.earthAtmo.visible;
+      this.earthAtmo.visible = v; if (this.earthGlow) this.earthGlow.visible = v;
+      return v;
+    }
+    if (key === 'day' && this.earthU) {
+      if (!this._dayStash) {
+        this._dayStash = this.earthU.uDay.value;
+        this.earthU.uDay.value = this._mkEarthTex((() => { const c = document.createElement('canvas'); c.width = 2; c.height = 1; const g = c.getContext('2d'); g.fillStyle = '#06162a'; g.fillRect(0, 0, 2, 1); return c; })(), true);
+      } else { this.earthU.uDay.value = this._dayStash; this._dayStash = null; }
+      return !this._dayStash;
+    }
+    if (key === 'night' && this.earthU) {
+      if (!this._nightStash) {
+        this._nightStash = this.earthU.uNight.value;
+        this.earthU.uNight.value = this._mkEarthTex((() => { const c = document.createElement('canvas'); c.width = 2; c.height = 1; const g = c.getContext('2d'); g.fillStyle = '#000'; g.fillRect(0, 0, 2, 1); return c; })(), true);
+      } else { this.earthU.uNight.value = this._nightStash; this._nightStash = null; }
+      return !this._nightStash;
+    }
+    return null;
+  }
+  /* ---- V3.4 encuadre matemático de esfera (brief §8) ----
+     frameSphereDistance: distancia para que el DISCO ocupe `coverage` del
+     alto del viewport con un FOV vertical dado (exacto, con tangentes). */
+  frameSphereDistance(coverage, fovDeg) {
+    const R = this.earthR || 1400;
+    const half = Math.tan((fovDeg * Math.PI / 180) / 2);
+    const alpha = Math.atan(Math.max(0.02, coverage) * half);
+    return R / Math.sin(clamp(alpha, 0.005, 1.4));
+  }
+  /* earthScreenCoverage: fracción vertical del viewport ocupada por la
+     Tierra AHORA. Disco completo → diámetro proyectado / alto de pantalla.
+     Disco mayor que el frame → fracción de pantalla debajo del limb. */
+  earthScreenCoverage() {
+    if (!this.earth || !this.gSpace.visible) return { frac: 0, mode: 'none' };
+    const C = this.earthCenter, R = this.earthR;
+    const cam = this.cam;
+    const d = cam.position.distanceTo(C);
+    if (d <= R + 1) return { frac: 1, mode: 'inside' };
+    const alpha = Math.asin(R / d);
+    const fov = cam.fov * Math.PI / 180;
+    const halfT = Math.tan(fov / 2);
+    const toC = this._tmpV.copy(C).sub(cam.position).normalize();
+    const fwd = cam.getWorldDirection(this._tmpV2);
+    const A = Math.acos(clamp(fwd.dot(toC), -1, 1));   /* centro vs forward */
+    if (2 * alpha < fov * 0.98 && A < fov * 0.75) {
+      return { frac: clamp(Math.tan(alpha) / halfT, 0, 1), mode: 'disc' };
+    }
+    /* limb: ángulo del borde superior del disco respecto al forward */
+    const limbAng = alpha - A;
+    const y = Math.tan(clamp(limbAng, -1.4, 1.4)) / halfT;
+    return { frac: clamp(0.5 + 0.5 * y, 0, 1), mode: 'limb' };
   }
   _applyEarthMaps(maps, tag, isBitmap) {
     const apply = (key, uniform, srgb) => {
@@ -3189,7 +3345,13 @@ class Experience {
       this.keys[e.code] = true;
       this._idle = 0;
       const k = e.key.toLowerCase();
-      if (k === 'f') { this.toggleScanner(); e.preventDefault(); }
+      if (k === 'f') {
+        /* V3.4: en FREE cam orbital, F = FOCUS EARTH; en el resto, scanner */
+        if (this.camMode === 'free' && (this.chapter === 'orbit' || this.chapter === 'charge')) this.focusEarth();
+        else this.toggleScanner();
+        e.preventDefault();
+      }
+      else if (k === 'r' && this.camMode === 'free' && (this.chapter === 'orbit' || this.chapter === 'charge')) { this.resetOrbitView(); }
       else if (k === 'c') { this.cycleCamera(); }
       else if (k === 'p') { this.togglePhoto(); }
       else if (e.code === 'Space' && this.photo) { this.capture(); e.preventDefault(); }
@@ -3234,7 +3396,15 @@ class Experience {
     }
   }
   _zoom(d) {
-    if (this.photo) { this.orb.radius = clamp(this.orb.radius + d, 10, 420); return; }
+    if (this.photo) {
+      /* V3.4: PHOTO orbital con target TIERRA permite alejarse hasta ver el
+         disco completo; con target NAVE mantiene el rango clásico */
+      const orbital = this.chapter === 'orbit' || this.chapter === 'charge';
+      const maxR = orbital && this._photoTarget === 'earth' ? (this.earthR || 1400) * 2.6 : 420;
+      const spd = orbital && this._photoTarget === 'earth' ? d * 14 : d;
+      this.orb.radius = clamp(this.orb.radius + spd, 10, maxR);
+      return;
+    }
     if (this.chapter === 'facility') {
       if (this.camMode === 'free') this.free.fov = clamp(this.free.fov + d * 0.35, 34, 78);
       else this.orb.radius = clamp(this.orb.radius + d, 26, 240);
@@ -3693,7 +3863,15 @@ class Experience {
     this.scanOff();
     this.audio.setPad(0);
     this._ventRate = 0;
-    const say = (n) => { this.ui.setCount('T-0' + n); this.audio.countdownTick(n); };
+    /* V3.4 (brief §14): número GRANDE + T-0n debajo + VOZ de mission control.
+       Squelch de radio antes del número; si la voz habló, el beep se calla;
+       si no hay voz disponible en este navegador → beep + texto (fallback). */
+    const say = (n) => {
+      this.ui.setCount(String(n), 'T-0' + n, 'mega');
+      this.audio.radioBlip();
+      const spoke = this.audio.enabled && this.voice.say(getLanguage(), n);
+      if (!spoke) this.audio.countdownTick(n);
+    };
     if (this._objKey === 'obj_prepare') this._objDone();
     this._obj('obj_launch');
     this.events = [
@@ -3717,9 +3895,9 @@ class Experience {
         },
       },
       {
-        at: 3.0, fn: () => { /* T-3: more vapor + arm 2 */
+        at: 3.0, fn: () => { /* T-3: more vapor + arm 2 + water standby (§16) */
           say(3);
-          this.ui.sgos('SG.OS // CRYOGENIC VENT INCREASE');
+          this.ui.sgos('SG.OS // WATER SUPPRESSION STANDBY');
           this._ventRate = 26;
           this._armSwing(this.arm2);
         },
@@ -3740,18 +3918,25 @@ class Experience {
           this.ui.hideObjective();             /* §14: HUD breathes for ignition */
           this._deluge(true);
           this.audio.setWater(1);
+          if (this.nozzleGlow) this.nozzleGlow.material.opacity = 0.30;  /* pre-ignition glow (§16) */
           for (let i = 0; i < 8; i++) this.pCore.spawn(rand(-2, 2), 3.4, rand(-2, 2), rand(-2, 2), rand(2, 6), rand(-2, 2), rand(0.25, 0.4), rand(2, 4));
         },
       },
       {
         at: 6.0, fn: () => { /* T-0: IGNITION */
           this._atPass('IGNITION');
-          this.ui.setCount('IGNITION');
+          this.ui.setCount(getLanguage() === 'es' ? 'IGNICIÓN' : 'IGNITION', 'T-00', 'word');
+          if (this.audio.enabled) this.voice.say(getLanguage(), 'ignition');
           this.audio.ignitionBoom();
           this.engineOn = 0.5;
           this.trauma = Math.max(this.trauma, 0.4);
           this._haptic(1, 0.6, 500);
           this.ui.flash('#ffd9a0', 0.30, 460);   /* §19: keep rocket/tower detail */
+        },
+      },
+      {
+        at: 6.78, fn: () => { /* "DESPEGUE" 0.6–1.0 s después de la ignición (§16) */
+          if (this.audio.enabled) this.voice.say(getLanguage(), 'liftoff');
         },
       },
       { at: 7.0, fn: () => this._liftoff() },
@@ -3813,6 +3998,11 @@ class Experience {
     this.gSurface.visible = false;
     this.gSpace.visible = true;
     this.miniRocket.visible = true;
+    /* V3.4 FIX MACH 1 (brief §11): el heat haze de superficie moría con
+       gSurface y su disco de refracción quedaba CONGELADO sobre el centro de
+       pantalla, doblando el fuselaje del mini-cohete. Se apaga en seco aquí
+       y además se amortigua fuera de _surfaceUpdate (ver _worldUpdate). */
+    if (this.post && this.postOK) this.post.compU.uHeat.value = 0;
     this.pSteam.clear();
     this.pSmoke.clear();
     this.pPlume.clear();
@@ -3832,23 +4022,32 @@ class Experience {
       { at: 7.6, fn: () => { if (!this.userCamLock) this.camRig = 'CHASE'; } },
       {
         at: 8.2, fn: () => {
+          /* V3.4 MACH 1 (brief §12): evento reconocible ≈1.2 s — cono de
+             condensación + shock collar + shake + carga estructural + HUD.
+             La silueta del cohete permanece RÍGIDA (fix uHeat en whiteout). */
+          this._atPass('MACH 1');
           this.ui.banner('MACH 1', 1300);
           this._haptic(0.5, 0.7, 260);
-          this.trauma = Math.max(this.trauma, 0.18);
+          this.trauma = Math.max(this.trauma, 0.22);
           this._transonic = 0.0001;    /* condensation ring + vapor cone */
+          this.audio.stress(0.5, 1.1);
         },
       },
       { at: 9.6, fn: () => this.ui.sgos('SG.OS // MAX-Q APPROACHING') },
       {
         at: 10.3, fn: () => {          /* brief, spectacular (1.9 s) */
+          /* V3.4 MAX-Q (brief §13): DISTINTO de Mach 1 — vibración más grave
+             y sostenida, throttle-down visual, sin cono de condensación */
           this._atPass('MAX-Q');
           this.ui.banner('MAX-Q', 1500);
-          this.trauma = Math.max(this.trauma, 0.3);
+          this.trauma = Math.max(this.trauma, 0.32);
           this._haptic(0.7, 0.8, 700);
+          this._maxqThrottle = 1;      /* dip visual del plume (bucket) */
+          this.audio.stress(0.85, 1.9);
           if (!this.userCamLock) this.camRig = 'NEARBODY';
         },
       },
-      { at: 12.2, fn: () => this.ui.banner('MAX-Q PASSED', 1300) },
+      { at: 12.2, fn: () => { this.ui.banner('MAX-Q PASSED', 1300); this._maxqThrottle = 0; } },
       { at: 13.2, fn: () => { this._atPass('STRATOSPHERE'); this.audio.setEngine(0.62); this.audio.setWind(0); this.ui.setChapter('STRATOSPHERE'); if (!this.userCamLock) this.camRig = 'STRATO'; } },
       { at: 15.2, fn: () => this._meco() },
       { at: 15.8, fn: () => this._stageSep() },
@@ -3929,6 +4128,12 @@ class Experience {
   _enterOrbit() {
     this._ensureSpaceMinimum();
     this._setChapter('orbit');
+    /* V3.4 hardening: el estado de espacio es idempotente al entrar en
+       órbita — un frame largo que salte la rampa de ascentSpace ya no puede
+       dejar el cielo diurno encendido sobre la escena orbital */
+    this.skyU.uSpace.value = 1;
+    this.skyU.uHaze.value = 0;
+    this.renderer.setClearColor(0x04070d, 1);
     this.ui.banner('EARTH ORBIT ACHIEVED', 2400);
     this.ui.setChapter('LOW EARTH ORBIT');
     this.ui.setTelemetry('<b>SG-L1</b>\nALT 402 KM\nV 7.66 KM/S\nORBIT — STABLE');
@@ -3956,20 +4161,22 @@ class Experience {
     for (const s of this.sats || []) s.visible = true;
     this._obj('obj_orbit');
     this.ui.cinematic(true);            /* §49: 2-3 s of pure Earth */
+    /* V3.4 §25: el HERO dura 3.2 s (brief pide 2.5–4) con HUD atenuado y
+       Tierra ocupando 45–65 % vertical — earthScreenCoverage lo verifica */
     this.events = [
-      { at: 2.3, fn: () => {            /* small line, nothing else (§49) */
+      { at: 3.2, fn: () => {            /* small line, nothing else (§49) */
         this.ui.cinematic(false);
         this.ui.quick(t('orbit_achieved'));
         if (this._objKey === 'obj_orbit') this._objDone();
       } },
-      { at: 2.7, fn: () => {            /* §50: ship AFTER the hero shot */
+      { at: 3.6, fn: () => {            /* §50: ship AFTER the hero shot */
         if (this.ship) { this.ship.visible = true; this._shipSlide = 0.0001; }
         this._atPass('SHIP REVEAL');
       } },
-      { at: 2.9, fn: () => this.ui.revealAction('scan') },   /* §52 staggered */
-      { at: 3.3, fn: () => this.ui.revealAction('cam') },
-      { at: 3.7, fn: () => this.ui.revealAction('photo') },
-      { at: 4.4, fn: () => this._beginDeparture() },
+      { at: 3.9, fn: () => this.ui.revealAction('scan') },   /* §52 staggered */
+      { at: 4.2, fn: () => this.ui.revealAction('cam') },
+      { at: 4.5, fn: () => this.ui.revealAction('photo') },
+      { at: 5.4, fn: () => this._beginDeparture() },
     ];
   }
   _computeOrbitPoints() {
@@ -4004,6 +4211,13 @@ class Experience {
     if (this._depT) return;
     this._depT = 0.0001;
     this._depDone = false;
+    /* V3.4 (brief §29/§30): la Tierra NO se escala — la cámara recorre una
+       trayectoria REAL de alejamiento a lo largo de la radial actual. La
+       reducción aparente es pura perspectiva. */
+    const C = this.earthCenter;
+    this._depDir = this.cam.position.clone().sub(C).normalize();
+    this._depDirB = new T.Vector3(0, 0.62, 0.78).normalize();   /* vista final ¾ */
+    this._depD0 = Math.max((this.earthR || 1400) + 120, this.cam.position.distanceTo(C));
     this.ui.banner('SG DEPARTURE BURN', 1400);
     this.ui.sgos('SG.OS // DEPARTURE BURN');
     this.audio.setEngine(0.30);
@@ -4012,12 +4226,29 @@ class Experience {
   }
   _departureTick(dt) {
     if (!this._depT || this._depDone) return;
-    this._depT = Math.min(1, this._depT + dt / 6.8);
-    /* thin blue burn from the ship while we climb out */
-    if (this.ship && this.ship.visible && Math.random() < dt * 40) {
-      const sp = this.ship.getWorldPosition(this._tmpV3 || (this._tmpV3 = new T.Vector3()));
-      this.pCore.spawn(sp.x, sp.y - 0.4, sp.z + 3.4, rand(-0.6, 0.6), rand(-2, 0), rand(7, 11), rand(0.14, 0.22), rand(1.6, 2.6));
+    /* 8 s de secuencia: FRAME A ~60 % → B 45 % → C 32 % → D disco completo */
+    this._depT = Math.min(1, this._depT + dt / 8.0);
+    const k = sstep(0, 1, this._depT);
+    /* la nave viaja con nosotros: composición nave + planeta (brief §29) */
+    if (this.ship && this.ship.visible) {
+      const fwd = this._tmpV.set(0, 0, -1).applyQuaternion(this.cam.quaternion);
+      const rgt = (this._tmpV3 || (this._tmpV3 = new T.Vector3())).set(1, 0, 0).applyQuaternion(this.cam.quaternion);
+      this.ship.position.copy(this.cam.position)
+        .addScaledVector(fwd, 52 + k * 34)
+        .addScaledVector(rgt, 11)
+        .addScaledVector(this._up, -9);
+      this.ship.quaternion.copy(this.cam.quaternion);
+      this.ship.rotateY(Math.PI * 0.94);        /* proa alejándose de la Tierra */
+      this.ship.rotateZ(Math.sin(this.elapsed * 0.6) * 0.03);
+      if (Math.random() < dt * 40) {
+        const sp = this.ship.getWorldPosition(this._tmpV3);
+        const burnDir = this._depDir || this._up;
+        this.pCore.spawn(sp.x, sp.y - 0.4, sp.z, -burnDir.x * 9 + rand(-0.6, 0.6), -burnDir.y * 9, -burnDir.z * 9 + rand(-0.6, 0.6), rand(0.14, 0.22), rand(1.6, 2.6));
+      }
     }
+    /* telemetría del alejamiento */
+    const alt = Math.round(402 + k * 34000);
+    this.ui.setTelemetry('<b>SG SHIP // EARTH DEPARTURE</b>\nALT ' + (alt >= 1000 ? (alt / 1000).toFixed(1) + 'K' : alt) + ' KM\nBURN ' + Math.round(k * 100) + '%');
     if (this._depT >= 1) {
       this._depDone = true;
       this._atPass('EARTH DEPARTURE');
@@ -4448,7 +4679,7 @@ class Experience {
   togglePhoto() {
     if (!['facility', 'orbit', 'hub', 'charge'].includes(this.chapter) && !this.photo) return;
     this.photo = !this.photo;
-    this.ui.photoMode(this.photo);
+    this.ui.photoMode(this.photo, this.chapter === 'orbit' || this.chapter === 'charge');
     this.timeScale = this.photo ? 0.25 : 1;
     if (this.photo) {
       this._photoSaved = { theta: this.orb.theta, phi: this.orb.phi, radius: this.orb.radius, yaw: this.aim.yaw, pitch: this.aim.pitch };
@@ -4521,6 +4752,11 @@ class Experience {
       this.free.yaw = e.y; this.free.pitch = clamp(e.x, -1.396, 1.484);
       this.free.vyaw = 0; this.free.vpitch = 0;
       this.free.fov = this.cam.fov;
+      /* V3.4: la FREE cam orbital SIEMPRE nace viendo la Tierra (brief §9) */
+      if (this.chapter === 'orbit' || this.chapter === 'charge') {
+        this._aimFreeAtEarth();
+        this.ui.setHint(t('hint_free_orbit'));
+      }
     }
     if (mode === 'orbit' && (this.chapter === 'orbit' || this.chapter === 'charge')) {
       this.orbShip.theta = rand(-0.4, 0.4); this.orbShip.phi = 0.14; this.orbShip.radius = 44;
@@ -4821,6 +5057,13 @@ class Experience {
 
     if (this.gSurface.visible) this._surfaceUpdate(dt);
     if (this.gSpace.visible) this._spaceEnvUpdate(dt);
+    /* V3.4 FIX MACH 1: el heat haze se amortigua SIEMPRE, aunque la
+       superficie ya no exista — jamás vuelve a quedar un disco de
+       refracción huérfano deformando el fuselaje (brief §11). */
+    if (!this.gSurface.visible && this.post && this.postOK) {
+      const U = this.post.compU;
+      U.uHeat.value = U.uHeat.value > 0.0004 ? damp(U.uHeat.value, 0, 12, dt) : 0;
+    }
   }
 
   _orientEarthHero() {
@@ -4844,8 +5087,10 @@ class Experience {
       this.earthCloudU.uSun.value.copy(this._heroSun);
       this.earth.quaternion.copy(this._heroQ);
       this.earth.rotation.x = this.earth.rotation.z = 0;
+      /* V3.4 §26 planeta VIVO: deriva rotacional muy sutil también en hero */
+      this.earth.rotateY(this.elapsed * 0.0016);
       this.earthClouds.quaternion.copy(this._heroQ);
-      this.earthClouds.rotateY(this.elapsed * 0.0035);
+      this.earthClouds.rotateY(this.elapsed * 0.0016 + this.elapsed * 0.0035);
     } else {
       /* Earth rotates with real GMST; clouds drift independently (spec §44) */
       this.earthU.uSun.value.copy(this.w.sunDirSpace);
@@ -4854,7 +5099,8 @@ class Experience {
       this.earth.rotation.y = rotY;
       this.earthClouds.rotation.y = rotY + this.elapsed * 0.0035;
     }
-    void dt;
+    if (this.auroraU) this.auroraU.uT.value = this.elapsed;
+    this._homeMarkerTick(dt);
   }
 
   _surfaceUpdate(dt) {
@@ -5096,10 +5342,17 @@ class Experience {
     this._goalFov = fov;
   }
   _yawPitchGoal(pos, yaw, pitch, fov) {
+    /* V3.4 FIX CRÍTICO: `pos` solía LLEGAR siendo this._tmpV y la línea de
+       abajo lo sobrescribía como target → lookAt(eye === target) degenerado
+       → quaternion identidad → pitch/yaw SIEMPRE 0. Todas las cámaras
+       limb-aware (ascentSpace, orbit hero, departure, hub) miraban al frente
+       ignorando su pitch calculado: LA CAUSA de la Tierra invisible. El eye
+       ahora es _goalPos (copia) y el target un vector propio. */
     this._goalPos.copy(pos);
     const cp = Math.cos(pitch);
-    this._tmpV.set(pos.x + Math.sin(yaw) * cp, pos.y + Math.sin(pitch), pos.z - Math.cos(yaw) * cp);
-    this._tmpM.lookAt(pos, this._tmpV, this._up);
+    if (!this._tmpVLook) this._tmpVLook = new T.Vector3();
+    this._tmpVLook.set(this._goalPos.x + Math.sin(yaw) * cp, this._goalPos.y + Math.sin(pitch), this._goalPos.z - Math.cos(yaw) * cp);
+    this._tmpM.lookAt(this._goalPos, this._tmpVLook, this._up);
     this._goalQuat.setFromRotationMatrix(this._tmpM);
     this._goalFov = fov;
   }
@@ -5107,13 +5360,21 @@ class Experience {
     const c = this.cam;
     if (this.photo) {
       const o = this.orb;
+      const orbital = this.chapter === 'orbit' || this.chapter === 'charge';
       const tgt = this.chapter === 'hub' ? this._tmpV2.set(0, 0, -620) :
-        (this.chapter === 'orbit' || this.chapter === 'charge') ? this.ship.getWorldPosition(this._tmpV2) : o.target;
+        orbital ? (this._photoTarget === 'earth' ? this._tmpV2.copy(this.earthCenter) : this.ship.getWorldPosition(this._tmpV2)) : o.target;
       const x = tgt.x + o.radius * Math.cos(o.phi) * Math.sin(o.theta);
       const z = tgt.z + o.radius * Math.cos(o.phi) * Math.cos(o.theta);
-      const y = tgt.y + o.radius * Math.sin(o.phi);
+      let y = tgt.y + o.radius * Math.sin(o.phi);
       const gy = this.gSurface.visible ? this.terrainHSafe(x, z) + 1.6 : -1e9;
-      this._lookGoal(this._tmpV.set(x, Math.max(y, gy), z), tgt, 55);
+      const p = this._tmpV.set(x, Math.max(y, gy), z);
+      /* V3.4: en órbita la cámara PHOTO jamás entra en la esfera terrestre */
+      if (orbital && this.earthCenter) {
+        const C = this.earthCenter, R = (this.earthR || 1400) + 60;
+        const dc = p.distanceTo(C);
+        if (dc < R) p.sub(C).multiplyScalar(R / Math.max(1, dc)).add(C);
+      }
+      this._lookGoal(p, tgt, 55);
       return;
     }
     if (this.chapter === 'intro') {
@@ -5176,10 +5437,12 @@ class Experience {
       /* V3.3 P0: EARTH-AWARE framing — every rig asks the sphere where its
          limb is and places it at a scripted screen fraction. No magic pitch.
          TRACK .10 · CHASE .16 · MAX-Q(NEARBODY) .22 · STRATO .34 */
+      /* V3.4 coverage targets (brief §8): cloud break 10–15 % · Mach1/Max-Q
+         18–28 % · stratosphere 25–38 % */
       let frac;
-      if (this.camRig === 'TRACK') { fov = 16; px = 40; pz = 30; frac = 0.10; }
-      else if (this.camRig === 'CHASE') { fov = 46; px = 10; pz = 18; frac = 0.16; }
-      else if (this.camRig === 'NEARBODY') { fov = 72; px = 4; pz = 8; frac = 0.22; }
+      if (this.camRig === 'TRACK') { fov = 16; px = 40; pz = 30; frac = 0.12; }
+      else if (this.camRig === 'CHASE') { fov = 46; px = 10; pz = 18; frac = 0.17; }
+      else if (this.camRig === 'NEARBODY') { fov = 72; px = 4; pz = 8; frac = 0.26; }
       else { fov = 82; px = -14; pz = 6; frac = 0.34; }
       pitch = this._pitchForLimb(this._tmpV2.set(px, camY, pz), fov, frac);
       const pos = this._tmpV.set(px, camY, pz);
@@ -5200,24 +5463,39 @@ class Experience {
         return;
       }
       if (this.camMode === 'free') { this._freeGoal(dt, false); return; }
-      /* DIRECTOR (V3.3): Earth-aware — the sphere tells us the pitch.
-         Hero: limb at 55 % (Earth 50-65 % of the frame, cropped below).
-         DEPARTURE: the camera climbs a real path away from the planet;
-         while the disc is bigger than the frame we keep limb-framing,
-         and once it fits we frame the full disc with space around it. */
+      /* DIRECTOR (V3.4): Earth-aware — the sphere tells us the pitch.
+         HERO: limb al 55 % (Tierra 45–65 % del frame — brief §8/§25).
+         DEPARTURE (brief §29/§30): la cámara recorre una RADIAL REAL de
+         alejamiento (frameSphereDistance decide cada distancia): la Tierra
+         pasa por ~60 % → 45 % → 32 % de pantalla y, cuando el disco por fin
+         CABE en el frame, se encuadra completo con espacio alrededor. Nada
+         se escala: solo distancia y perspectiva. */
       const dep = this._depDone ? 1 : (this._depT ? sstep(0, 1, this._depT) : 0);
-      const pos = this._tmpV.set(0, -40 + dep * 700, dep * 1500);
       const fov = this.confirming ? 66 : lerp(58, 52, dep);
+      const C = this.earthCenter;
+      let pos;
+      if (dep > 0 || this._depDir) {
+        const dirA = this._depDir || this._tmpV2.set(0, 0.9936, 0.1132);
+        const dirB = this._depDirB || dirA;
+        const d0 = this._depD0 || 1590;
+        const dFull62 = this.frameSphereDistance(0.62, fov);
+        const dFull52 = this.frameSphereDistance(0.52, fov);
+        const d = lerpTable([[0, d0], [0.45, lerp(d0, dFull62, 0.42)], [0.8, dFull62], [1, dFull52]], dep);
+        /* swing orbital: de la radial inicial a un tres-cuartos cinematográfico */
+        const sw = sstep(0.15, 0.9, dep);
+        pos = this._tmpV.copy(dirA).multiplyScalar(1 - sw).addScaledVector(dirB, sw).normalize().multiplyScalar(d).add(C);
+      } else {
+        pos = this._tmpV.set(0, -40, 0);
+      }
       const ang = this._earthAngRadius(pos);
       let basePitch;
-      if (ang * 2 < (fov * Math.PI / 180) * 0.82) {
+      if (ang * 2 < (fov * Math.PI / 180) * 0.9) {
         /* full disc fits: centre it slightly low, sky above (Frame D) */
-        const C = this.earthCenter;
         const d = Math.hypot(C.x - pos.x, C.y - pos.y, C.z - pos.z);
         const el = Math.asin((C.y - pos.y) / d);
         basePitch = clamp(el + (fov * Math.PI / 180) * 0.06, -1.25, 0.6);
       } else {
-        basePitch = this._pitchForLimb(pos, fov, lerp(0.55, 0.46, dep));
+        basePitch = this._pitchForLimb(pos, fov, lerpTable([[0, 0.55], [0.4, 0.45], [0.7, 0.32], [1, 0.26]], dep));
       }
       this._yawPitchGoal(pos, this.aim.yaw, basePitch + this.aim.pitch, fov);
       return;
@@ -5307,7 +5585,12 @@ class Experience {
     this.orb.theta = theta; this.orb.phi = phi; this.orb.radius = radius;
   }
   /* FREE CAMERA (mandatory, spec §11): yaw 360°, pitch −80..+85°, inertia,
-     wheel FOV, WASD inside a safe zone, terrain-clamped, no forced lookAt. */
+     wheel FOV, WASD, no forced lookAt.
+     V3.4 ORBITAL: los límites ya no son una caja arbitraria — se definen en
+     función de earthR: mínimo R+safeAltitude (nunca dentro del planeta ni
+     cortando la esfera con el near plane), máximo 3.4R de observación.
+     La velocidad escala con la altitud para que explorar el planeta entero
+     sea posible sin perder precisión cerca de la nave (brief §9). */
   _freeGoal(dt, onSurface) {
     const f = this.free;
     f.yaw += f.vyaw; f.pitch = clamp(f.pitch + f.vpitch, -1.396, 1.484);
@@ -5316,21 +5599,78 @@ class Experience {
     const ks = (this.keys.KeyD ? 1 : 0) - (this.keys.KeyA ? 1 : 0);
     const ku = (this.keys.KeyE ? 1 : 0) - (this.keys.KeyQ ? 1 : 0);
     if (kf || ks || ku) this._idle = 0;
-    const sp = onSurface ? 26 : 20;
-    const fwdX = Math.sin(f.yaw), fwdZ = -Math.cos(f.yaw);
-    f.pos.x += (fwdX * kf + Math.cos(f.yaw) * ks) * sp * dt;
-    f.pos.z += (fwdZ * kf + Math.sin(f.yaw) * ks) * sp * dt;
-    f.pos.y += ku * (onSurface ? 14 : 12) * dt;
     if (onSurface) {
+      const sp = 26;
+      const fwdX = Math.sin(f.yaw), fwdZ = -Math.cos(f.yaw);
+      f.pos.x += (fwdX * kf + Math.cos(f.yaw) * ks) * sp * dt;
+      f.pos.z += (fwdZ * kf + Math.sin(f.yaw) * ks) * sp * dt;
+      f.pos.y += ku * 14 * dt;
       const rr = Math.hypot(f.pos.x, f.pos.z);
       if (rr > 300) { f.pos.x *= 300 / rr; f.pos.z *= 300 / rr; }
       f.pos.y = clamp(f.pos.y, this.terrainHSafe(f.pos.x, f.pos.z) + 2.0, 190);
     } else {
-      f.pos.x = clamp(f.pos.x, -70, 70);
-      f.pos.y = clamp(f.pos.y, -90, 30);
-      f.pos.z = clamp(f.pos.z, -40, 40);
+      const C = this.earthCenter || this._tmpV2.set(0, -1620, -180);
+      const R = this.earthR || 1400;
+      const dC = Math.max(1, f.pos.distanceTo(C));
+      const sp = 24 + Math.max(0, dC - R) * 0.24;      /* rápido lejos, fino cerca */
+      const cp = Math.cos(f.pitch);
+      /* vuelo real: W/S avanzan a lo largo de la mirada (incluye pitch) */
+      const fx = Math.sin(f.yaw) * cp, fy = Math.sin(f.pitch), fz = -Math.cos(f.yaw) * cp;
+      const rx = Math.cos(f.yaw), rz = Math.sin(f.yaw);
+      f.pos.x += (fx * kf + rx * ks) * sp * dt;
+      f.pos.y += (fy * kf + ku * 0.6) * sp * dt;
+      f.pos.z += (fz * kf + rz * ks) * sp * dt;
+      /* SAFE RADIUS por earthR: nunca entrar en la Tierra, nunca perderla */
+      const d2 = f.pos.distanceTo(C);
+      const minD = R + 70, maxD = R * 3.4;
+      if (d2 < minD || d2 > maxD) {
+        const k2 = clamp(d2, minD, maxD) / d2;
+        f.pos.sub(C).multiplyScalar(k2).add(C);
+      }
     }
     this._yawPitchGoal(f.pos, f.yaw, f.pitch, f.fov);
+  }
+  /* V3.4 FOCUS EARTH: conserva la posición, rota suavemente hacia el centro
+     terrestre (brief §9). Hotkey F en FREE cam orbital + botón QA. */
+  _aimFreeAtEarth() {
+    const f = this.free;
+    const C = this.earthCenter;
+    if (!C) return;
+    const dir = this._tmpV.copy(C).sub(f.pos).normalize();
+    f.yaw = Math.atan2(dir.x, -dir.z);
+    f.pitch = clamp(Math.asin(clamp(dir.y, -1, 1)), -1.396, 1.484);
+    f.vyaw = 0; f.vpitch = 0;
+  }
+  focusEarth() {
+    if (this.camMode !== 'free' || !(this.chapter === 'orbit' || this.chapter === 'charge')) return;
+    this._aimFreeAtEarth();
+    this.camBlend.t = 0;
+    this.camBlend.dur = 0.7;
+    this.camBlend.fromPos.copy(this.cam.position);
+    this.camBlend.fromQuat.copy(this.cam.quaternion);
+    this.camBlend.fromFov = this.cam.fov;
+    this.ui.quick('FOCUS EARTH');
+    this.audio.uiHover();
+  }
+  resetOrbitView() {
+    if (!(this.chapter === 'orbit' || this.chapter === 'charge')) return;
+    this.aim.yaw = 0; this.aim.pitch = 0;
+    this._setCamMode('director', true);
+    this.ui.quick('RESET ORBIT VIEW');
+    this.audio.uiHover();
+  }
+  setPhotoTarget(k) {
+    this._photoTarget = k === 'earth' ? 'earth' : 'ship';
+    if (this._photoTarget === 'earth') {
+      this.orb.radius = (this.earthR || 1400) * 1.5;
+      this.orb.phi = clamp(this.orb.phi, 0.05, 0.9);
+    } else this.orb.radius = clamp(this.orb.radius, 10, 220);
+    this.ui.quick(this._photoTarget === 'earth' ? 'TARGET // EARTH' : 'TARGET // SHIP');
+  }
+  photoResetCam() {
+    this.orb.theta = -0.7; this.orb.phi = 0.3;
+    this.orb.radius = this._photoTarget === 'earth' ? (this.earthR || 1400) * 1.5 : 42;
+    this.ui.quick('CAMERA RESET');
   }
   terrainHSafe(x, z) { return this.builtFacility ? this.terrainH(x, z) : 0; }
 
@@ -5340,6 +5680,12 @@ class Experience {
     /* CINEMATIC CLOCK: monotonic real time — a slow frame can no longer
        stretch a 7 s sequence into minutes (P0 §1) */
     this.mt = this._chBase + (performance.now() - this._chStart) / 1000;
+    /* V3.4 QA pin: tope duro ANTES de disparar eventos — un frame lento no
+       puede saltarse el beat congelado (?qa=v34; producción: siempre null) */
+    if (this._qaPin != null && this.mt > this._qaPin) {
+      this.mt = this._qaPin;
+      this._chStart = performance.now() - (this._qaPin - this._chBase) * 1000;
+    }
     for (const ev of this.events) {
       if (!ev.done && mtPrev <= ev.at && this.mt > ev.at) { ev.done = true; ev.fn(); }
     }
@@ -5398,8 +5744,11 @@ class Experience {
       }
       if (this.engineOn > 0 && this.miniRocket) {
         const p = this.miniRocket.position;
-        for (let i = 0; i < 3; i++) this.pCore.spawn(p.x + rand(-1, 1), p.y - 18, p.z + rand(-1, 1), rand(-2, 2), rand(-60, -46), rand(-2, 2), rand(0.2, 0.35), rand(4, 7));
-        this.mGlow.material.opacity = 0.9;
+        /* V3.4 MAX-Q: throttle bucket visual — el plume respira hacia abajo */
+        const thr = 1 - (this._maxqThrottle ? 0.32 : 0);
+        const nSp = Math.random() < thr ? 3 : 2;
+        for (let i = 0; i < nSp; i++) this.pCore.spawn(p.x + rand(-1, 1), p.y - 18, p.z + rand(-1, 1), rand(-2, 2), rand(-60, -46) * thr, rand(-2, 2), rand(0.2, 0.35), rand(4, 7));
+        this.mGlow.material.opacity = 0.9 * thr;
       } else if (this.mGlow) this.mGlow.material.opacity = damp(this.mGlow.material.opacity, 0, 3, dt);
       /* V3.3 STAGE 1 SEPARATION: the booster falls behind, drifts, tumbles
          slowly, keeps its minimal lights, never explodes, leaves the frame */
@@ -5431,20 +5780,34 @@ class Experience {
         this.mFairL.rotation.x = ft * 0.4; this.mFairR.rotation.x = -ft * 0.3;
         if (ft > 2.6) { this.mFairL.visible = false; this.mFairR.visible = false; }
       }
-      /* transonic condensation: expanding ring + brief vapor cone (spec §33) */
+      /* V3.4 transonic (brief §12): ~1.2 s de evento — CONO DE CONDENSACIÓN
+         translúcido sobre el vehículo + shock collar en expansión + vapor.
+         Todo son mallas alrededor del cohete: el fuselaje NUNCA se deforma. */
       if (this._transonic) {
-        this._transonic = Math.min(1, this._transonic + dt / 0.7);
+        this._transonic = Math.min(1, this._transonic + dt / 1.2);
         if (!this.transRing) {
           this.transRing = new T.Mesh(new T.RingGeometry(0.9, 1, 40), new T.MeshBasicMaterial({ color: 0xeef6ff, transparent: true, opacity: 0, side: T.DoubleSide, blending: T.AdditiveBlending, depthWrite: false }));
           this.gSpace.add(this.transRing);
         }
+        if (!this.transCone) {
+          this.transCone = new T.Mesh(
+            new T.ConeGeometry(4.4, 11, 26, 1, true),
+            new T.MeshBasicMaterial({ color: 0xf2f8ff, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide })
+          );
+          this.gSpace.add(this.transCone);
+        }
         const p = this.miniRocket.position;
+        const tk = this._transonic;
+        const env = Math.sin(Math.min(1, tk) * Math.PI);          /* in→peak→out */
         this.transRing.position.set(p.x, p.y - 4, p.z);
         this.transRing.rotation.x = Math.PI / 2;
-        this.transRing.scale.setScalar(4 + this._transonic * 26);
-        this.transRing.material.opacity = (1 - this._transonic) * 0.7;
+        this.transRing.scale.setScalar(4 + tk * 30);
+        this.transRing.material.opacity = (1 - tk) * 0.7;
+        this.transCone.position.set(p.x, p.y + 10.5, p.z);        /* nariz/hombro */
+        this.transCone.scale.set(1 + tk * 0.5, 1 + tk * 0.9, 1 + tk * 0.5);
+        this.transCone.material.opacity = env * 0.30;
         for (let i = 0; i < 2; i++) this.pSteam.spawn(p.x + rand(-2, 2), p.y - rand(2, 8), p.z + rand(-1.5, 1.5), rand(-3, 3), rand(-6, -2), rand(-2, 2), 0.4, rand(3, 5));
-        if (this._transonic >= 1) this._transonic = 0;
+        if (tk >= 1) { this._transonic = 0; this.transCone.material.opacity = 0; }
       }
       this.pCore.update(dt, 0, 0);
       this.pSmoke.update(dt, 0, 0);
@@ -5462,11 +5825,12 @@ class Experience {
         if (this.mGlow2) this.mGlow2.material.opacity = damp(this.mGlow2.material.opacity, 0, 2, dt);
         if (this._vehDrift > 4.5) this.miniRocket.visible = false;
       }
-      if (this._shipSlide && this.ship) {
+      if (this._shipSlide && this.ship && !this._depT) {
+        /* V3.4: durante DEPARTURE la nave la coloca _departureTick (sigue a
+           la cámara para mantener la composición nave + planeta) */
         this._shipSlide = Math.min(1, this._shipSlide + dt / 2.2);
         const k = sstep(0, 1, this._shipSlide);
-        const depZ = (this._depT ? sstep(0, 1, this._depT) : 0) * -34;
-        this.ship.position.set(0, this.cam.position.y - 15 + k * 3, -120 + k * 58 + depZ);
+        this.ship.position.set(0, this.cam.position.y - 15 + k * 3, -120 + k * 58);
         this.ship.rotation.y = Math.PI * (1 - k * 0.06);
         this.ship.rotation.x = Math.sin(this.elapsed * 0.5) * 0.03;
       }
@@ -5722,6 +6086,7 @@ class Experience {
         this.galaxyActivate(0);
       }
       if (this._autotest) this._autotestTick();
+      if (this._qa34) this._qa34.tick(dt);          /* V3.4 ?qa=v34 */
 
       if (!this._ctxLost) this._renderFrame();
       this.fatalCount = 0;
@@ -5988,6 +6353,7 @@ class Experience {
     }
   }
   /* ------------------------------ external ------------------------------ */
+  attachQA34(handle) { this._qa34 = handle; }
   refreshLang() {
     if (this.ctaMode) this.ui.setCTA(this.ctaMode);
     if (this.chapter === 'facility') this.ui.setHint(this.isTouch ? t('hint_facility_touch') : t('hint_facility'));

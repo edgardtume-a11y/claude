@@ -75,3 +75,56 @@ el desarrollo. Se intentó: las peticiones a `visibleearth.nasa.gov` y
   público) siguiendo `assets/README.txt` y el upgrade es automático,
   sin tocar código. Resolución objetivo 4096×2048 (HIGH/ULTRA) o
   2048×1024 (PERF); generar versiones optimizadas si el source es mayor.
+
+## 6) V3.4 — TRUE EARTH: IMAGINERÍA NASA REAL INCLUIDA EN EL ZIP
+
+Fecha de obtención: 2026-08-20. Los hosts oficiales NASA
+(`visibleearth.nasa.gov`, `eoimages.gsfc.nasa.gov`) siguen bloqueados por el
+proxy de egress de este entorno (HTTP 403 CONNECT, documentado en
+AUDIT-V34.md §5). La imaginería NASA se obtuvo por el ÚNICO canal permitido:
+el paquete npm `three-globe@2.45.2` (MIT, © Vasco Asturiano,
+https://github.com/vasturiano/three-globe), que redistribuye reproducciones
+de las imágenes NASA en `example/img/` y `example/clouds/`. Las imágenes NASA
+son de dominio público según las NASA Media Usage Guidelines
+(https://www.nasa.gov/nasa-brand-center/images-and-media/); no se usa logo,
+insignia ni se sugiere afiliación o respaldo de NASA.
+
+### Originales sin modificar — `assets/earth/source/`
+
+| Archivo | Obra NASA de origen | URL de origen (oficial) | Resolución | Tamaño | SHA-256 (16) |
+|---|---|---|---|---|---|
+| `earth-blue-marble.jpg` | NASA Visible Earth — Blue Marble: Land Surface, Ocean Color and Sea Ice (Reto Stöckli, NASA GSFC) | https://visibleearth.nasa.gov/collection/1484/blue-marble | 4096×2048 | 1.43 MB | 228deba2e4b60014 |
+| `earth-night.jpg` | NASA Earth Observatory — Earth at Night / Black Marble (NASA GSFC / NOAA) | https://earthobservatory.nasa.gov/features/NightLights | 4096×2048 | 0.70 MB | 355ab23dd1323315 |
+| `clouds.png` | NASA Visible Earth — Blue Marble Clouds (canal alfa real) | https://visibleearth.nasa.gov/images/57747/blue-marble-clouds | 4096×2048 | 4.92 MB | 35c46d8b29651a99 |
+| `earth-water.png` | Máscara oceánica derivada de Blue Marble (three-globe) | ídem colección Blue Marble | 1600×800 | 0.42 MB | 3a8132db56aac4e6 |
+| `earth-topology.png` | Topología/elevación derivada (three-globe) — no usada en runtime V3.4 | ídem | 2048×1024 | 0.37 MB | 839b12da2e4dd346 |
+
+Vía de redistribución: `https://registry.npmjs.org/three-globe/-/three-globe-2.45.2.tgz`
+(`package/example/img/*`, `package/example/clouds/clouds.png`).
+
+### Derivados runtime — `assets/earth/runtime/` (generados con Pillow 12.3, Lanczos)
+
+| Archivo | Derivación | Resolución | Uso |
+|---|---|---|---|
+| `day-4096.jpg` | Blue Marble recomprimido q88 | 4096×2048 | HIGH/ULTRA día |
+| `day-2048.jpg` / `day-1024.jpg` | reescalado Lanczos | 2048×1024 / 1024×512 | PERF / MOBILE |
+| `night-4096.jpg` | Black Marble recomprimido q85 | 4096×2048 | HIGH/ULTRA luces urbanas |
+| `night-2048.jpg` / `night-1024.jpg` | reescalado | 2048×1024 / 1024×512 | PERF / MOBILE |
+| `clouds-alpha-2048.png` / `-1024.png` | RGBA blanco + CANAL ALFA REAL del original (no luminancia; el original P-con-transparencia se preservó intacto en source/) | 2048×1024 / 1024×512 | shell de nubes |
+| `spec-1024.jpg` | máscara oceánica en escala de grises (blanco=agua) | 1024×512 | especular/glint solo océanos |
+
+El loader (`js/celestial.js → loadOptionalTextures`) elige resolución por tier
+y cae al procedural SOLO si el archivo falta. `?qa=v34` verifica en vivo
+`DAY/NIGHT/CLOUDS/SPEC = FILE` y marca ERROR un HIGH/ULTRA sin archivo real.
+
+Mejora opcional para el usuario final (sin tocar código): descargar los
+originales 8K/full-res directamente de las URLs NASA de arriba y regenerar
+los derivados con las mismas rutas.
+
+### Otros añadidos V3.4
+
+| Asset | Fuente | Licencia |
+|---|---|---|
+| `vendor/three.module.js` (three 0.161.0 build oficial, 1.28 MB) | `https://registry.npmjs.org/three/-/three-0.161.0.tgz` (package/build/three.module.js) | MIT |
+| Voz del countdown | `SpeechSynthesis` del navegador del visitante (es-CO→es-419→es-US→es-MX→es-ES / en-US); sin servicios TTS externos, ningún dato del visitante sale del navegador. Slots para clips locales: `assets/audio/voice/` + `manifest.json` (vacíos, documentados) | API del navegador |
+| Marcador HOME//MEDELLÍN, aurora polar, cono de condensación Mach 1 | Código y shaders propios (`js/experience.js`) | Obra propia |

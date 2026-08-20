@@ -232,10 +232,22 @@ export class UI {
   enableCTA() { this.el.cta.disabled = false; }
 
   /* ---------- countdown / banner ---------- */
-  setCount(text) {
-    if (text == null) { this.el.countBig.classList.remove('show'); return; }
-    this.el.countBig.textContent = text;
-    this.el.countBig.classList.add('show');
+  /* V3.4: mega = 'mega' número gigante centrado (5-4-3-2-1) · 'word' palabra
+     grande (IGNICIÓN) · falsy = chip clásico. sub = línea T-0n debajo. */
+  setCount(text, sub, mega) {
+    const el = this.el.countBig;
+    if (text == null) { el.classList.remove('show', 'mega', 'word'); el.textContent = ''; return; }
+    el.classList.toggle('mega', mega === 'mega' || mega === 'word');
+    el.classList.toggle('word', mega === 'word');
+    if (sub != null) {
+      el.textContent = '';
+      const n = document.createElement('div'); n.className = 'cb-n'; n.textContent = text;
+      const s = document.createElement('div'); s.className = 'cb-s'; s.textContent = sub;
+      el.appendChild(n); el.appendChild(s);
+    } else {
+      el.textContent = text;
+    }
+    el.classList.add('show');
   }
   banner(text, ms, gold) {
     clearTimeout(this._bannerTimer);
@@ -615,9 +627,42 @@ export class UI {
   }
 
   /* ---------- photo / welcome / loader / debug ---------- */
-  photoMode(on) {
+  photoMode(on, orbital) {
     document.body.classList.toggle('photo', on);
     this.el.photoUi.classList.toggle('on', on);
+    this._photoOrbital(!!on && !!orbital);
+  }
+  /* V3.4 PHOTO orbital (brief §10): target Tierra/nave, HOME, satélites,
+     reset — construido bajo demanda para no tocar el index */
+  _photoOrbital(show) {
+    if (!this._poRow && show) {
+      const row = document.createElement('div');
+      row.id = 'photo-orbital';
+      const mk = (label, cbName, arg) => {
+        const b = document.createElement('button');
+        b.className = 'icon-btn hit';
+        b.textContent = label;
+        b.addEventListener('click', () => { if (this.cb[cbName]) this.cb[cbName](arg); });
+        row.appendChild(b);
+        return b;
+      };
+      const bt = document.createElement('button');
+      bt.className = 'icon-btn hit';
+      bt.textContent = 'TARGET: NAVE';
+      bt.addEventListener('click', () => {
+        const toEarth = bt.dataset.t !== 'earth';
+        bt.dataset.t = toEarth ? 'earth' : 'ship';
+        bt.textContent = toEarth ? 'TARGET: TIERRA' : 'TARGET: NAVE';
+        if (this.cb.onPhotoTarget) this.cb.onPhotoTarget(bt.dataset.t);
+      });
+      row.appendChild(bt);
+      mk('LOCATE HOME', 'onPhotoHome');
+      mk('SATELLITES', 'onPhotoSats');
+      mk('RESET CAM', 'onPhotoResetCam');
+      this.el.photoUi.appendChild(row);
+      this._poRow = row;
+    }
+    if (this._poRow) this._poRow.style.display = show ? '' : 'none';
   }
   showWelcome(save, withChoices) {
     const s = save;

@@ -1,18 +1,28 @@
-UNIVERSO SEBAS GRANDA — ASSETS OPCIONALES (mejora automática de la Tierra y la Luna)
+UNIVERSO SEBAS GRANDA — ASSETS (V3.4: TRUE EARTH INCLUIDA)
 ====================================================================================
 
-El sitio funciona COMPLETO sin esta carpeta: la Tierra y la Luna se generan
-proceduralmente con geografía real (costas, ciudades reales de noche, mares
-lunares reales). Si quieres el nivel máximo de fidelidad fotográfica, puedes
-añadir imágenes reales de la NASA (dominio público). El código las detecta
-solo — sin tocar nada más — y las usa automáticamente.
+★ V3.4: la Tierra REAL ya viene incluida en assets/earth/ ★
 
-ARCHIVOS QUE EL CÓDIGO BUSCA (nombres exactos):
+  assets/earth/source/    → originales NASA sin modificar (Blue Marble día,
+                            Black Marble noche, Blue Marble Clouds con alfa,
+                            máscara oceánica). Ver ASSET-CREDITS.md §6.
+  assets/earth/runtime/   → derivados optimizados que el código carga por tier:
+                            day-4096/2048/1024.jpg · night-4096/2048/1024.jpg ·
+                            clouds-alpha-2048/1024.png · spec-1024.jpg
+                            (4096 HIGH/ULTRA · 2048 PERF · 1024 MOBILE)
 
-  assets/earth/day.jpg      → NASA Blue Marble (color de la superficie, equirectangular)
-  assets/earth/night.jpg    → NASA Black Marble / Earth at Night (luces de ciudad)
-  assets/earth/clouds.png   → capa de nubes con transparencia (equirectangular)
+NO BORRES assets/earth/runtime/: sin esos archivos la Tierra vuelve al
+fallback procedural y ?qa=v34 lo marcará como ERROR en HIGH/ULTRA.
+
+El resto de esta carpeta sigue siendo OPCIONAL (el sitio funciona completo):
+
+ARCHIVOS OPCIONALES ADICIONALES QUE EL CÓDIGO BUSCA:
+
+  assets/earth/day.jpg      → override legacy de día (prioridad menor que runtime/)
+  assets/earth/night.jpg    → override legacy de noche
+  assets/earth/clouds.png   → override legacy de nubes (con alfa)
   assets/moon.jpg           → NASA LRO / CGI Moon Kit (superficie lunar, equirectangular)
+  assets/audio/voice/       → clips de voz del countdown (ver su README.txt)
 
 DÓNDE DESCARGARLAS (todas dominio público, cortesía NASA):
 

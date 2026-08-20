@@ -22,6 +22,10 @@ const SAFE = qs.get('safe') === '1';
 const DIAG = qs.get('diag') === '1';
 const FAIL_FLAGS = new Set((qs.get('fail') || '').split(',').map((x) => x.trim()).filter(Boolean));
 const SHOT = ['intro', 'facility', 'ignition', 'ascent', 'maxq', 'stageSep', 'stage2', 'fairing', 'orbit', 'earthDeparture25', 'earthDeparture50', 'earthDeparture100', 'hub', 'galaxySelected'].indexOf(qs.get('shot') || '') >= 0 ? qs.get('shot') : null;
+/* V3.4 QA (brief §38): ?qa=v34 activa el panel de saltos + coverage;
+   ?qa=v34&jump=<beat> arranca el salto automáticamente (Playwright). */
+const QA34 = qs.get('qa') === 'v34';
+const QA_JUMP = qs.get('jump') || null;
 
 const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
 const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -137,6 +141,11 @@ const ui = new UI({
   onPhotoToggle() { if (exp) exp.togglePhoto(); },
   onCapture() { if (exp) exp.capture(); },
   onPhotoPreset(k) { if (exp) exp.setPhotoPreset(k); },
+  /* V3.4 photo orbital */
+  onPhotoTarget(k) { if (exp) exp.setPhotoTarget(k); },
+  onPhotoHome() { if (exp) exp.toggleHomeMarker(); },
+  onPhotoSats() { if (exp) exp.toggleSats(); },
+  onPhotoResetCam() { if (exp) exp.photoResetCam(); },
   onSkipIntro() { if (exp) exp.skipIntro(); },
   onSkipFlight() { if (exp) exp.skipFlight(); },
   onCTA() { if (exp) exp.handleCTA(); },
@@ -207,7 +216,7 @@ ui.setSightings(save.celestialSightings.length);
 const returning = save.visits > 1;
 let welcomeChoice = null;         /* 'continue' | 'replay' | 'hub' */
 let welcomeResolve = null;
-const welcomePromise = (returning && !AUTOTEST && !SHOT && !FORCE_LITE && !DIAG)
+const welcomePromise = (returning && !AUTOTEST && !SHOT && !FORCE_LITE && !DIAG && !QA34)
   ? new Promise((res) => { welcomeResolve = res; })
   : Promise.resolve(null);
 if (welcomeResolve) {
@@ -261,7 +270,11 @@ async function vendorLooksReal(url) {
   } catch (e) { return false; }
 }
 async function loadThree() {
-  const local = './vendor/three.module.js?v=' + SG_BUILD_ID;
+  /* V3.4 FIX: el import dinámico resuelve relativo al MÓDULO (js/), no al
+     documento — con './vendor/…' el vendor jamás se importaba (404 silencioso
+     a js/vendor/) y TODO caía al CDN. URL anclada al documento para fetch e
+     import por igual (soporta despliegues en subcarpetas como /pruebas/). */
+  const local = new URL('vendor/three.module.js?v=' + SG_BUILD_ID, document.baseURI).href;
   if (await vendorLooksReal(local)) {
     try {
       const m = await import(/* @vite-ignore */ local);
@@ -465,6 +478,11 @@ async function boot() {
     if (DEBUG) {
       ui.debug('UNIVERSO SG v' + SG_VERSION + ' BUILD ' + SG_BUILD_ID + (safeMode ? ' [SAFE]' : ''));
       ui.qaControls((a) => { if (exp) exp.qa(a); });   /* V3.3 QA buttons */
+    }
+    if (QA34) {
+      import('./qa34.js')
+        .then((m) => { if (exp) exp.attachQA34(m.initQA34(exp, ui, { jump: QA_JUMP })); })
+        .catch((e) => console.error('[SG QA34] module failed', e));
     }
     if (AUTOTEST && safeMode) console.log('[SG TEST] SAFE MODE ACTIVE');
   };

@@ -101,4 +101,11 @@ export const DIAG_ASSETS = [
   { url: 'js/earthworker.js', js: true },
   { url: 'js/boot-diagnostics.js', js: true },
   { url: 'vendor/three.module.js', js: true },
+  /* V3.4 TRUE EARTH: los archivos NASA reales forman parte del contrato */
+  { url: 'js/countdown-voice.js', js: true },
+  { url: 'js/qa34.js', js: true },
+  { url: 'assets/earth/runtime/day-4096.jpg', js: false },
+  { url: 'assets/earth/runtime/night-4096.jpg', js: false },
+  { url: 'assets/earth/runtime/clouds-alpha-2048.png', js: false },
+  { url: 'assets/earth/runtime/spec-1024.jpg', js: false },
 ];

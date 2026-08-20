@@ -40,6 +40,7 @@ const DICT = {
     hint_dbl: '1 CLIC — SELECCIONAR · DOBLE CLIC — ENTRAR',
     hint_dbl_touch: 'TOCA — SELECCIONAR · TOCA DE NUEVO — ENTRAR',
     hint_orbit: 'MIRA ALREDEDOR · ESCANEA LA ÓRBITA',
+    hint_free_orbit: 'WASD MOVER · Q/E VERTICAL · F ENFOCAR TIERRA · R RESET',
     galaxy_locked: 'GALAXY LOCKED',
     galaxy_selected: 'GALAXIA SELECCIONADA',
     /* SG MISSION 001 (narrative layer) */
@@ -141,6 +142,7 @@ const DICT = {
     hint_dbl: 'CLICK — SELECT · DOUBLE CLICK — ENTER',
     hint_dbl_touch: 'TAP — SELECT · TAP AGAIN — ENTER',
     hint_orbit: 'LOOK AROUND · SCAN THE ORBIT',
+    hint_free_orbit: 'WASD MOVE · Q/E VERTICAL · F FOCUS EARTH · R RESET',
     galaxy_locked: 'GALAXY LOCKED',
     galaxy_selected: 'GALAXY SELECTED',
     /* SG MISSION 001 (narrative layer) */

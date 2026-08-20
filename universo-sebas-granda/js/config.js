@@ -1,7 +1,7 @@
 /* UNIVERSO SEBAS GRANDA — configuration (single source of truth) */
 
-export const SG_VERSION = '1.3.0';
-export const SG_BUILD_ID = '20260820-V33-01';   /* changes on EVERY delivery */
+export const SG_VERSION = '1.4.0';
+export const SG_BUILD_ID = '20260820-V34-01';   /* changes on EVERY delivery */
 export const SAVE_KEY = 'sg-mission-save';
 export const WEATHER_CACHE_KEY = 'sg-weather-cache';
 export const SAVE_VERSION = 1;

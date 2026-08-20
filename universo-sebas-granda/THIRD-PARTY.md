@@ -55,3 +55,19 @@ nunca hotlinking en producción (§75).
 - Sin dependencias nuevas en V3.3: staging, cámara Earth-aware, Earth
   Departure, doble clic robusto, anillo de selección y failsafe son código
   propio sobre el stack existente (three r161).
+
+## Nota V3.4
+
+- `three-globe@2.45.2` (MIT, Vasco Asturiano) — NO se integró la librería:
+  solo se extrajeron de su tarball npm las reproducciones de imaginería NASA
+  de dominio público (ver ASSET-CREDITS §6) y se estudiaron sus ejemplos
+  Clouds / Day-Night Cycle / Solar Terminator como referencia de
+  comportamiento. Cero código de three-globe en este proyecto.
+- `bobbyroe/threejs-earth` (MIT) — re-verificado como referencia de capas
+  (day/night/clouds/fresnel). Sus texturas (planetpixelemporium) NO se usan
+  por licencia; las nuestras son NASA de dominio público. Cero código copiado.
+- `vendor/three.module.js` — ahora SÍ incluido físicamente (build oficial
+  0.161.0 desde npm, MIT, sin modificar). Misma versión r161 del proyecto:
+  sin migración de Three.js (brief §46).
+- SpeechSynthesis (Web Speech API) — API estándar del navegador para la voz
+  del countdown; prioridad de clips locales y fallback beep+texto propios.
