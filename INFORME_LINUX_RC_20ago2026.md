@@ -158,6 +158,22 @@ contra el binario de producción. **[HECHO COMPROBADO]** Resultados
 - **Superficie completa:** `./INICIAR.sh --mode offline` → `OFFLINE_READY` (batería 292/2 dentro de
   los hijos aislados reales).
 
+### Rondas 3 y 4 — revisión total del código adoptado y mutaciones
+
+- **[HECHO COMPROBADO]** Revisado el 100 % del diff del bootstrap adoptado del RC (las líneas que
+  faltaban): todo sano, incluido que el marcador `CAPTURA_COMPLETA_AUDITADA.json` sigue al
+  `JEAN_FLOW_STATE_ROOT` (el gate de la fase ML vive con el estado, correcto bajo systemd).
+- **[HECHO COMPROBADO]** Replay de registro sobre el árbol frío del linux.2: sello de spot idéntico al
+  de campo (`e9d8a230…`).
+- **Mutaciones (la disciplina de QA del propio proyecto, aplicada al código nuevo):** las tres
+  mutaciones deliberadas cayeron exactamente donde debían —
+  (1) serie rotada reducida al fichero base → caen 2 pruebas;
+  (2) gate de disco sin la regla del 15 % → cae 1 prueba;
+  (3) **la banda convertida en gate — el comportamiento del RC de ChatGPT — → cae
+  `test_la_calidad_utc_es_informativa_y_nunca_niega_el_gate`**: la decisión del plan rector §6.3 quedó
+  fijada por una prueba y ya no puede reintroducirse en silencio.
+  Árbol restaurado y verificado byte a byte contra el sellado tras el experimento.
+
 ## 5. Qué queda para autorizar de verdad la migración
 
 Sin cambios sobre el plan rector: la Fase 2 en el VPS (chrony real, systemd, red, escalera 10/30/120 con
