@@ -1,0 +1,13 @@
+Coloca aqui las imagenes de los croquis con estos nombres:
+
+  croquis-1.png   Patio Principal
+  croquis-2.png   Patio Inicial
+  croquis-3.png   Futsal
+  croquis-4.png   Comedor Nuevo
+  croquis-5.png   Zona de Kiosko
+  croquis-6.png   Pabellon 3
+  croquis-7.png   Pabellon 2
+  croquis-8.png   Cancha Sintetica
+
+Sirven PNG, JPG o WEBP. Despues escribe la ruta en el arreglo
+UBICACIONES, dentro de index.html.

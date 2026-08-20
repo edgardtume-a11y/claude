@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expociencia 2026 — Croquis interactivo</title>
+<meta name="description" content="Croquis interactivo de Expociencia 2026: ocho ubicaciones navegables desde la pantalla principal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   EXPOCIENCIA 2026 — Croquis interactivo
+   Estructura base con navegacion completa.
+
+   PARA AGREGAR LAS IMAGENES: edita unicamente el arreglo UBICACIONES
+   que esta al final de este archivo (busca "UNICO LUGAR QUE HAY QUE EDITAR").
+   ========================================================================== */
+
+:root{
+  --navy:#12294f;
+  --navy-claro:#1b3f79;
+  --verde:#62a924;
+  --verde-claro:#8bc63f;
+  --verde-osc:#4a8a1c;
+  --panel:#eef2f6;
+  --marco:#ffffff;
+  --sombra:0 18px 46px rgba(18,41,79,.13);
+  --sombra-suave:0 4px 14px rgba(18,41,79,.10);
+}
+
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  min-height:100dvh;
+  background:var(--marco);
+  color:var(--navy);
+  font-family:"Montserrat","Segoe UI",system-ui,-apple-system,sans-serif;
+  overflow:hidden;
+}
+button{font:inherit;color:inherit;}
+
+/* ---------- Fondo compartido por la portada y por los 8 croquis ----------
+   Es una "hoja" recuadrada: marco blanco por fuera, panel gris claro por
+   dentro y las ondas verdes/azules recortadas dentro de ese panel.        */
+.hoja{
+  position:fixed;
+  inset:clamp(9px,1.1vw,20px);
+  z-index:0;
+  overflow:hidden;
+  pointer-events:none;
+  border-radius:clamp(14px,1.8vw,28px);
+  background:var(--panel);
+}
+.hoja .hex{position:absolute;inset:0;width:100%;height:100%;}
+.hoja .esquina{position:absolute;}
+.deco-si{top:0;left:0;width:clamp(140px,22vw,340px);}
+.deco-ii{bottom:0;left:0;width:clamp(170px,29vw,470px);}
+.deco-der{top:0;right:0;height:100%;width:clamp(64px,9vw,150px);}
+.deco-id{bottom:0;right:0;width:clamp(130px,21vw,330px);}
+
+/* ---------- Sistema de pantallas ---------- */
+.pantalla{
+  position:fixed;inset:0;z-index:1;
+  display:none;
+  min-height:100dvh;
+  padding:clamp(22px,3.6vw,60px);
+}
+.pantalla.activa{display:flex;flex-direction:column;animation:entrar .28s ease both;}
+@keyframes entrar{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@media (prefers-reduced-motion:reduce){.pantalla.activa{animation:none;}}
+
+/* ========================= PANTALLA PRINCIPAL ========================= */
+#inicio{align-items:center;justify-content:center;gap:clamp(12px,2.2vh,26px);}
+
+.marca{display:flex;align-items:center;justify-content:center;gap:clamp(8px,2.2vw,40px);width:100%;}
+.marca .icono-lateral{width:clamp(42px,6.4vw,100px);flex:0 0 auto;}
+.titulo-bloque{text-align:center;}
+
+.logotipo{
+  display:flex;align-items:center;justify-content:center;gap:.01em;
+  margin:0;
+  font-weight:900;letter-spacing:-.015em;line-height:.95;
+  font-size:clamp(32px,7.2vw,100px);
+}
+.logotipo .expo{color:var(--navy);}
+.logotipo .ciencia{color:var(--verde);}
+.logotipo .matraz{width:.86em;height:.86em;margin:0 -.015em;flex:0 0 auto;}
+
+.anio-fila{display:flex;align-items:center;justify-content:center;gap:clamp(8px,1.6vw,22px);margin-top:clamp(1px,.5vh,8px);}
+.anio{font-weight:900;color:var(--navy);font-size:clamp(21px,4.4vw,60px);line-height:1;}
+.linea{display:flex;align-items:center;gap:6px;}
+.linea i{display:block;width:clamp(34px,6.4vw,110px);height:3px;border-radius:2px;background:var(--verde);}
+.linea b{display:block;width:9px;height:9px;border-radius:50%;background:var(--verde);}
+
+/* Tarjeta blanca con las 8 ubicaciones */
+.tarjeta{
+  width:min(1080px,100%);
+  background:#fff;
+  border-radius:clamp(16px,1.8vw,26px);
+  padding:clamp(13px,1.9vw,28px);
+  box-shadow:var(--sombra);
+}
+.columnas{
+  display:grid;
+  grid-template-columns:1fr 2px 1fr;
+  gap:clamp(8px,1.1vh,15px) clamp(16px,2.6vw,38px);
+}
+.col{display:flex;flex-direction:column;gap:clamp(8px,1.1vh,15px);}
+.divisor{background:#e2e8f0;border-radius:2px;}
+
+.boton-ubicacion{
+  display:flex;align-items:center;gap:clamp(8px,1.1vw,17px);
+  width:100%;
+  padding:clamp(7px,.8vw,11px);
+  border:2px solid transparent;
+  border-radius:clamp(12px,1.2vw,17px);
+  background:#fff;
+  box-shadow:var(--sombra-suave);
+  cursor:pointer;
+  text-align:left;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.boton-ubicacion:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(18,41,79,.18);}
+.boton-ubicacion:focus-visible{outline:none;border-color:var(--verde);box-shadow:0 0 0 4px rgba(98,169,36,.3);}
+.boton-ubicacion:active{transform:translateY(-1px);}
+
+.num{
+  width:clamp(34px,3.4vw,56px);aspect-ratio:1;flex:0 0 auto;
+  display:grid;place-items:center;
+  border-radius:clamp(9px,1vw,14px);
+  color:#fff;font-weight:900;line-height:1;
+  font-size:clamp(16px,1.9vw,29px);
+}
+.nombre{
+  flex:1;min-width:0;
+  font-weight:700;text-transform:uppercase;letter-spacing:.015em;
+  font-size:clamp(11px,1.3vw,20px);
+}
+.pin{
+  width:clamp(28px,2.8vw,45px);aspect-ratio:1;flex:0 0 auto;
+  display:grid;place-items:center;border-radius:50%;
+  background:var(--verde);
+}
+.pin svg{width:64%;height:64%;}
+
+.pie-marca{display:flex;justify-content:center;align-items:center;gap:clamp(8px,1.4vw,18px);width:100%;}
+.pie-marca .linea i{width:clamp(46px,9vw,170px);height:2px;background:var(--navy);opacity:.5;}
+.pie-marca .linea b{width:7px;height:7px;background:var(--navy);opacity:.5;}
+.pie-marca .atomo{width:clamp(30px,3.6vw,56px);}
+
+/* ========================= PANTALLAS DE CROQUIS ========================= */
+.croquis{gap:clamp(10px,1.6vh,20px);}
+
+.croquis-cabecera{
+  display:flex;align-items:center;gap:clamp(10px,1.4vw,20px);
+  width:min(1240px,100%);margin:0 auto;flex:0 0 auto;
+  padding:clamp(9px,1.1vw,16px) clamp(12px,1.5vw,22px);
+  background:#fff;
+  border-radius:clamp(12px,1.4vw,20px);
+  box-shadow:var(--sombra-suave);
+}
+.croquis-etiqueta{
+  margin:0 0 2px;color:var(--verde-osc);font-weight:700;
+  font-size:clamp(9px,1vw,13px);letter-spacing:.18em;text-transform:uppercase;
+}
+.croquis-titulo{
+  margin:0;font-weight:900;text-transform:uppercase;
+  font-size:clamp(16px,2.5vw,36px);line-height:1.1;
+}
+.croquis-titulo:focus{outline:none;}
+.croquis-nota{
+  margin:5px 0 0;color:#5c6f86;font-weight:600;
+  font-size:clamp(11px,1.15vw,15px);line-height:1.4;
+}
+
+.lienzo{
+  flex:1 1 auto;min-height:0;
+  display:grid;place-items:center;
+  width:min(1240px,100%);margin:0 auto;
+  padding:clamp(8px,1.1vw,16px);
+  background:#fff;
+  border-radius:clamp(14px,1.6vw,24px);
+  box-shadow:var(--sombra);
+  overflow:hidden;
+}
+.lienzo img{display:block;max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;}
+
+.marcador{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  padding:24px;text-align:center;line-height:1.6;
+  border:3px dashed #cbd6e2;border-radius:clamp(12px,1.4vw,20px);
+  color:#7b8ca0;font-weight:600;
+}
+.marcador svg{width:clamp(38px,4.6vw,66px);height:auto;opacity:.5;}
+.marcador strong{display:block;color:var(--navy);font-size:clamp(13px,1.5vw,20px);}
+.marcador code{
+  font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;
+  font-size:clamp(11px,1.15vw,15px);
+  background:var(--panel);border-radius:6px;padding:3px 8px;color:var(--navy);
+}
+
+/* Boton inferior para regresar a la pantalla principal */
+.croquis-pie{flex:0 0 auto;display:flex;justify-content:center;padding-top:clamp(4px,1vh,10px);}
+.btn-volver{
+  display:inline-flex;align-items:center;gap:10px;
+  min-height:46px;
+  padding:clamp(10px,1.1vw,15px) clamp(20px,2.4vw,36px);
+  border:0;border-radius:999px;
+  background:var(--navy);color:#fff;
+  font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+  font-size:clamp(11px,1.15vw,16px);
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(18,41,79,.28);
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+}
+.btn-volver:hover{background:var(--verde);transform:translateY(-2px);box-shadow:0 14px 30px rgba(98,169,36,.34);}
+.btn-volver:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(98,169,36,.45);}
+.btn-volver svg{width:1.15em;height:1.15em;}
+
+/* ---------- Pantallas pequeñas ---------- */
+@media (max-width:760px){
+  body{overflow:auto;}
+  .pantalla{position:static;padding:clamp(18px,5vw,30px);}
+  .marca .icono-lateral{display:none;}
+  .columnas{grid-template-columns:1fr;}
+  .divisor{height:2px;}
+  .pie-marca .linea{display:none;}
+  .croquis{min-height:100dvh;}
+  .lienzo{min-height:46vh;}
+  .deco-der{width:clamp(34px,6vw,80px);}
+  .deco-si{width:clamp(110px,30vw,200px);}
+  .deco-ii{width:clamp(140px,42vw,260px);}
+  .deco-id{width:clamp(100px,30vw,200px);}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Fondo compartido: portada y los 8 croquis usan exactamente este ===== -->
+<div class="hoja" aria-hidden="true">
+  <svg class="hex" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="pHex" width="76" height="88" patternUnits="userSpaceOnUse">
+        <path d="M38 2 71 21v38L38 78 5 59V21z" fill="none" stroke="#12294f" stroke-opacity=".075" stroke-width="1.6"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#pHex)"/>
+  </svg>
+
+  <svg class="esquina deco-si" viewBox="0 0 340 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0h340C244 66 132 132 0 168z" fill="#62a924"/>
+    <path d="M0 24C118 0 236 0 340 0 244 66 132 132 0 168z" fill="#8bc63f" opacity=".55"/>
+    <circle cx="228" cy="24" r="9" fill="#12294f" opacity=".16"/>
+    <circle cx="272" cy="60" r="6" fill="#12294f" opacity=".11"/>
+    <circle cx="44" cy="128" r="7" fill="#12294f" opacity=".13"/>
+  </svg>
+
+  <svg class="esquina deco-ii" viewBox="0 0 470 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 300V88C136 126 300 194 470 300z" fill="#12294f"/>
+    <path d="M0 300V176C116 202 244 242 370 300z" fill="#1b3f79" opacity=".9"/>
+    <path d="M0 300v-54c86 12 172 30 256 54z" fill="#62a924"/>
+  </svg>
+
+  <svg class="esquina deco-der" viewBox="0 0 150 900" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M150 0v900C58 726 58 174 150 0z" fill="#62a924"/>
+    <path d="M150 0v900c-46-176-46-724 0-900z" fill="#8bc63f" opacity=".5"/>
+  </svg>
+
+  <svg class="esquina deco-id" viewBox="0 0 330 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M330 260H96C186 200 268 122 330 22z" fill="#62a924"/>
+    <path d="M330 260H196c54-40 106-92 134-142z" fill="#12294f" opacity=".9"/>
+  </svg>
+</div>
+
+<!-- ============================ PANTALLA PRINCIPAL ============================ -->
+<section id="inicio" class="pantalla activa" aria-labelledby="titulo-evento">
+
+  <div class="marca">
+    <!-- atomo (izquierda) -->
+    <svg class="icono-lateral" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="60" cy="60" rx="52" ry="21" stroke="#12294f" stroke-width="4"/>
+      <ellipse cx="60" cy="60" rx="52" ry="21" stroke="#12294f" stroke-width="4" transform="rotate(60 60 60)"/>
+      <ellipse cx="60" cy="60" rx="52" ry="21" stroke="#62a924" stroke-width="4" transform="rotate(120 60 60)"/>
+      <circle cx="60" cy="60" r="10" fill="#62a924"/>
+      <circle cx="14" cy="72" r="6" fill="#12294f"/>
+      <circle cx="101" cy="40" r="5" fill="#62a924"/>
+    </svg>
+
+    <div class="titulo-bloque">
+      <h1 id="titulo-evento" class="logotipo">
+        <span class="expo">EXP</span>
+        <!-- la "O" es un matraz, igual que en el diseño de referencia -->
+        <svg class="matraz" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="O">
+          <circle cx="50" cy="50" r="45" stroke="#12294f" stroke-width="9"/>
+          <path d="M43 27h14v17l13 21a8 8 0 0 1-7 12H37a8 8 0 0 1-7-12l13-21z" stroke="#12294f" stroke-width="6" stroke-linejoin="round"/>
+          <path d="M35 59h30l5 6a8 8 0 0 1-7 12H37a8 8 0 0 1-7-12z" fill="#62a924"/>
+          <path d="M40 24h20" stroke="#12294f" stroke-width="6" stroke-linecap="round"/>
+        </svg>
+        <span class="ciencia">CIENCIA</span>
+      </h1>
+
+      <div class="anio-fila">
+        <span class="linea" aria-hidden="true"><i></i><b></b></span>
+        <span class="anio">2026</span>
+        <span class="linea" aria-hidden="true"><b></b><i></i></span>
+      </div>
+    </div>
+
+    <!-- bombilla con hoja (derecha) -->
+    <svg class="icono-lateral" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M60 12c-19 0-34 15-34 33 0 13 7 20 12 27 3 4 4 8 4 12h36c0-4 1-8 4-12 5-7 12-14 12-27 0-18-15-33-34-33z" stroke="#62a924" stroke-width="5"/>
+      <path d="M44 96h32M48 108h24" stroke="#62a924" stroke-width="5" stroke-linecap="round"/>
+      <path d="M60 78V50m0 0c0-9 7-16 16-16 0 9-7 16-16 16zm0 8c0-7-6-13-13-13 0 7 6 13 13 13z" stroke="#62a924" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <!-- Los 8 botones se generan desde el arreglo UBICACIONES -->
+  <div class="tarjeta">
+    <div class="columnas">
+      <div class="col" id="col-izq"></div>
+      <div class="divisor" aria-hidden="true"></div>
+      <div class="col" id="col-der"></div>
+    </div>
+  </div>
+
+  <div class="pie-marca" aria-hidden="true">
+    <span class="linea"><i></i><b></b></span>
+    <svg class="atomo" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="60" cy="60" rx="50" ry="20" stroke="#12294f" stroke-width="4"/>
+      <ellipse cx="60" cy="60" rx="50" ry="20" stroke="#12294f" stroke-width="4" transform="rotate(60 60 60)"/>
+      <ellipse cx="60" cy="60" rx="50" ry="20" stroke="#62a924" stroke-width="4" transform="rotate(120 60 60)"/>
+      <circle cx="60" cy="60" r="11" fill="#62a924"/>
+    </svg>
+    <span class="linea"><b></b><i></i></span>
+  </div>
+</section>
+
+<!-- Las 8 pantallas de croquis se generan aqui por JavaScript -->
+
+<script>
+/* ==========================================================================
+   >>>>>>>>>>>>>>>  UNICO LUGAR QUE HAY QUE EDITAR  <<<<<<<<<<<<<<<
+
+   Para cada ubicacion:
+     imagen : ruta del croquis. Dejala en "" mientras no tengas la imagen.
+     nota   : texto opcional que aparece debajo del titulo.
+
+   Ejemplo, cuando ya tengas el croquis 1:
+     { n:1, nombre:"Patio Principal", color:"#1d4ed8",
+       imagen:"img/croquis-1.png", nota:"Stands de robotica y biologia" },
+   ========================================================================== */
+const UBICACIONES = [
+  { n:1, nombre:"Patio Principal",  color:"#1d4ed8", imagen:"", nota:"" },
+  { n:2, nombre:"Patio Inicial",    color:"#0e9488", imagen:"", nota:"" },
+  { n:3, nombre:"Futsal",           color:"#5aa82b", imagen:"", nota:"" },
+  { n:4, nombre:"Comedor Nuevo",    color:"#7c3aed", imagen:"", nota:"" },
+  { n:5, nombre:"Zona de Kiosko",   color:"#f97316", imagen:"", nota:"" },
+  { n:6, nombre:"Pabellón 3",       color:"#eda110", imagen:"", nota:"" },
+  { n:7, nombre:"Pabellón 2",       color:"#ec4899", imagen:"", nota:"" },
+  { n:8, nombre:"Cancha Sintética", color:"#0ea5e9", imagen:"", nota:"" }
+];
+
+/* ------------------------------ Iconos ------------------------------ */
+const ICONO_PIN =
+  '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<path d="M12 22.5s7.3-7.9 7.3-13.1a7.3 7.3 0 1 0-14.6 0C4.7 14.6 12 22.5 12 22.5z" fill="none" stroke="#fff" stroke-width="2"/>' +
+    '<path d="M9.4 6.6 12 7.7l2.6-1.1v6.6L12 14.3l-2.6-1.1z" fill="#fff"/>' +
+    '<path d="M12 7.7v6.6M9.4 6.6v6.6M14.6 6.6v6.6" stroke="#62a924" stroke-width="1"/>' +
+  '</svg>';
+
+const ICONO_FLECHA =
+  '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<path d="M19 12H5m0 0 6-6m-6 6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' +
+  '</svg>';
+
+const ICONO_IMAGEN =
+  '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/>' +
+    '<circle cx="8.5" cy="9.5" r="1.8" stroke="currentColor" stroke-width="1.8"/>' +
+    '<path d="m4 17 5-5 4 4 3-2 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
+  '</svg>';
+
+/* ------------- 1. Botones 1-8 de la pantalla principal ------------- */
+const colIzq = document.getElementById("col-izq");
+const colDer = document.getElementById("col-der");
+
+UBICACIONES.forEach(function (u, i) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "boton-ubicacion";
+  b.dataset.ir = String(u.n);
+  b.setAttribute("aria-label", "Ver croquis " + u.n + ": " + u.nombre);
+  b.innerHTML =
+    '<span class="num" style="background:' + u.color + '">' + u.n + '</span>' +
+    '<span class="nombre">' + u.nombre + '</span>' +
+    '<span class="pin" aria-hidden="true">' + ICONO_PIN + '</span>';
+  (i < 4 ? colIzq : colDer).appendChild(b);
+});
+
+/* ------------- 2. Una pantalla por cada croquis ------------- */
+UBICACIONES.forEach(function (u) {
+  const s = document.createElement("section");
+  s.id = "croquis-" + u.n;
+  s.className = "pantalla croquis";
+  s.setAttribute("aria-labelledby", "titulo-" + u.n);
+
+  const contenido = u.imagen
+    ? '<img src="' + u.imagen + '" alt="Croquis de ' + u.nombre + '">'
+    : marcador(u.n);
+
+  s.innerHTML =
+    '<header class="croquis-cabecera">' +
+      '<span class="num" style="background:' + u.color + '" aria-hidden="true">' + u.n + '</span>' +
+      '<div>' +
+        '<p class="croquis-etiqueta">Ubicación ' + String(u.n).padStart(2, "0") + '</p>' +
+        '<h2 class="croquis-titulo" id="titulo-' + u.n + '" tabindex="-1">' + u.nombre + '</h2>' +
+        (u.nota ? '<p class="croquis-nota">' + u.nota + '</p>' : '') +
+      '</div>' +
+    '</header>' +
+    '<div class="lienzo">' + contenido + '</div>' +
+    '<div class="croquis-pie">' +
+      '<button type="button" class="btn-volver" data-volver>' + ICONO_FLECHA + 'Volver a la pantalla principal</button>' +
+    '</div>';
+
+  document.body.appendChild(s);
+
+  // Si la ruta existe pero el archivo aun no, mostramos el marcador en su lugar.
+  const img = s.querySelector("img");
+  if (img) {
+    img.addEventListener("error", function () {
+      s.querySelector(".lienzo").innerHTML = marcador(u.n);
+    });
+  }
+});
+
+function marcador(n) {
+  return '<div class="marcador">' + ICONO_IMAGEN +
+    '<strong>Croquis pendiente</strong>' +
+    '<span>Guarda la imagen como <code>img/croquis-' + n + '.png</code><br>' +
+    'y escribe esa ruta en <code>UBICACIONES</code>.</span></div>';
+}
+
+/* ------------- 3. Navegacion ------------- */
+const pantallas = document.querySelectorAll(".pantalla");
+
+function mostrar(id) {
+  let destino = document.getElementById(id);
+  if (!destino || !destino.classList.contains("pantalla")) {
+    destino = document.getElementById("inicio");
+    id = "inicio";
+  }
+
+  pantallas.forEach(function (p) { p.classList.remove("activa"); });
+  destino.classList.add("activa");
+  window.scrollTo(0, 0);
+
+  document.title = (id === "inicio")
+    ? "Expociencia 2026 — Croquis interactivo"
+    : destino.querySelector(".croquis-titulo").textContent + " — Expociencia 2026";
+
+  // El foco acompaña a la navegacion (teclado y lector de pantalla).
+  const foco = destino.querySelector(".croquis-titulo") || destino.querySelector("[data-ir]");
+  if (foco) foco.focus({ preventScroll: true });
+}
+
+function irA(id) {
+  // Se navega por hash para que el boton "atras" del navegador y del celular funcionen.
+  if (location.hash.slice(1) === id) mostrar(id);
+  else location.hash = id;
+}
+
+function rutaActual() {
+  mostrar(location.hash.slice(1) || "inicio");
+}
+
+document.addEventListener("click", function (e) {
+  const abrir = e.target.closest("[data-ir]");
+  if (abrir) { irA("croquis-" + abrir.dataset.ir); return; }
+  if (e.target.closest("[data-volver]")) irA("inicio");
+});
+
+// Escape tambien regresa a la pantalla principal.
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape" && location.hash.slice(1) !== "inicio" && location.hash) irA("inicio");
+});
+
+window.addEventListener("hashchange", rutaActual);
+rutaActual();
+</script>
+</body>
+</html>
