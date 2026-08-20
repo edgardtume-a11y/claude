@@ -1,0 +1,1896 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Sobremesa — recetario vivo del mundo hispano: 12 recetas guiadas con temporizadores, escalado de comensales, temporada, técnicas y medidas.">
+<title>Sobremesa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alegreya:ital,wght@0,400..900;1,400..900&family=Spline+Sans+Mono:wght@300..700&display=swap">
+<style>
+/* ============================================================
+   SOBREMESA — recetario vivo del mundo hispano
+   Dirección: azulejo y mercado. Cobalto sobre cerámica.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+img, svg, canvas { max-width: 100%; display: block; }
+button, input, select { font: inherit; color: inherit; }
+
+/* ---------- Tokens: luz de mediodía (tema claro) ---------- */
+:root {
+  --bg: #F2F2EC;
+  --bg-deep: #E9E9E1;
+  --surface: #FBFBF7;
+  --surface-2: #F6F6F0;
+  --ink: #1A2237;
+  --ink-soft: #4C5670;
+  --ink-faint: #7B8299;
+  --line: #D9DACF;
+  --line-strong: #BFC1B2;
+
+  --accent: #2C4E9E;          /* cobalto de azulejo */
+  --accent-strong: #1E3A7C;
+  --accent-ink: #FBFBF7;      /* texto sobre cobalto */
+  --accent-soft: #E3E9F6;     /* lavado cobalto */
+  --azafran: #C97F10;
+  --azafran-soft: #F6EBD4;
+  --pimenton: #B24225;
+  --pimenton-soft: #F4E2DA;
+  --oliva: #5F6E33;
+  --oliva-soft: #E7EAD6;
+
+  --tile: #2C4E9E;            /* motivo azulejo */
+  --tile-dim: rgba(44, 78, 158, 0.16);
+  --plate: #FFFFFF;
+  --plate-shadow: rgba(26, 34, 55, 0.14);
+  --shadow: 0 1px 2px rgba(26,34,55,.05), 0 12px 32px -12px rgba(26,34,55,.18);
+  --shadow-lift: 0 2px 4px rgba(26,34,55,.06), 0 22px 44px -14px rgba(26,34,55,.28);
+  --overlay-veil: rgba(26, 34, 55, 0.46);
+
+  --f-display: "Abril Fatface", "Georgia", serif;
+  --f-body: "Alegreya", "Georgia", serif;
+  --f-mono: "Spline Sans Mono", "Courier New", monospace;
+
+  --radius: 14px;
+  --radius-lg: 22px;
+}
+
+/* ---------- Tokens: cocina de noche (tema oscuro) ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F131C;
+    --bg-deep: #0B0F16;
+    --surface: #161C2A;
+    --surface-2: #1B2233;
+    --ink: #E9EAE1;
+    --ink-soft: #ADB4C6;
+    --ink-faint: #7D849A;
+    --line: #2A3247;
+    --line-strong: #3A4460;
+
+    --accent: #8FA8E0;
+    --accent-strong: #AFC2EC;
+    --accent-ink: #0F131C;
+    --accent-soft: #22304F;
+    --azafran: #E3A94D;
+    --azafran-soft: #33290F;
+    --pimenton: #DE7A57;
+    --pimenton-soft: #391B10;
+    --oliva: #A3B06A;
+    --oliva-soft: #232A10;
+
+    --tile: #7C97D4;
+    --tile-dim: rgba(124, 151, 212, 0.20);
+    --plate: #202839;
+    --plate-shadow: rgba(0, 0, 0, 0.5);
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -12px rgba(0,0,0,.55);
+    --shadow-lift: 0 2px 4px rgba(0,0,0,.35), 0 22px 44px -14px rgba(0,0,0,.65);
+    --overlay-veil: rgba(4, 6, 11, 0.62);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F131C;
+  --bg-deep: #0B0F16;
+  --surface: #161C2A;
+  --surface-2: #1B2233;
+  --ink: #E9EAE1;
+  --ink-soft: #ADB4C6;
+  --ink-faint: #7D849A;
+  --line: #2A3247;
+  --line-strong: #3A4460;
+
+  --accent: #8FA8E0;
+  --accent-strong: #AFC2EC;
+  --accent-ink: #0F131C;
+  --accent-soft: #22304F;
+  --azafran: #E3A94D;
+  --azafran-soft: #33290F;
+  --pimenton: #DE7A57;
+  --pimenton-soft: #391B10;
+  --oliva: #A3B06A;
+  --oliva-soft: #232A10;
+
+  --tile: #7C97D4;
+  --tile-dim: rgba(124, 151, 212, 0.20);
+  --plate: #202839;
+  --plate-shadow: rgba(0, 0, 0, 0.5);
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -12px rgba(0,0,0,.55);
+  --shadow-lift: 0 2px 4px rgba(0,0,0,.35), 0 22px 44px -14px rgba(0,0,0,.65);
+  --overlay-veil: rgba(4, 6, 11, 0.62);
+}
+
+/* ---------- Base ---------- */
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 1.05rem;
+  line-height: 1.68;
+  overflow-x: hidden;
+}
+::selection { background: var(--accent); color: var(--accent-ink); }
+a { color: var(--accent); }
+:focus-visible {
+  outline: 2.5px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px;
+  clip-path: inset(50%); overflow: hidden; white-space: nowrap;
+}
+
+/* ---------- Motivo azulejo (banda de diamantes) ---------- */
+.azulejos {
+  height: 18px;
+  background-image:
+    linear-gradient(135deg, var(--tile) 25%, transparent 25.5%),
+    linear-gradient(225deg, var(--tile) 25%, transparent 25.5%),
+    linear-gradient(45deg,  var(--tile) 25%, transparent 25.5%),
+    linear-gradient(315deg, var(--tile) 25%, transparent 25.5%);
+  background-size: 18px 18px;
+  background-position: 9px 0, 9px 0, 0 0, 0 0;
+  background-repeat: repeat-x;
+  opacity: .9;
+}
+.azulejos.tenue { opacity: .28; height: 14px; background-size: 14px 14px; background-position: 7px 0, 7px 0, 0 0, 0 0; }
+
+.rombo { color: var(--accent); font-style: normal; }
+
+/* ---------- Cabecera ---------- */
+.barra {
+  position: sticky; top: 0; z-index: 60;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.barra-int {
+  max-width: 1160px; margin: 0 auto; padding: 0 20px;
+  display: flex; align-items: center; gap: 18px;
+  height: 60px;
+}
+.marca {
+  font-family: var(--f-display);
+  font-size: 1.35rem;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: .01em;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.marca .rombo { font-size: .8rem; transform: translateY(-2px); display: inline-block; }
+.barra nav { display: flex; gap: 4px; margin-left: 6px; }
+.barra nav a {
+  font-family: var(--f-mono); font-size: .78rem; letter-spacing: .06em;
+  text-transform: uppercase; text-decoration: none;
+  color: var(--ink-soft); padding: 7px 10px; border-radius: 8px;
+}
+.barra nav a:hover { color: var(--accent); background: var(--accent-soft); }
+.barra-acciones { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+.btn-icono {
+  position: relative;
+  border: 1px solid var(--line); background: var(--surface);
+  border-radius: 10px; padding: 7px 11px; cursor: pointer;
+  font-family: var(--f-mono); font-size: .82rem;
+  color: var(--ink-soft);
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.btn-icono:hover { border-color: var(--accent); color: var(--accent); }
+.contador-compra {
+  min-width: 19px; height: 19px; padding: 0 5px;
+  background: var(--pimenton); color: #fff;
+  border-radius: 999px; font-size: .68rem; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.contador-compra[hidden] { display: none; }
+
+/* ---------- Portada ---------- */
+.portada {
+  position: relative;
+  padding: clamp(60px, 9vw, 120px) 20px clamp(48px, 7vw, 96px);
+  text-align: center;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(1100px 480px at 50% -160px, var(--accent-soft), transparent 70%),
+    var(--bg);
+}
+#vapor {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; opacity: .8;
+}
+.portada-int { position: relative; max-width: 880px; margin: 0 auto; }
+.portada-etiqueta {
+  font-family: var(--f-mono); font-size: .8rem; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--accent);
+  display: inline-flex; align-items: center; gap: 12px;
+  margin-bottom: 22px;
+}
+.portada-etiqueta::before, .portada-etiqueta::after {
+  content: "◆"; font-size: .55rem; opacity: .7;
+}
+.portada h1 {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(3.4rem, 11vw, 8rem);
+  line-height: .98;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+.portada h1 .acento { color: var(--accent); }
+.portada-lema {
+  font-size: clamp(1.08rem, 2vw, 1.3rem);
+  font-style: italic;
+  color: var(--ink-soft);
+  max-width: 34em; margin: 0 auto 34px;
+}
+.portada-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+.btn {
+  font-family: var(--f-mono); font-size: .88rem; letter-spacing: .04em;
+  border-radius: 12px; padding: 13px 22px; cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 9px;
+  transition: transform .15s, box-shadow .15s, background .15s, border-color .15s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primario { background: var(--accent); color: var(--accent-ink); box-shadow: var(--shadow); }
+.btn-primario:hover { background: var(--accent-strong); box-shadow: var(--shadow-lift); }
+.btn-secundario { background: var(--surface); color: var(--ink); border-color: var(--line-strong); }
+.btn-secundario:hover { border-color: var(--accent); color: var(--accent); }
+
+.cifras {
+  margin: 52px auto 0; display: flex; justify-content: center;
+  gap: clamp(20px, 5vw, 64px); flex-wrap: wrap;
+}
+.cifra { text-align: center; }
+.cifra b {
+  display: block; font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(1.9rem, 4vw, 2.6rem); color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.cifra span {
+  font-family: var(--f-mono); font-size: .72rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+
+/* ---------- Capítulos ---------- */
+.capitulo { max-width: 1160px; margin: 0 auto; padding: clamp(56px, 8vw, 104px) 20px 0; }
+.capitulo:last-of-type { padding-bottom: clamp(56px, 8vw, 104px); }
+.cap-cabecera { max-width: 720px; margin-bottom: 38px; }
+.cap-etiqueta {
+  font-family: var(--f-mono); font-size: .76rem; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--accent);
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.cap-etiqueta::before { content: "◆"; font-size: .55rem; }
+.cap-cabecera h2 {
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(2rem, 4.6vw, 3.2rem); line-height: 1.08;
+  margin-bottom: 14px;
+}
+.cap-intro { color: var(--ink-soft); max-width: 60ch; }
+
+/* ---------- Filtros del recetario ---------- */
+.filtros {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  padding: 16px; margin-bottom: 26px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow);
+}
+.buscador { position: relative; flex: 1 1 210px; min-width: 180px; }
+.buscador input {
+  width: 100%; padding: 10px 14px 10px 36px;
+  font-family: var(--f-mono); font-size: .86rem;
+  background: var(--surface-2); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 10px;
+}
+.buscador input::placeholder { color: var(--ink-faint); }
+.buscador::before {
+  content: ""; position: absolute; left: 12px; top: 50%;
+  width: 13px; height: 13px; transform: translateY(-62%);
+  border: 2px solid var(--ink-faint); border-radius: 50%;
+}
+.buscador::after {
+  content: ""; position: absolute; left: 23px; top: 58%;
+  width: 7px; height: 2px; background: var(--ink-faint);
+  transform: rotate(45deg); border-radius: 2px;
+}
+.chips { display: flex; gap: 7px; flex-wrap: wrap; }
+.chip {
+  font-family: var(--f-mono); font-size: .78rem; letter-spacing: .03em;
+  padding: 8px 14px; border-radius: 999px; cursor: pointer;
+  background: var(--surface-2); color: var(--ink-soft);
+  border: 1px solid var(--line);
+  transition: background .15s, color .15s, border-color .15s;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip[aria-pressed="true"] {
+  background: var(--accent); color: var(--accent-ink); border-color: var(--accent);
+}
+.filtros select {
+  font-family: var(--f-mono); font-size: .8rem;
+  padding: 9px 12px; border-radius: 10px;
+  background: var(--surface-2); color: var(--ink-soft);
+  border: 1px solid var(--line); cursor: pointer;
+}
+.resultado-linea {
+  font-family: var(--f-mono); font-size: .78rem; color: var(--ink-faint);
+  letter-spacing: .05em; margin: 0 4px 18px;
+}
+
+/* ---------- Rejilla de platos ---------- */
+.rejilla-platos {
+  display: grid; gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+}
+.plato {
+  position: relative;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 26px 22px 20px;
+  cursor: pointer; text-align: left; width: 100%;
+  box-shadow: var(--shadow);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s;
+  display: flex; flex-direction: column; gap: 0;
+}
+.plato:hover { transform: translateY(-5px); box-shadow: var(--shadow-lift); border-color: var(--line-strong); }
+.plato-ceramica {
+  width: 128px; height: 128px; margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--plate);
+  box-shadow:
+    inset 0 0 0 5px var(--plate),
+    inset 0 0 0 7px var(--tile-dim),
+    inset 0 8px 18px -6px var(--plate-shadow),
+    0 10px 22px -10px var(--plate-shadow);
+  display: grid; place-items: center;
+  position: relative;
+}
+.plato-ceramica::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: repeating-conic-gradient(var(--tile) 0deg 4deg, transparent 4deg 12deg);
+  -webkit-mask: radial-gradient(circle, transparent 62%, #000 63%, #000 72%, transparent 73%);
+  mask: radial-gradient(circle, transparent 62%, #000 63%, #000 72%, transparent 73%);
+  opacity: .55;
+}
+.plato-ceramica span { font-size: 3.1rem; line-height: 1; transform: translateY(2px); }
+.plato-region {
+  font-family: var(--f-mono); font-size: .72rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-faint);
+  display: flex; align-items: center; gap: 7px; justify-content: center;
+  margin-bottom: 8px;
+}
+.plato h3 {
+  font-family: var(--f-body); font-weight: 800; font-size: 1.3rem;
+  line-height: 1.25; text-align: center; margin-bottom: 8px;
+}
+.plato-desc {
+  font-size: .95rem; color: var(--ink-soft); text-align: center;
+  flex-grow: 1; margin-bottom: 16px;
+}
+.plato-meta {
+  display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
+  padding-top: 14px; border-top: 1px dashed var(--line);
+}
+.insignia {
+  font-family: var(--f-mono); font-size: .7rem; letter-spacing: .04em;
+  padding: 4px 10px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.insignia-tiempo { background: var(--accent-soft); color: var(--accent); }
+.insignia-facil { background: var(--oliva-soft); color: var(--oliva); }
+.insignia-media { background: var(--azafran-soft); color: var(--azafran); }
+.insignia-elaborada { background: var(--pimenton-soft); color: var(--pimenton); }
+.insignia-veg { background: var(--oliva-soft); color: var(--oliva); }
+.insignia-picante { background: var(--pimenton-soft); color: var(--pimenton); letter-spacing: 0; }
+.sin-resultados {
+  grid-column: 1 / -1; text-align: center; padding: 56px 20px;
+  color: var(--ink-faint); font-style: italic;
+}
+.sin-resultados b { font-family: var(--f-display); font-weight: 400; font-style: normal; display: block; font-size: 1.6rem; color: var(--ink-soft); margin-bottom: 8px; }
+
+/* ---------- Ficha de receta (overlay) ---------- */
+.velo {
+  position: fixed; inset: 0; z-index: 80;
+  background: var(--overlay-veil);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .22s ease;
+}
+.velo.abierto { opacity: 1; pointer-events: auto; }
+
+.ficha {
+  position: fixed; z-index: 90;
+  inset: 0;
+  margin: auto;
+  width: min(1020px, calc(100% - 24px));
+  height: min(92vh, 900px);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lift);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+.ficha.abierta { display: flex; }
+.ficha-scroll { overflow-y: auto; overscroll-behavior: contain; flex: 1; }
+
+.ficha-cabecera {
+  position: relative;
+  padding: 34px clamp(20px, 5vw, 48px) 26px;
+  background:
+    radial-gradient(700px 260px at 18% -80px, var(--accent-soft), transparent 70%),
+    var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.ficha-cerrar {
+  position: absolute; top: 14px; right: 14px; z-index: 5;
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid var(--line-strong); background: var(--surface);
+  color: var(--ink-soft); cursor: pointer; font-size: 1rem;
+  display: grid; place-items: center;
+}
+.ficha-cerrar:hover { color: var(--pimenton); border-color: var(--pimenton); }
+.ficha-cab-int { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; }
+.ficha-cab-int .plato-ceramica { width: 108px; height: 108px; margin: 0; flex-shrink: 0; }
+.ficha-cab-int .plato-ceramica span { font-size: 2.6rem; }
+.ficha-titulos { flex: 1; min-width: 240px; }
+.ficha-region {
+  font-family: var(--f-mono); font-size: .74rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+  display: flex; gap: 8px; align-items: center;
+}
+.ficha h2 {
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.05;
+  margin-bottom: 10px;
+}
+.ficha-desc { font-style: italic; color: var(--ink-soft); max-width: 52ch; }
+.ficha-insignias { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+
+.ficha-cuerpo {
+  display: grid; grid-template-columns: 340px 1fr;
+  gap: clamp(24px, 4vw, 44px);
+  padding: 30px clamp(20px, 5vw, 48px) 44px;
+  align-items: start;
+}
+
+/* Ingredientes */
+.despensa {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: 22px;
+  position: sticky; top: 18px;
+}
+.despensa h3, .cuaderno h3 {
+  font-family: var(--f-mono); font-size: .78rem; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--accent);
+  display: flex; align-items: center; gap: 9px; margin-bottom: 16px;
+}
+.despensa h3::before, .cuaderno h3::before { content: "◆"; font-size: .5rem; }
+.comensales {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 12px; padding: 8px 12px; margin-bottom: 16px;
+}
+.comensales button {
+  width: 32px; height: 32px; border-radius: 9px; cursor: pointer;
+  border: 1px solid var(--line-strong); background: var(--surface);
+  font-family: var(--f-mono); font-size: 1rem; color: var(--ink);
+}
+.comensales button:hover { border-color: var(--accent); color: var(--accent); }
+.comensales output {
+  flex: 1; text-align: center; font-family: var(--f-mono);
+  font-size: .86rem; color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.comensales output b { font-size: 1.15rem; }
+.lista-ingredientes { list-style: none; margin: 0 0 18px; padding: 0; }
+.lista-ingredientes li { border-bottom: 1px dashed var(--line); }
+.lista-ingredientes li:last-child { border-bottom: none; }
+.lista-ingredientes label {
+  display: flex; gap: 10px; align-items: baseline;
+  padding: 8px 2px; cursor: pointer; font-size: .96rem;
+}
+.lista-ingredientes input[type="checkbox"] {
+  accent-color: var(--accent); width: 15px; height: 15px;
+  transform: translateY(2px); flex-shrink: 0; cursor: pointer;
+}
+.lista-ingredientes input:checked ~ .ing-nombre { text-decoration: line-through; color: var(--ink-faint); }
+.ing-cant {
+  font-family: var(--f-mono); font-size: .8rem; color: var(--accent);
+  min-width: 74px; text-align: right; font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.ing-nombre { color: var(--ink); }
+.ing-nombre small { color: var(--ink-faint); font-style: italic; }
+.despensa-acciones { display: flex; flex-direction: column; gap: 9px; }
+.despensa-acciones .btn { justify-content: center; padding: 11px 16px; font-size: .82rem; }
+
+/* Pasos */
+.cuaderno { min-width: 0; }
+.pasos { list-style: none; margin: 0; padding: 0; counter-reset: paso; }
+.paso {
+  display: flex; gap: 16px; padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  counter-increment: paso;
+}
+.paso:last-child { border-bottom: none; }
+.paso-num {
+  font-family: var(--f-display); font-size: 1.5rem; color: var(--tile-dim);
+  min-width: 40px; line-height: 1.1; user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+.paso.hecho .paso-num { color: var(--oliva); }
+.paso-cuerpo { flex: 1; }
+.paso-cuerpo label { display: flex; gap: 10px; cursor: pointer; align-items: baseline; }
+.paso-cuerpo input[type="checkbox"] {
+  accent-color: var(--oliva); width: 16px; height: 16px;
+  transform: translateY(3px); flex-shrink: 0; cursor: pointer;
+}
+.paso.hecho .paso-texto { color: var(--ink-faint); }
+.paso-extra { margin-top: 10px; margin-left: 26px; }
+
+.timer-chip {
+  font-family: var(--f-mono); font-size: .78rem;
+  padding: 7px 14px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent);
+  display: inline-flex; align-items: center; gap: 8px;
+  font-variant-numeric: tabular-nums;
+  transition: background .15s;
+}
+.timer-chip:hover { background: var(--accent); color: var(--accent-ink); }
+.timer-chip.corriendo { background: var(--accent); color: var(--accent-ink); }
+.timer-chip.fin { background: var(--pimenton); border-color: var(--pimenton); color: #fff; animation: parpadeo 1s ease infinite; }
+@keyframes parpadeo { 50% { opacity: .55; } }
+
+.saber-mas { margin-top: 34px; display: grid; gap: 18px; }
+.nota {
+  background: var(--surface); border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 12px; padding: 18px 20px;
+}
+.nota.nota-azafran { border-left-color: var(--azafran); }
+.nota.nota-oliva { border-left-color: var(--oliva); }
+.nota h4 {
+  font-family: var(--f-mono); font-size: .72rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 9px;
+}
+.nota ul { margin: 0; padding-left: 18px; }
+.nota li { margin-bottom: 6px; font-size: .97rem; }
+.nota li:last-child { margin-bottom: 0; }
+.nota p { font-size: .97rem; }
+
+/* ---------- Modo cocina ---------- */
+.modo-cocina {
+  position: absolute; inset: 0; z-index: 10;
+  background: var(--bg);
+  display: none; flex-direction: column;
+}
+.modo-cocina.activo { display: flex; }
+.mc-barra {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px clamp(18px, 4vw, 36px);
+  border-bottom: 1px solid var(--line);
+}
+.mc-barra .progreso {
+  flex: 1; height: 6px; border-radius: 99px; background: var(--line);
+  overflow: hidden;
+}
+.mc-barra .progreso i {
+  display: block; height: 100%; background: var(--accent);
+  border-radius: 99px; transition: width .25s ease;
+}
+.mc-contador { font-family: var(--f-mono); font-size: .8rem; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.mc-centro {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  padding: 20px clamp(22px, 6vw, 64px); gap: 22px; overflow-y: auto;
+}
+.mc-paso-num {
+  font-family: var(--f-display); font-size: clamp(2.4rem, 6vw, 4rem);
+  color: var(--tile-dim); line-height: 1;
+}
+.mc-texto {
+  font-size: clamp(1.25rem, 2.6vw, 1.75rem); line-height: 1.5;
+  max-width: 26em;
+}
+.mc-timer { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.mc-timer-num {
+  font-family: var(--f-mono); font-weight: 600;
+  font-size: clamp(2.6rem, 7vw, 4.4rem);
+  color: var(--accent); font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+}
+.mc-timer-num.fin { color: var(--pimenton); animation: parpadeo 1s ease infinite; }
+.mc-pies {
+  display: flex; gap: 12px; padding: 18px clamp(18px, 4vw, 36px) 26px;
+  border-top: 1px solid var(--line);
+}
+.mc-pies .btn { flex: 1; justify-content: center; }
+
+/* ---------- Sorpresa (¿qué cocino hoy?) ---------- */
+.modal-sorpresa {
+  position: fixed; z-index: 95; inset: 0; margin: auto;
+  width: min(560px, calc(100% - 28px)); height: fit-content;
+  max-height: 90vh; overflow-y: auto;
+  background: var(--bg); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lift);
+  display: none; padding: 36px clamp(22px, 5vw, 44px) 38px;
+  text-align: center;
+}
+.modal-sorpresa.abierta { display: block; }
+.modal-sorpresa h2 {
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(1.6rem, 4vw, 2.2rem); margin-bottom: 8px;
+}
+.modal-sorpresa .sub { color: var(--ink-soft); font-style: italic; margin-bottom: 24px; }
+.sorpresa-grupo { margin-bottom: 20px; }
+.sorpresa-grupo h3 {
+  font-family: var(--f-mono); font-size: .72rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 10px;
+}
+.sorpresa-grupo .chips { justify-content: center; }
+.ruleta {
+  height: 108px; margin: 8px 0 18px;
+  display: grid; place-items: center;
+  font-size: 3.6rem;
+  background: var(--surface); border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+}
+.sorpresa-resultado { margin-bottom: 18px; display: none; }
+.sorpresa-resultado.visible { display: block; }
+.sorpresa-resultado h4 { font-family: var(--f-body); font-weight: 800; font-size: 1.35rem; margin-bottom: 4px; }
+.sorpresa-resultado p { color: var(--ink-soft); font-size: .95rem; font-style: italic; }
+.sorpresa-acciones { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ---------- Temporada ---------- */
+.meses {
+  display: flex; gap: 7px; overflow-x: auto; padding: 4px 2px 14px;
+  scrollbar-width: thin;
+}
+.meses .chip { flex-shrink: 0; }
+.temporada-panel {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow);
+}
+.productos {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  margin-bottom: 22px;
+}
+.producto {
+  display: flex; align-items: center; gap: 11px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 12px; padding: 11px 14px;
+}
+.producto .em { font-size: 1.5rem; }
+.producto b { display: block; font-size: .95rem; line-height: 1.25; }
+.producto small {
+  font-family: var(--f-mono); font-size: .64rem; letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.producto.fruta small { color: var(--azafran); }
+.producto.verdura small { color: var(--oliva); }
+.consejo-mercado {
+  display: flex; gap: 12px; align-items: baseline;
+  border-top: 1px dashed var(--line); padding-top: 18px;
+  color: var(--ink-soft); font-style: italic;
+}
+.consejo-mercado::before {
+  content: "◆"; color: var(--azafran); font-style: normal; font-size: .6rem;
+  transform: translateY(-2px);
+}
+
+/* ---------- Técnicas ---------- */
+.rejilla-tecnicas {
+  display: grid; gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+.tecnica {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: 24px;
+  box-shadow: var(--shadow);
+}
+.tecnica h3 {
+  font-family: var(--f-body); font-weight: 800; font-size: 1.2rem;
+  margin-bottom: 10px; display: flex; gap: 10px; align-items: baseline;
+}
+.tecnica h3::before { content: "◆"; color: var(--accent); font-size: .55rem; transform: translateY(-2px); }
+.tecnica p { font-size: .96rem; color: var(--ink-soft); margin-bottom: 12px; }
+.tecnica ul { margin: 0; padding: 0; list-style: none; }
+.tecnica li {
+  font-size: .9rem; padding: 6px 0 6px 18px; position: relative;
+  border-top: 1px dashed var(--line);
+}
+.tecnica li::before {
+  content: ""; position: absolute; left: 2px; top: 14px;
+  width: 7px; height: 7px; transform: rotate(45deg);
+  background: var(--azafran); border-radius: 1px;
+}
+
+/* ---------- Medidas ---------- */
+.rejilla-medidas {
+  display: grid; gap: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  align-items: start;
+}
+.util {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow);
+}
+.util h3 {
+  font-family: var(--f-mono); font-size: .76rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+  display: flex; gap: 9px; align-items: center;
+}
+.util h3::before { content: "◆"; font-size: .5rem; }
+.util-fila { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.util-fila > * { flex: 1; min-width: 90px; }
+.util input, .util select {
+  padding: 10px 12px; border-radius: 10px;
+  font-family: var(--f-mono); font-size: .86rem;
+  background: var(--surface-2); color: var(--ink);
+  border: 1px solid var(--line); width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.util-resultado {
+  font-family: var(--f-mono); font-size: 1.05rem; color: var(--ink);
+  background: var(--accent-soft); border-radius: 10px;
+  padding: 13px 16px; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.util-resultado b { color: var(--accent); font-size: 1.3rem; }
+.util-resultado small { display: block; font-size: .72rem; color: var(--ink-soft); letter-spacing: .06em; margin-top: 3px; }
+.tabla-scroll { overflow-x: auto; }
+.util table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.util th {
+  font-family: var(--f-mono); font-size: .68rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-faint);
+  text-align: left; padding: 7px 10px 9px; border-bottom: 2px solid var(--line-strong);
+  white-space: nowrap;
+}
+.util td {
+  padding: 8px 10px; border-bottom: 1px dashed var(--line);
+  font-variant-numeric: tabular-nums;
+}
+.util tr:last-child td { border-bottom: none; }
+.util td.num { font-family: var(--f-mono); font-size: .82rem; color: var(--accent); white-space: nowrap; }
+.equivalencias-lista { list-style: none; margin: 0; padding: 0; }
+.equivalencias-lista li {
+  display: flex; justify-content: space-between; gap: 14px; align-items: baseline;
+  padding: 9px 2px; border-bottom: 1px dashed var(--line);
+  font-size: .93rem;
+}
+.equivalencias-lista li:last-child { border-bottom: none; }
+.equivalencias-lista b { font-family: var(--f-mono); font-size: .82rem; font-weight: 600; color: var(--accent); text-align: right; }
+
+/* ---------- Lista de la compra (cajón) ---------- */
+.cajon {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 90;
+  width: min(420px, 100%);
+  background: var(--bg); border-left: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-lift);
+  transform: translateX(102%);
+  transition: transform .28s cubic-bezier(.22,.8,.36,1);
+  display: flex; flex-direction: column;
+}
+.cajon.abierto { transform: translateX(0); }
+.cajon-cabecera {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px 22px; border-bottom: 1px solid var(--line);
+}
+.cajon-cabecera h2 { font-family: var(--f-display); font-weight: 400; font-size: 1.5rem; flex: 1; }
+.cajon-cuerpo { flex: 1; overflow-y: auto; padding: 18px 22px; }
+.compra-grupo { margin-bottom: 22px; }
+.compra-grupo h3 {
+  font-family: var(--f-mono); font-size: .72rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+  display: flex; gap: 8px; align-items: center;
+}
+.compra-grupo h3::before { content: "◆"; font-size: .5rem; }
+.compra-grupo ul { list-style: none; margin: 0; padding: 0; }
+.compra-grupo li { border-bottom: 1px dashed var(--line); }
+.compra-grupo label {
+  display: flex; gap: 10px; align-items: baseline; padding: 8px 2px;
+  cursor: pointer; font-size: .95rem;
+}
+.compra-grupo input { accent-color: var(--oliva); transform: translateY(2px); cursor: pointer; }
+.compra-grupo input:checked ~ span { text-decoration: line-through; color: var(--ink-faint); }
+.compra-grupo .ing-cant { min-width: 64px; }
+.compra-vacia { text-align: center; color: var(--ink-faint); font-style: italic; padding: 48px 18px; }
+.compra-vacia .em { font-size: 2.6rem; display: block; margin-bottom: 12px; font-style: normal; }
+.cajon-pie { padding: 16px 22px 20px; border-top: 1px solid var(--line); display: flex; gap: 10px; }
+.cajon-pie .btn { flex: 1; justify-content: center; font-size: .8rem; padding: 11px 12px; }
+
+/* ---------- Avisos (toast) ---------- */
+.avisos {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+  z-index: 120; display: flex; flex-direction: column; gap: 8px;
+  align-items: center; pointer-events: none; width: max-content; max-width: calc(100vw - 32px);
+}
+.aviso {
+  font-family: var(--f-mono); font-size: .82rem;
+  background: var(--ink); color: var(--bg);
+  padding: 11px 20px; border-radius: 999px;
+  box-shadow: var(--shadow-lift);
+  animation: aviso-sube .25s ease;
+  max-width: 100%;
+}
+@keyframes aviso-sube { from { opacity: 0; transform: translateY(10px); } }
+
+/* ---------- Pie ---------- */
+.pie {
+  border-top: 1px solid var(--line);
+  margin-top: clamp(56px, 8vw, 104px);
+  background: var(--bg-deep);
+}
+.pie-int {
+  max-width: 1160px; margin: 0 auto; padding: 44px 20px 52px;
+  display: flex; flex-wrap: wrap; gap: 26px; align-items: baseline;
+  justify-content: space-between;
+}
+.pie .marca { font-size: 1.6rem; }
+.pie-nota { color: var(--ink-faint); font-style: italic; font-size: .93rem; }
+.pie-nota b { color: var(--ink-soft); font-weight: 600; }
+
+/* ---------- Aparición al hacer scroll ---------- */
+.aparece { opacity: 0; transform: translateY(18px); transition: opacity .55s ease, transform .55s ease; }
+.aparece.visto { opacity: 1; transform: none; }
+
+/* ---------- Impresión ---------- */
+@media print {
+  .barra, .portada, .capitulo, .pie, .azulejos, .cajon, .avisos, .velo, .modal-sorpresa { display: none !important; }
+  .ficha { position: static; width: auto; height: auto; border: none; box-shadow: none; display: block !important; }
+  .ficha-scroll { overflow: visible; }
+  .ficha-cerrar, .despensa-acciones, .timer-chip, .comensales button, .modo-cocina { display: none !important; }
+  .ficha-cuerpo { grid-template-columns: 1fr; }
+  .despensa { position: static; }
+  body { background: #fff; color: #000; }
+}
+
+/* ---------- Movimiento reducido ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .aparece { opacity: 1; transform: none; }
+  #vapor { display: none; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .ficha-cuerpo { grid-template-columns: 1fr; }
+  .despensa { position: static; }
+  .barra nav { display: none; }
+}
+@media (max-width: 560px) {
+  .barra-int { gap: 10px; }
+  .btn-icono .btn-texto { display: none; }
+  .ficha { width: calc(100% - 12px); height: 94vh; }
+  .cifras { gap: 18px; }
+}
+
+</style>
+</head>
+<body>
+<header class="barra">
+  <div class="barra-int">
+    <a class="marca" href="#inicio"><i class="rombo">◆</i>Sobremesa</a>
+    <nav aria-label="Secciones">
+      <a href="#recetario">Recetario</a>
+      <a href="#temporada">Temporada</a>
+      <a href="#tecnicas">Técnicas</a>
+      <a href="#medidas">Medidas</a>
+    </nav>
+    <div class="barra-acciones">
+      <button class="btn-icono" id="btn-abrir-compra" aria-label="Abrir lista de la compra">
+        🧺 <span class="btn-texto">La compra</span>
+        <span class="contador-compra" id="contador-compra" hidden>0</span>
+      </button>
+      <button class="btn-icono" id="btn-tema" aria-label="Cambiar tema de color">
+        <span id="tema-icono">◐</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="inicio">
+  <!-- ================= PORTADA ================= -->
+  <section class="portada">
+    <canvas id="vapor" aria-hidden="true"></canvas>
+    <div class="portada-int">
+      <p class="portada-etiqueta">Recetario vivo del mundo hispano</p>
+      <h1>Sobre<span class="acento">mesa</span></h1>
+      <p class="portada-lema">Lo que pasa en la mesa cuando ya no queda comida y nadie quiere levantarse. Doce recetas de siete países, contadas como se cuentan en casa: con historia, con truco y con tiempo.</p>
+      <div class="portada-cta">
+        <button class="btn btn-primario" id="btn-sorpresa">🍳 ¿Qué cocino hoy?</button>
+        <a class="btn btn-secundario" href="#recetario">Abrir el recetario ↓</a>
+      </div>
+      <div class="cifras" aria-label="La cocina en cifras">
+        <div class="cifra"><b id="cifra-recetas">12</b><span>recetas</span></div>
+        <div class="cifra"><b id="cifra-paises">7</b><span>países</span></div>
+        <div class="cifra"><b id="cifra-pasos">100+</b><span>pasos guiados</span></div>
+        <div class="cifra"><b>0</b><span>excusas</span></div>
+      </div>
+    </div>
+  </section>
+  <div class="azulejos" aria-hidden="true"></div>
+
+  <!-- ================= RECETARIO ================= -->
+  <section class="capitulo" id="recetario">
+    <div class="cap-cabecera aparece">
+      <p class="cap-etiqueta">El recetario</p>
+      <h2>Platos que cruzaron el océano</h2>
+      <p class="cap-intro">Cada ficha trae la receta completa: ingredientes que se escalan a tus comensales, pasos con temporizador, la historia del plato y los trucos que no vienen en los libros. Abre un plato y cocina con la página al lado.</p>
+    </div>
+
+    <div class="filtros aparece" role="search" aria-label="Filtrar recetas">
+      <div class="buscador">
+        <input type="search" id="buscador" placeholder="Buscar plato o ingrediente…" aria-label="Buscar plato o ingrediente">
+      </div>
+      <div class="chips" id="chips-categoria" role="group" aria-label="Categoría">
+        <button class="chip" data-cat="Todas" aria-pressed="true">Todas</button>
+        <button class="chip" data-cat="Entrante" aria-pressed="false">Entrantes</button>
+        <button class="chip" data-cat="Principal" aria-pressed="false">Principales</button>
+        <button class="chip" data-cat="Postre" aria-pressed="false">Postres</button>
+      </div>
+      <select id="filtro-pais" aria-label="Filtrar por país">
+        <option value="">Todos los países</option>
+      </select>
+      <select id="filtro-dificultad" aria-label="Filtrar por dificultad">
+        <option value="">Cualquier dificultad</option>
+        <option value="Fácil">Fácil</option>
+        <option value="Media">Media</option>
+        <option value="Elaborada">Elaborada</option>
+      </select>
+      <div class="chips">
+        <button class="chip" id="chip-veg" aria-pressed="false">🌿 Vegetarianas</button>
+        <button class="chip" id="chip-rapidas" aria-pressed="false">⏱ Menos de 45′</button>
+      </div>
+    </div>
+
+    <p class="resultado-linea" id="resultado-linea" aria-live="polite"></p>
+    <div class="rejilla-platos" id="rejilla-platos"></div>
+  </section>
+
+  <!-- ================= TEMPORADA ================= -->
+  <section class="capitulo" id="temporada">
+    <div class="cap-cabecera aparece">
+      <p class="cap-etiqueta">El mercado</p>
+      <h2>Lo que la temporada manda</h2>
+      <p class="cap-intro">Cocinar bien empieza comprando bien. Esto es lo que está en su mejor momento cada mes — más sabor, mejor precio y menos viaje hasta tu cocina.</p>
+    </div>
+    <div class="meses" id="meses" role="tablist" aria-label="Elegir mes"></div>
+    <div class="temporada-panel aparece">
+      <div class="productos" id="productos"></div>
+      <p class="consejo-mercado" id="consejo-mercado"></p>
+    </div>
+  </section>
+
+  <!-- ================= TÉCNICAS ================= -->
+  <section class="capitulo" id="tecnicas">
+    <div class="cap-cabecera aparece">
+      <p class="cap-etiqueta">El oficio</p>
+      <h2>Técnicas que sostienen todo lo demás</h2>
+      <p class="cap-intro">Ocho gestos que se repiten en casi todas las recetas de este cuaderno. Domínalos una vez y te sirven para siempre.</p>
+    </div>
+    <div class="rejilla-tecnicas" id="rejilla-tecnicas"></div>
+  </section>
+
+  <!-- ================= MEDIDAS ================= -->
+  <section class="capitulo" id="medidas">
+    <div class="cap-cabecera aparece">
+      <p class="cap-etiqueta">La báscula</p>
+      <h2>Medidas sin misterio</h2>
+      <p class="cap-intro">Para cuando la receta habla en tazas y tu cocina habla en gramos. Convierte, consulta y sigue cocinando.</p>
+    </div>
+    <div class="rejilla-medidas">
+      <div class="util aparece">
+        <h3>De tazas a gramos</h3>
+        <div class="util-fila">
+          <input type="number" id="conv-cantidad" value="1" min="0" step="0.25" aria-label="Cantidad">
+          <select id="conv-unidad" aria-label="Unidad">
+            <option value="taza">tazas (250 ml)</option>
+            <option value="cda">cucharadas (15 ml)</option>
+          </select>
+        </div>
+        <div class="util-fila">
+          <select id="conv-ingrediente" aria-label="Ingrediente"></select>
+        </div>
+        <p class="util-resultado" id="conv-resultado" aria-live="polite"></p>
+      </div>
+      <div class="util aparece">
+        <h3>Horno: °C ↔ °F</h3>
+        <div class="util-fila">
+          <input type="number" id="temp-c" value="180" step="5" aria-label="Grados Celsius">
+          <input type="number" id="temp-f" value="356" step="5" aria-label="Grados Fahrenheit">
+        </div>
+        <p class="util-resultado" id="temp-resultado" aria-live="polite"></p>
+        <div class="tabla-scroll" style="margin-top:16px">
+          <table>
+            <thead><tr><th>Horno</th><th>°C</th><th>°F</th><th>Gas</th><th>Para</th></tr></thead>
+            <tbody id="tabla-temperaturas"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="util aparece">
+        <h3>Equivalencias rápidas</h3>
+        <ul class="equivalencias-lista" id="lista-equivalencias"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ================= PIE ================= -->
+<footer class="pie">
+  <div class="azulejos tenue" aria-hidden="true"></div>
+  <div class="pie-int">
+    <span class="marca"><i class="rombo">◆</i>Sobremesa</span>
+    <p class="pie-nota">Hecho a fuego lento. <b>Las buenas recetas se comparten</b> — como la mesa.</p>
+  </div>
+</footer>
+
+<!-- ================= VELO + FICHA DE RECETA ================= -->
+<div class="velo" id="velo"></div>
+
+<article class="ficha" id="ficha" role="dialog" aria-modal="true" aria-labelledby="ficha-titulo">
+  <button class="ficha-cerrar" id="ficha-cerrar" aria-label="Cerrar receta">✕</button>
+  <div class="ficha-scroll" id="ficha-scroll">
+    <header class="ficha-cabecera">
+      <div class="ficha-cab-int">
+        <div class="plato-ceramica" aria-hidden="true"><span id="ficha-emoji"></span></div>
+        <div class="ficha-titulos">
+          <p class="ficha-region" id="ficha-region"></p>
+          <h2 id="ficha-titulo"></h2>
+          <p class="ficha-desc" id="ficha-desc"></p>
+          <div class="ficha-insignias" id="ficha-insignias"></div>
+        </div>
+      </div>
+    </header>
+    <div class="ficha-cuerpo">
+      <aside class="despensa">
+        <h3>La despensa</h3>
+        <div class="comensales">
+          <button id="menos-comensales" aria-label="Un comensal menos">−</button>
+          <output id="num-comensales" aria-live="polite"></output>
+          <button id="mas-comensales" aria-label="Un comensal más">+</button>
+        </div>
+        <ul class="lista-ingredientes" id="lista-ingredientes"></ul>
+        <div class="despensa-acciones">
+          <button class="btn btn-primario" id="btn-a-compra">🧺 Añadir a la compra</button>
+          <button class="btn btn-secundario" id="btn-modo-cocina">👨‍🍳 Modo cocina</button>
+          <button class="btn btn-secundario" id="btn-imprimir">🖨 Imprimir ficha</button>
+        </div>
+      </aside>
+      <div class="cuaderno">
+        <h3>Manos a la obra</h3>
+        <ol class="pasos" id="pasos"></ol>
+        <div class="saber-mas">
+          <div class="nota"><h4>De dónde viene</h4><p id="ficha-historia"></p></div>
+          <div class="nota nota-azafran"><h4>Trucos de oficio</h4><ul id="ficha-consejos"></ul></div>
+          <div class="nota nota-oliva"><h4>Y si un día cambias</h4><ul id="ficha-variaciones"></ul></div>
+          <div class="nota"><h4>Para acompañar</h4><p id="ficha-maridaje"></p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modo cocina -->
+  <div class="modo-cocina" id="modo-cocina">
+    <div class="mc-barra">
+      <span class="mc-contador" id="mc-contador"></span>
+      <div class="progreso"><i id="mc-progreso" style="width:0%"></i></div>
+      <button class="btn-icono" id="mc-salir">✕ Salir</button>
+    </div>
+    <div class="mc-centro">
+      <div class="mc-paso-num" id="mc-paso-num"></div>
+      <p class="mc-texto" id="mc-texto"></p>
+      <div class="mc-timer" id="mc-timer" hidden>
+        <span class="mc-timer-num" id="mc-timer-num"></span>
+        <button class="btn btn-secundario" id="mc-timer-btn">▶ Empezar</button>
+      </div>
+    </div>
+    <div class="mc-pies">
+      <button class="btn btn-secundario" id="mc-anterior">← Anterior</button>
+      <button class="btn btn-primario" id="mc-siguiente">Siguiente →</button>
+    </div>
+  </div>
+</article>
+
+<!-- ================= SORPRESA ================= -->
+<div class="modal-sorpresa" id="modal-sorpresa" role="dialog" aria-modal="true" aria-labelledby="sorpresa-titulo">
+  <h2 id="sorpresa-titulo">¿Qué cocino hoy?</h2>
+  <p class="sub">Dime cuánto tiempo tienes y la cocina decide por ti.</p>
+  <div class="sorpresa-grupo">
+    <h3>Tiempo disponible</h3>
+    <div class="chips" id="sorpresa-tiempo">
+      <button class="chip" data-min="30" aria-pressed="false">Media hora</button>
+      <button class="chip" data-min="60" aria-pressed="true">Una hora</button>
+      <button class="chip" data-min="9999" aria-pressed="false">Sin prisa</button>
+    </div>
+  </div>
+  <div class="sorpresa-grupo">
+    <h3>Me apetece…</h3>
+    <div class="chips" id="sorpresa-tipo">
+      <button class="chip" data-tipo="" aria-pressed="true">Lo que sea</button>
+      <button class="chip" data-tipo="Entrante" aria-pressed="false">Entrante</button>
+      <button class="chip" data-tipo="Principal" aria-pressed="false">Principal</button>
+      <button class="chip" data-tipo="Postre" aria-pressed="false">Postre</button>
+    </div>
+  </div>
+  <div class="ruleta" id="ruleta" aria-hidden="true">🍲</div>
+  <div class="sorpresa-resultado" id="sorpresa-resultado" aria-live="polite">
+    <h4 id="sorpresa-nombre"></h4>
+    <p id="sorpresa-desc"></p>
+  </div>
+  <div class="sorpresa-acciones">
+    <button class="btn btn-primario" id="btn-girar">🎲 ¡Sorpréndeme!</button>
+    <button class="btn btn-secundario" id="btn-abrir-sorpresa" hidden>Abrir la receta →</button>
+    <button class="btn btn-secundario" id="btn-cerrar-sorpresa">Cerrar</button>
+  </div>
+</div>
+
+<!-- ================= CAJÓN: LISTA DE LA COMPRA ================= -->
+<aside class="cajon" id="cajon" role="dialog" aria-modal="false" aria-labelledby="cajon-titulo">
+  <div class="cajon-cabecera">
+    <h2 id="cajon-titulo">La compra</h2>
+    <button class="btn-icono" id="btn-cerrar-cajon" aria-label="Cerrar lista de la compra">✕</button>
+  </div>
+  <div class="cajon-cuerpo" id="cajon-cuerpo"></div>
+  <div class="cajon-pie">
+    <button class="btn btn-secundario" id="btn-copiar-compra">⧉ Copiar lista</button>
+    <button class="btn btn-secundario" id="btn-vaciar-compra">Vaciar</button>
+  </div>
+</aside>
+
+<div class="avisos" id="avisos" aria-live="polite"></div>
+
+<script>
+const DATA = {"recetas":[{"id":"croquetas-de-jamon","nombre":"Croquetas de jamón","pais":"España","bandera":"🇪🇸","categoria":"Entrante","emoji":"🧆","descripcion":"Bocados de bechamel cremosa cargada de jamón, con costra fina y crujiente que cede a un interior casi líquido. El termómetro no oficial de cualquier bar español.","historia":"La croqueta nace en Francia: el cocinero Antonin Carême codificó las 'croquettes' a principios del siglo XIX como aperitivo de la alta cocina. Llegó a España a mediados de ese siglo y aquí cambió de carácter: se volvió más cremosa, se rellenó con jamón y restos del cocido, y pasó de plato burgués a receta de aprovechamiento casero. Hoy es un icono del tapeo, con concursos nacionales dedicados a ella.","dificultad":"Media","tiempoPrepMin":30,"tiempoCoccionMin":45,"porcionesBase":6,"vegetariano":false,"picante":0,"caloriasPorPorcion":410,"maridaje":"Caña de cerveza lager muy fría (o un fino de Jerez)","ingredientes":[{"nombre":"Jamón serrano o ibérico","cantidad":200,"unidad":"g","escalable":true,"nota":"picado fino a cuchillo, con parte de su grasa"},{"nombre":"Leche entera","cantidad":1000,"unidad":"ml","escalable":true},{"nombre":"Mantequilla","cantidad":80,"unidad":"g","escalable":true},{"nombre":"Aceite de oliva suave","cantidad":20,"unidad":"ml","escalable":true,"nota":"para el roux, junto a la mantequilla"},{"nombre":"Harina de trigo","cantidad":110,"unidad":"g","escalable":true},{"nombre":"Cebolla","cantidad":0.5,"unidad":"ud","escalable":true,"nota":"picada muy fina"},{"nombre":"Nuez moscada","cantidad":1,"unidad":"pizca","escalable":true,"nota":"recién rallada"},{"nombre":"Pimienta blanca","cantidad":1,"unidad":"pizca","escalable":true},{"nombre":"Huevos","cantidad":2,"unidad":"ud","escalable":true,"nota":"batidos, para rebozar"},{"nombre":"Pan rallado","cantidad":200,"unidad":"g","escalable":true,"nota":"fino; el panko da más crujiente"},{"nombre":"Aceite de girasol u oliva suave para freír","cantidad":750,"unidad":"ml","escalable":true},{"nombre":"Sal","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto; el jamón ya sala mucho"}],"pasos":[{"texto":"Calienta la leche en un cazo hasta que humee, sin hervir, y mantenla caliente. Si tienes recortes o un trozo de hueso de jamón, déjalos infusionar dentro mientras preparas el resto."},{"texto":"En una cazuela ancha, funde la mantequilla con el aceite a fuego suave y pocha la cebolla hasta que esté transparente y dulce, sin que tome color.","timerMin":8},{"texto":"Añade el jamón picado y dale apenas un minuto, lo justo para que suelte su grasa y perfume; si se cocina de más, queda duro y salado."},{"texto":"Incorpora la harina de golpe y cocina el roux removiendo sin parar hasta que huela a galleta tostada; esta cocción elimina el sabor a harina cruda.","timerMin":3},{"texto":"Vierte la leche caliente en 3 o 4 tandas, integrando cada una por completo con varillas antes de añadir la siguiente, para que no salgan grumos."},{"texto":"Cocina la bechamel a fuego medio-bajo removiendo constantemente con espátula, rascando fondo y esquinas, hasta que la masa espese y se despegue en bloque de las paredes. Sazona al final con nuez moscada, pimienta y, con prudencia, sal.","timerMin":20},{"texto":"Extiende la masa en una fuente amplia, cúbrela con film a contacto (pegado a la superficie para que no forme costra) y deja templar. Refrigera un mínimo de 4 horas, mejor de un día para otro.","timerMin":240},{"texto":"Con las manos ligeramente aceitadas o dos cucharas, forma croquetas de unos 30 g, cilíndricas u ovaladas, todas del mismo tamaño para que frían parejo."},{"texto":"Pasa cada croqueta por huevo batido y después por pan rallado, presionando bien para sellar toda la superficie sin grietas."},{"texto":"Fríe en abundante aceite a 180 °C, en tandas pequeñas de 5 o 6, hasta que estén doradas por todos lados. Escúrrelas sobre rejilla y sirve enseguida.","timerMin":3}],"consejos":["La bechamel está en su punto cuando se despega en bloque de las paredes y remover cuesta esfuerzo; si dudas, dale 5 minutos más: una masa poco cocida sabe a harina y revienta en la fritura.","Fríe las croquetas recién sacadas de la nevera y nunca llenes la sartén: cada croqueta fría baja la temperatura del aceite, y por debajo de 170 °C absorben grasa y se abren.","Infusiona la leche con un hueso o recortes de jamón 10 minutos antes de hacer la bechamel: el sabor a jamón impregna toda la masa, no solo los tropezones."],"variaciones":["De pollo asado: sustituye el jamón por 250 g de restos de pollo rustido desmenuzado y añade una cucharada de su jugo de asado a la bechamel.","De boletus (vegetarianas): saltea 250 g de setas picadas con chalota hasta evaporar su agua y úsalas en lugar del jamón, reforzando con un toque más de sal."]},{"id":"gazpacho-andaluz","nombre":"Gazpacho andaluz","pais":"España","bandera":"🇪🇸","categoria":"Entrante","emoji":"🍅","descripcion":"Sopa fría de tomate maduro emulsionada con aceite de oliva virgen extra, de textura sedosa y con la acidez viva del vinagre de Jerez. El plato que sostiene los veranos andaluces.","historia":"Nació como comida de jornaleros andaluces: un majado de pan duro, ajo, aceite, vinagre y agua que refrescaba durante la siega. El tomate y el pimiento, llegados de América, no se incorporaron de forma generalizada hasta el siglo XIX. La versión triturada y colada que hoy conocemos se popularizó en el siglo XX con la llegada de la batidora eléctrica.","dificultad":"Fácil","tiempoPrepMin":20,"tiempoCoccionMin":0,"porcionesBase":4,"vegetariano":true,"picante":0,"caloriasPorPorcion":190,"maridaje":"Fino de Jerez bien frío (o limonada natural con hierbabuena, sin alcohol)","ingredientes":[{"nombre":"Tomate pera muy maduro","cantidad":1000,"unidad":"g","escalable":true},{"nombre":"Pepino","cantidad":100,"unidad":"g","escalable":true,"nota":"pelado"},{"nombre":"Pimiento verde italiano","cantidad":60,"unidad":"g","escalable":true,"nota":"sin semillas"},{"nombre":"Ajo","cantidad":1,"unidad":"diente","escalable":true,"nota":"sin el germen central"},{"nombre":"Pan blanco del día anterior","cantidad":60,"unidad":"g","escalable":true,"nota":"solo la miga"},{"nombre":"Aceite de oliva virgen extra","cantidad":60,"unidad":"ml","escalable":true},{"nombre":"Vinagre de Jerez","cantidad":20,"unidad":"ml","escalable":true},{"nombre":"Agua fría","cantidad":100,"unidad":"ml","escalable":true,"nota":"ajustar según la textura deseada"},{"nombre":"Sal","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto"},{"nombre":"Guarnición: dados de pepino, pimiento, tomate y picatostes","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto, para servir"}],"pasos":[{"texto":"Trocea la miga de pan, riégala con el vinagre y un chorrito de agua fría y déjala en remojo 10 minutos para que se ablande.","timerMin":10},{"texto":"Mientras, lava los tomates, retírales el pedúnculo y trocéalos sin pelar. Pela el pepino y trocéalo; despepita el pimiento y córtalo en tiras."},{"texto":"Pela el diente de ajo, córtalo por la mitad a lo largo y retira el germen central."},{"texto":"Tritura primero los tomates solos en el vaso de la batidora hasta licuarlos por completo: harán de líquido base para el resto."},{"texto":"Añade el pepino, el pimiento, el ajo y el pan escurrido. Tritura a máxima potencia unos 3 minutos, hasta que no queden tropezones.","timerMin":3},{"texto":"Con la batidora en marcha, incorpora el aceite en un hilo fino y constante hasta que emulsione: la mezcla se aclarará y ganará cremosidad."},{"texto":"Pasa el gazpacho por un chino o colador fino presionando con un cucharón. Prueba y ajusta de sal, vinagre y agua fría hasta la textura deseada."},{"texto":"Tapa y refrigera al menos 2 horas para que se enfríe bien y los sabores se asienten.","timerMin":120},{"texto":"Remueve antes de servir y acompaña con la guarnición picada en cuencos aparte, para que cada comensal se sirva."}],"consejos":["Tritura los tomates a temperatura ambiente (liberan mejor sus jugos) y enfría después en nevera: nunca añadas hielo directamente, porque agua el sabor.","No pases de un diente de ajo y quítale siempre el germen: el ajo crudo se acentúa con las horas de nevera y puede dominar todo el plato.","El aceite va siempre al final, en hilo y con la batidora en marcha: emulsiona como una mayonesa ligera y da ese color anaranjado y esa textura cremosa que distinguen un gazpacho bien hecho de un simple zumo de tomate."],"variaciones":["Gazpacho de sandía o de cereza: sustituye 300 g de tomate por fruta muy fría para una versión veraniega con punto dulce.","Sin pan (apto para celíacos): compensa el cuerpo con 100 g más de tomate y una emulsión más generosa de aceite."]},{"id":"guacamole-con-totopos","nombre":"Guacamole con totopos","pais":"México","bandera":"🇲🇽","categoria":"Entrante","emoji":"🥑","descripcion":"Aguacate machacado sobre una base de chile serrano, cebolla y sal de grano, con limón, jitomate y cilantro, acompañado de totopos recién fritos y todavía tibios. Cremoso pero con trozos, como debe ser.","historia":"Su nombre viene del náhuatl āhuacamōlli, 'salsa de aguacate', y se preparaba en Mesoamérica desde mucho antes de la llegada de los españoles. Los mexicas lo molían en molcajete de piedra volcánica, el mismo utensilio que hoy sigue dando la textura clásica, y los totopos toman su nombre del náhuatl totopochtli, 'tostado'.","dificultad":"Fácil","tiempoPrepMin":20,"tiempoCoccionMin":10,"porcionesBase":4,"vegetariano":true,"picante":1,"caloriasPorPorcion":430,"maridaje":"Agua fresca de limón con chía","ingredientes":[{"nombre":"aguacate Hass maduro","cantidad":3,"unidad":"ud","escalable":true},{"nombre":"chile serrano","cantidad":1,"unidad":"ud","escalable":true,"nota":"usa 2 si lo quieres más bravo"},{"nombre":"cebolla blanca picada fina","cantidad":40,"unidad":"g","escalable":true},{"nombre":"cilantro fresco","cantidad":15,"unidad":"g","escalable":true,"nota":"hojas y tallos tiernos, picados"},{"nombre":"jitomate (tomate) firme","cantidad":1,"unidad":"ud","escalable":true,"nota":"sin semillas, en cubos pequeños"},{"nombre":"limón (lima)","cantidad":1,"unidad":"ud","escalable":true,"nota":"solo el jugo"},{"nombre":"tortillas de maíz","cantidad":10,"unidad":"ud","escalable":true,"nota":"de preferencia del día anterior"},{"nombre":"aceite vegetal para freír","cantidad":500,"unidad":"ml","escalable":true,"nota":"se puede colar y reutilizar"},{"nombre":"sal de grano","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto"}],"pasos":[{"texto":"Corta cada tortilla en 6 triángulos y extiéndelos sobre una rejilla o paño para que se oreen y pierdan humedad; así dorarán parejo y absorberán menos aceite.","timerMin":10},{"texto":"Calienta el aceite en una olla o sartén honda a 180 °C (un triángulo debe burbujear de inmediato al entrar) y fríe los totopos en tres tandas, moviéndolos, hasta que estén dorados y rígidos.","timerMin":3},{"texto":"Escurre los totopos sobre papel absorbente y sálalos de inmediato, mientras están calientes, para que la sal se adhiera."},{"texto":"En el molcajete (o en un tazón con tenedor), muele el chile serrano picado con la cebolla y una buena pizca de sal de grano hasta formar una pasta rústica."},{"texto":"Agrega la mitad del cilantro y machaca unos segundos más para integrar su aroma a la base."},{"texto":"Corta los aguacates a la mitad, retira el hueso, saca la pulpa con cuchara y machácala sobre la pasta con movimientos envolventes, dejando trozos visibles; no busques un puré liso."},{"texto":"Incorpora el jugo de limón, el jitomate en cubos y el resto del cilantro con dos o tres movimientos suaves; prueba y rectifica de sal."},{"texto":"Sirve el guacamole en el propio molcajete o en un tazón, rodeado de los totopos tibios, y llévalo a la mesa de inmediato."}],"consejos":["El orden del molcajete importa: moler primero chile, cebolla y sal de grano crea un tempero que reparte el picor y el sabor de manera uniforme, en lugar de dejar trozos crudos sueltos entre el aguacate.","Dejar el hueso dentro no evita la oxidación: lo que funciona es cubrir con film plástico pegado directamente a la superficie del guacamole, sin cámara de aire, hasta el momento de servir.","Elige aguacates que cedan apenas al presionar cerca del pedúnculo; si al desprender el pedúnculo el interior se ve verde claro, está en su punto exacto."],"variaciones":["Festivo: termina con granos de granada roja y queso fresco desmoronado por encima, un contraste clásico de fondas para fiestas patrias.","Verde taquero: licúa el aguacate con tomatillo (tomate verde) cocido, serrano y cilantro para obtener la salsa cremosa y fluida que se sirve sobre tacos."]},{"id":"ropa-vieja","nombre":"Ropa vieja","pais":"Cuba","bandera":"🇨🇺","categoria":"Principal","emoji":"🥘","descripcion":"Falda de res cocida lentamente hasta deshacerse en hebras, envuelta en un sofrito criollo de tomate, pimientos, vino y comino. Un guiso de cuchara y arroz blanco que sabe a cocina de casa cubana.","historia":"Aunque es emblema de la cocina cubana, su origen está en las Islas Canarias, donde se aprovechaban las carnes sobrantes del puchero deshebrándolas en un sofrito. Los emigrantes canarios la llevaron al Caribe entre los siglos XVIII y XIX, y en Cuba adoptó el sofrito de tomate, pimientos y comino que hoy la define. El nombre alude a las hebras de carne, que recuerdan a trapos de ropa gastada.","dificultad":"Media","tiempoPrepMin":25,"tiempoCoccionMin":135,"porcionesBase":4,"vegetariano":false,"picante":0,"caloriasPorPorcion":520,"maridaje":"Cerveza lager ligera muy fría","ingredientes":[{"nombre":"Falda de res","cantidad":800,"unidad":"g","escalable":true,"nota":"en 2-3 trozos grandes"},{"nombre":"Agua","cantidad":1500,"unidad":"ml","escalable":true,"nota":"para cocer la carne"},{"nombre":"Cebolla blanca","cantidad":2,"unidad":"ud","escalable":true,"nota":"1 en cuartos para el caldo, 1 en juliana para el sofrito"},{"nombre":"Pimiento rojo (morrón)","cantidad":1,"unidad":"ud","escalable":true,"nota":"en tiras"},{"nombre":"Pimiento verde","cantidad":1,"unidad":"ud","escalable":true,"nota":"en tiras"},{"nombre":"Ajo","cantidad":4,"unidad":"diente","escalable":true,"nota":"2 enteros para el caldo, 2 picados para el sofrito"},{"nombre":"Tomate triturado","cantidad":400,"unidad":"g","escalable":true},{"nombre":"Pasta de tomate (concentrado)","cantidad":1,"unidad":"cda","escalable":true},{"nombre":"Vino blanco seco","cantidad":100,"unidad":"ml","escalable":true},{"nombre":"Laurel","cantidad":2,"unidad":"hoja","escalable":true,"nota":"1 para el caldo, 1 para el guiso"},{"nombre":"Comino molido","cantidad":1,"unidad":"cdta","escalable":true},{"nombre":"Orégano seco","cantidad":1,"unidad":"cdta","escalable":true},{"nombre":"Aceite de oliva","cantidad":3,"unidad":"cda","escalable":true},{"nombre":"Sal","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto"},{"nombre":"Pimienta negra","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto"}],"pasos":[{"texto":"Pon la falda en una olla, cúbrela con el agua fría y añade 1 cebolla en cuartos, 2 dientes de ajo enteros, 1 hoja de laurel y sal. Lleva a hervor y retira la espuma que suba a la superficie."},{"texto":"Baja el fuego, tapa y cocina a hervor muy suave hasta que la carne se deshaga al presionarla con un tenedor.","timerMin":90},{"texto":"Saca la carne, cuela y reserva 300 ml del caldo. Deja entibiar la falda sobre una tabla.","timerMin":15},{"texto":"Deshebra la carne a mano en hebras finas siguiendo la dirección de la fibra. Reserva."},{"texto":"En una sartén amplia, calienta el aceite y sofríe a fuego medio la cebolla en juliana con los pimientos en tiras hasta que estén blandos y empiecen a dorarse.","timerMin":10},{"texto":"Agrega el ajo picado, el comino, el orégano y la pasta de tomate; remueve un minuto hasta que perfume, sin dejar que el ajo se queme."},{"texto":"Vierte el vino blanco y deja que reduzca raspando el fondo de la sartén.","timerMin":2},{"texto":"Añade el tomate triturado y la hoja de laurel restante; cocina a fuego medio hasta que el sofrito pierda acidez y se concentre.","timerMin":8},{"texto":"Incorpora la carne deshebrada y el caldo reservado. Cocina destapado, removiendo de vez en cuando, hasta que la salsa espese y abrace las hebras. Rectifica sal y pimienta y sirve con arroz blanco.","timerMin":20}],"consejos":["Deshebra la carne tibia y a mano, nunca fría de nevera ni con cuchillo: las fibras se separan solas y las hebras irregulares atrapan mucha más salsa.","No tires el caldo de cocción: reducido dentro del guiso es lo que separa una ropa vieja jugosa de una seca; congela el sobrante para sopas o arroces.","El punto exacto es cuando la salsa deja de verse líquida y 'abraza' las hebras: si al arrastrar la cuchara ves el fondo de la sartén durante un par de segundos, está lista."],"variaciones":["A la habanera: añade aceitunas rellenas de pimiento y alcaparras en los últimos 10 minutos de guiso.","Versión canaria (la original): incorpora garbanzos cocidos y papa (patata) en dados dorados al final."]},{"id":"paella-de-mariscos","nombre":"Paella de mariscos","pais":"España","bandera":"🇪🇸","categoria":"Principal","emoji":"🥘","descripcion":"Arroz seco al azafrán cocido en fumet de pescado, coronado con langostinos, mejillones y almejas, con esa capa tostada en el fondo que se disputa a cucharadas.","historia":"La paella nació entre los siglos XVIII y XIX en la huerta de la Albufera de Valencia como comida de jornaleros, hecha con lo que daba la tierra. La versión marinera se desarrolló en las barracas y merenderos de la costa valenciana, donde los pescadores sustituyeron pollo y conejo por el género del día. Su fama internacional llegó con el turismo de mediados del siglo XX.","dificultad":"Media","tiempoPrepMin":25,"tiempoCoccionMin":35,"porcionesBase":4,"vegetariano":false,"picante":0,"caloriasPorPorcion":520,"maridaje":"Vino blanco albariño bien frío","ingredientes":[{"nombre":"Arroz bomba","cantidad":320,"unidad":"g","escalable":true,"nota":"unos 80 g por persona; no lavar"},{"nombre":"Fumet de pescado y marisco","cantidad":1000,"unidad":"ml","escalable":true,"nota":"caliente; proporción 3:1 sobre el arroz bomba"},{"nombre":"Langostinos crudos","cantidad":12,"unidad":"ud","escalable":true,"nota":"con cabeza y cáscara"},{"nombre":"Mejillones","cantidad":500,"unidad":"g","escalable":true,"nota":"limpios y sin barbas"},{"nombre":"Almejas","cantidad":250,"unidad":"g","escalable":true},{"nombre":"Calamar limpio","cantidad":300,"unidad":"g","escalable":true,"nota":"en anillas o dados; sirve sepia"},{"nombre":"Tomate maduro rallado","cantidad":200,"unidad":"g","escalable":true},{"nombre":"Ajo","cantidad":3,"unidad":"diente","escalable":true,"nota":"picado fino"},{"nombre":"Pimentón dulce","cantidad":1,"unidad":"cdta","escalable":true},{"nombre":"Azafrán en hebras","cantidad":1,"unidad":"pizca","escalable":true,"nota":"unas 12-15 hebras"},{"nombre":"Aceite de oliva virgen extra","cantidad":60,"unidad":"ml","escalable":true},{"nombre":"Limón","cantidad":1,"unidad":"ud","escalable":true,"nota":"en cuartos, para servir"},{"nombre":"Sal","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto; el fumet ya aporta"}],"pasos":[{"texto":"Purga las almejas en agua fría con un puñado de sal para que suelten la arena; mientras, raspa los mejillones y retira las barbas.","timerMin":20},{"texto":"Tuesta las hebras de azafrán envueltas en papel de aluminio 10 segundos sobre la llama, machácalas y disuélvelas en el fumet. Mantén el fumet apenas hirviendo en un cazo aparte."},{"texto":"Calienta el aceite en una paella de 40-46 cm a fuego medio-alto. Sella los langostinos un minuto por cada lado hasta que cambien de color y retíralos a un plato."},{"texto":"En el mismo aceite, sofríe el calamar hasta que suelte y evapore su agua. Añade el ajo, y cuando huela, el tomate rallado; sofríe hasta que oscurezca, pierda el agua y el aceite se separe por los bordes.","timerMin":10},{"texto":"Añade el pimentón, remueve 30 segundos sin que se queme, incorpora el arroz y nacáralo removiendo hasta que el grano esté brillante y caliente.","timerMin":2},{"texto":"Vierte todo el fumet caliente de golpe, reparte el arroz en una capa uniforme con la cuchara, prueba y corrige de sal. Fuego fuerte y, a partir de aquí, no vuelvas a remover.","timerMin":10},{"texto":"Baja a fuego medio-bajo. Clava las almejas y los mejillones con la bisagra hacia abajo en el arroz y sigue cocinando hasta que el caldo esté casi absorbido y los moluscos abiertos.","timerMin":7},{"texto":"Coloca los langostinos reservados sobre el arroz y sube el fuego al máximo para formar el socarrat: escucha el crepitar seco del fondo y retira en cuanto huela a tostado, no a quemado.","timerMin":2},{"texto":"Aparta del fuego, cubre con un paño limpio y deja reposar antes de llevar la paella al centro de la mesa con los cuartos de limón.","timerMin":5}],"consejos":["El socarrat se hace con el oído, no con la vista: en el último minuto a fuego máximo escucha un crepitar seco, como de arroz friéndose; si el aroma pasa de tostado a quemado, fuera del fuego al instante.","No remuevas el arroz después de añadir el caldo: liberarías almidón y tendrías un risotto. Si el nivel queda desigual, nivela agitando la paella por las asas, nunca con la cuchara.","Mide el caldo en vez de echarlo a ojo: el bomba pide 3 partes por 1 de arroz; si usas senia o albufera baja a 2,5 partes y acorta la cocción un par de minutos, porque se pasan antes."],"variaciones":["Arroz negro: añade 8 g de tinta de calamar disuelta en el fumet, prescinde de mejillones y almejas si quieres, y sírvelo con un buen alioli.","Paella mixta: dora trozos de pollo y costilla de cerdo al principio y déjalos cocer con el arroz junto al marisco, al estilo de los merenderos de playa."]},{"id":"tortilla-de-patatas","nombre":"Tortilla de patatas","pais":"España","bandera":"🇪🇸","categoria":"Principal","emoji":"🍳","descripcion":"Papas (patatas) confitadas lentamente en aceite de oliva y envueltas en huevo, doradas por fuera y jugosas por dentro. El plato más discutido y más querido de la cocina española.","historia":"Su primera mención documentada aparece en un memorial anónimo dirigido a las Cortes de Navarra en 1817, donde se describe como alimento humilde de los campesinos de la zona. La leyenda que atribuye su invención al general carlista Zumalacárregui durante el sitio de Bilbao (1835) es posterior y casi con seguridad apócrifa. Desde entonces se ha convertido en el plato nacional oficioso de España y en objeto del eterno cisma entre concebollistas y sincebollistas.","dificultad":"Media","tiempoPrepMin":20,"tiempoCoccionMin":35,"porcionesBase":4,"vegetariano":true,"picante":0,"caloriasPorPorcion":420,"maridaje":"Caña de cerveza lager muy fría (o mosto de uva frío, sin alcohol)","ingredientes":[{"nombre":"Papa (patata) tipo Monalisa o Kennebec","cantidad":800,"unidad":"g","escalable":true},{"nombre":"Huevos","cantidad":6,"unidad":"ud","escalable":true,"nota":"tamaño L"},{"nombre":"Cebolla","cantidad":200,"unidad":"g","escalable":true,"nota":"opcional para los sincebollistas"},{"nombre":"Aceite de oliva","cantidad":400,"unidad":"ml","escalable":true,"nota":"para confitar; se recupera casi todo y sirve para otro uso"},{"nombre":"Sal","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto"}],"pasos":[{"texto":"Pela las papas (patatas), lávalas y córtalas en láminas finas e irregulares de unos 3 mm, dejando que algunas se rompan al cortar. Sálalas ligeramente."},{"texto":"Pela la cebolla y córtala en juliana fina, para que se funda con la papa durante la cocción."},{"texto":"Calienta el aceite en una sartén honda a fuego medio-bajo (unos 140 °C) y confita las papas con la cebolla: deben cocerse con un burbujeo suave, sin apenas dorarse, removiendo de vez en cuando.","timerMin":22},{"texto":"Cuando la papa se rompa al presionarla con la espátula, escurre todo en un colador grande sobre un bol y reserva el aceite."},{"texto":"Bate los huevos en un bol amplio con una pizca de sal. Incorpora las papas aún calientes, aplasta ligeramente parte de ellas y deja reposar la mezcla para que el huevo se impregne.","timerMin":10},{"texto":"Calienta una sartén antiadherente de 24 cm con 1 cda del aceite reservado a fuego medio-alto. Vierte la mezcla, baja a fuego medio y cuaja la primera cara moviendo la sartén en círculos para que no se pegue.","timerMin":3},{"texto":"Coloca un plato plano mayor que la sartén encima, sujétalo firme y voltea la tortilla con un movimiento rápido y decidido."},{"texto":"Desliza la tortilla de vuelta a la sartén, recoge los bordes hacia dentro con la espátula para redondearla y cuaja la segunda cara.","timerMin":2},{"texto":"Pasa la tortilla a un plato y déjala reposar antes de cortar: el calor residual termina de asentar un interior jugoso sin resecarlo.","timerMin":5}],"consejos":["La papa se confita, no se fríe: el aceite apenas debe burbujear. Si se dora antes de ablandarse, baja el fuego; sabrás que está lista cuando se rompa sola al presionarla con la espátula.","Mezcla las papas escurridas aún calientes con el huevo batido y respeta los 10 minutos de reposo: el huevo se impregna en la papa y la tortilla sale cremosa e integrada, no como huevo con tropezones.","Sobre el eterno debate cebolla sí o no: los concebollistas ganan en jugosidad y dulzor si la cebolla se pocha hasta caramelizar ligeramente; los sincebollistas defienden el sabor limpio de papa y huevo, más firme al corte. Prueba ambas versiones y toma partido con conocimiento de causa."],"variaciones":["Estilo Betanzos: papa frita a fuego más vivo, sin cebolla, y solo 1-2 minutos por cara para que el interior quede casi líquido.","Paisana vegetal: añade 100 g de pimiento rojo y 80 g de guisantes al confitado junto con la papa."]},{"id":"tacos-al-pastor-caseros","nombre":"Tacos al pastor caseros","pais":"México","bandera":"🇲🇽","categoria":"Principal","emoji":"🌮","descripcion":"Láminas de cerdo marinadas en adobo de achiote y chiles secos, doradas en sartén hasta formar bordes crujientes y servidas con piña asada, cebolla y cilantro. La versión casera del trompo que huele a taquería de esquina.","historia":"El pastor nació en Puebla y la Ciudad de México a mediados del siglo XX, cuando descendientes de inmigrantes libaneses adaptaron la técnica del shawarma de cordero al cerdo con adobo de chiles y achiote. Del taco árabe servido en pan pita se pasó a la tortilla de maíz y al trompo vertical, y hacia los años sesenta ya era emblema de las taquerías capitalinas.","dificultad":"Media","tiempoPrepMin":35,"tiempoCoccionMin":30,"porcionesBase":4,"vegetariano":false,"picante":1,"caloriasPorPorcion":620,"maridaje":"Agua fresca de piña con hierbabuena (o una cerveza lager estilo Viena bien fría)","ingredientes":[{"nombre":"bistec delgado de pierna o lomo de cerdo","cantidad":800,"unidad":"g","escalable":true,"nota":"en láminas de unos 5 mm"},{"nombre":"chile guajillo seco","cantidad":4,"unidad":"ud","escalable":true,"nota":"desvenado y sin semillas"},{"nombre":"chile ancho seco","cantidad":2,"unidad":"ud","escalable":true,"nota":"desvenado y sin semillas"},{"nombre":"chile de árbol seco","cantidad":1,"unidad":"ud","escalable":true,"nota":"opcional; sube el picante"},{"nombre":"pasta de achiote","cantidad":40,"unidad":"g","escalable":true},{"nombre":"jugo de piña natural","cantidad":120,"unidad":"ml","escalable":true},{"nombre":"vinagre blanco","cantidad":60,"unidad":"ml","escalable":true},{"nombre":"ajo","cantidad":3,"unidad":"diente","escalable":true},{"nombre":"cebolla blanca","cantidad":60,"unidad":"g","escalable":true,"nota":"para el adobo"},{"nombre":"orégano seco","cantidad":1,"unidad":"cdta","escalable":true},{"nombre":"comino molido","cantidad":0.5,"unidad":"cdta","escalable":true},{"nombre":"clavo de olor","cantidad":2,"unidad":"ud","escalable":true},{"nombre":"pimienta negra molida","cantidad":0.5,"unidad":"cdta","escalable":true},{"nombre":"piña fresca en rebanadas","cantidad":250,"unidad":"g","escalable":true},{"nombre":"tortillas de maíz","cantidad":12,"unidad":"ud","escalable":true},{"nombre":"cebolla blanca picada fina","cantidad":80,"unidad":"g","escalable":true,"nota":"para servir"},{"nombre":"cilantro fresco picado","cantidad":20,"unidad":"g","escalable":true,"nota":"para servir"},{"nombre":"limón (lima)","cantidad":2,"unidad":"ud","escalable":true,"nota":"en cuartos, para servir"},{"nombre":"aceite vegetal","cantidad":2,"unidad":"cda","escalable":true},{"nombre":"sal","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto"}],"pasos":[{"texto":"Desvena los chiles guajillo, ancho y de árbol, retira semillas y tuéstalos en una sartén seca a fuego medio unos 30 segundos por lado, solo hasta que aromen; si se queman, amargan."},{"texto":"Cubre los chiles tostados con agua muy caliente y déjalos hidratar hasta que estén suaves y flexibles.","timerMin":15},{"texto":"Licúa los chiles escurridos con la pasta de achiote, el jugo de piña, el vinagre, el ajo, los 60 g de cebolla, el orégano, el comino, los clavos, la pimienta y una cucharadita de sal, hasta obtener un adobo espeso y completamente liso. Cuélalo si quedaron pieles."},{"texto":"Embarra los bisteces de cerdo con el adobo por ambas caras, cúbrelos y refrigéralos mínimo 4 horas, idealmente toda la noche.","timerMin":240},{"texto":"Calienta una sartén de fondo grueso o plancha a fuego alto y asa las rebanadas de piña sin grasa hasta que caramelicen y marquen por ambos lados; retíralas y córtalas en cubos pequeños.","timerMin":8},{"texto":"En la misma sartén con el aceite, sella los bisteces adobados en tandas, sin encimarlos, de 2 a 3 minutos por lado, hasta que los bordes se doren y el adobo se tueste ligeramente. Alternativa al horno: 220 °C sobre rejilla unos 15 minutos, volteando a la mitad.","timerMin":6},{"texto":"Pasa la carne a una tabla, pícala en tiras finas y regrésala a la sartén bien caliente junto con la piña; saltea hasta que se formen orillas crujientes.","timerMin":4},{"texto":"Calienta las tortillas en comal o sartén seca, unos 30 segundos por lado, y mantenlas tapadas con un paño para que no se enfríen."},{"texto":"Arma los tacos: carne con piña sobre cada tortilla, cebolla picada, cilantro y un buen apretón de limón. Sirve de inmediato, con la salsa que prefieras."}],"consejos":["Mete la carne 30 minutos al congelador antes de filetearla si la compraste en trozo: firme se corta en láminas parejas de 5 mm, que es lo que permite imitar el corte del trompo.","Si vas a marinar más de 12 horas, hierve antes el jugo de piña 2 minutos y déjalo enfriar: su bromelina desactivada ya no deshace la fibra de la carne ni la vuelve pastosa.","El sabor a taquería está en la costrita: después de picar la carne, regrésala a la sartén casi sin moverla un par de minutos para que el adobo se caramelice contra el metal."],"variaciones":["Gringas: sirve la misma carne con piña entre dos tortillas de harina con queso Oaxaca o manchego fundido.","Taco árabe estilo Puebla: omite el achiote y la piña, marina solo con especias, cebolla y vinagre, y sírvelo en pan pita con salsa de chipotle."]},{"id":"ceviche-clasico-peruano","nombre":"Ceviche clásico peruano","pais":"Perú","bandera":"🇵🇪","categoria":"Principal","emoji":"🐟","descripcion":"Cubos de pescado blanco fresquísimo \"cocidos\" al instante en una leche de tigre cítrica y punzante, con cebolla morada crocante y el contraste dulce del camote.","historia":"Sus raíces se remontan a los pueblos pesqueros del antiguo Perú: los moche maceraban pescado con jugo de tumbo y ají hace unos dos mil años. Con la llegada española se incorporaron el limón sutil y la cebolla, que dieron al plato su forma actual. En 2023 la Unesco declaró las prácticas asociadas al ceviche peruano Patrimonio Cultural Inmaterial de la Humanidad.","dificultad":"Media","tiempoPrepMin":30,"tiempoCoccionMin":25,"porcionesBase":4,"vegetariano":false,"picante":2,"caloriasPorPorcion":380,"maridaje":"Chicha morada helada: su dulzor de maíz morado, piña y canela equilibra la acidez del limón y el golpe del ají.","ingredientes":[{"nombre":"pescado blanco muy fresco (lenguado, corvina o mero)","cantidad":800,"unidad":"g","escalable":true,"nota":"en filetes sin piel ni espinas, del día"},{"nombre":"limón sutil (lima ácida)","cantidad":15,"unidad":"ud","escalable":true,"nota":"para unos 250 ml de jugo recién exprimido"},{"nombre":"cebolla roja (morada)","cantidad":2,"unidad":"ud","escalable":true,"nota":"medianas, en pluma fina"},{"nombre":"ají limo","cantidad":2,"unidad":"ud","escalable":true,"nota":"sin venas ni semillas si lo quieres menos bravo"},{"nombre":"culantro (cilantro) fresco picado","cantidad":2,"unidad":"cda","escalable":true,"nota":""},{"nombre":"ajo","cantidad":1,"unidad":"diente","escalable":true,"nota":"machacado, para la leche de tigre"},{"nombre":"kion (jengibre)","cantidad":5,"unidad":"g","escalable":true,"nota":"rallado, para la leche de tigre"},{"nombre":"apio","cantidad":1,"unidad":"ud","escalable":true,"nota":"una rama pequeña, solo para infusionar la leche de tigre"},{"nombre":"hielo","cantidad":4,"unidad":"ud","escalable":true,"nota":"cubos grandes"},{"nombre":"camote (batata)","cantidad":2,"unidad":"ud","escalable":true,"nota":"medianos"},{"nombre":"choclo (maíz tierno)","cantidad":2,"unidad":"ud","escalable":true,"nota":""},{"nombre":"cancha serrana (maíz chulpe tostado)","cantidad":100,"unidad":"g","escalable":true,"nota":"opcional pero muy recomendable"},{"nombre":"lechuga","cantidad":4,"unidad":"hoja","escalable":true,"nota":"para la base del plato"},{"nombre":"sal","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto, de preferencia marina fina"},{"nombre":"pimienta blanca molida","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto"}],"pasos":[{"texto":"Pon a hervir los camotes con piel en agua con una pizca de sal hasta que un cuchillo entre sin resistencia. Pélalos y córtalos en rodajas gruesas.","timerMin":25},{"texto":"En otra olla, hierve los choclos en agua sin sal (la sal endurece el grano) hasta que estén tiernos. Desgrana uno y corta el otro en rodajas. Reserva ambos tibios.","timerMin":10},{"texto":"Corta la cebolla en pluma fina, enjuágala bajo el chorro de agua fría y déjala reposar en un bol con agua y hielo: pierde bravura y gana crocancia."},{"texto":"Corta el pescado en cubos parejos de unos 2 cm con un cuchillo bien afilado. Guárdalo tapado en la refrigeradora (nevera) junto con el bol grande donde mezclarás el ceviche: todo debe estar frío."},{"texto":"Prepara la leche de tigre, el corazón del ceviche: exprime los limones con presión suave y sin apurar el fondo de la cáscara. En un bol frío mezcla el jugo con el ajo machacado, el kion rallado, la rama de apio, 3 o 4 recortes de pescado, medio ají limo y los cubos de hielo. Deja infusionar y cuela: ese líquido lechoso, cítrico y con cuerpo es la leche de tigre.","timerMin":3},{"texto":"Saca el pescado del frío, sazónalo con sal y pimienta blanca, añade el resto del ají limo picado muy fino y mezcla con suavidad para no romper los cubos."},{"texto":"Vierte la leche de tigre colada sobre el pescado y deja macerar apenas unos minutos: el exterior se torna opaco mientras el centro queda nacarado y jugoso.","timerMin":3},{"texto":"Escurre muy bien la cebolla e incorpórala junto con el culantro picado. Prueba el jugo y rectifica de sal y ají: debe estar ácido, salino y con un final picante claro."},{"texto":"Sirve de inmediato en platos hondos fríos: una hoja de lechuga, el ceviche con abundante jugo, rodajas de camote, choclo y un puñado de cancha por encima o al lado."}],"consejos":["Exprime los limones a mano y sin apretar hasta el final: el fondo de la cáscara suelta aceites del albedo que amargan la leche de tigre.","Cadena de frío total: pescado, jugo, bol y platos fríos. Mete el bol de mezcla 10 minutos al congelador antes de empezar; un ceviche tibio pierde textura y se pasa de punto.","No maceres de más: el punto actual es de 2 a 3 minutos para un centro nacarado. Si lo prefieres al estilo antiguo, más \"cocido\", no pases de 10 o el pescado se vuelve harinoso."],"variaciones":["Ceviche mixto: añade calamar, camarones y caracol blanqueados 30-60 segundos y enfriados en agua con hielo antes de mezclarlos con el pescado.","Tiradito: el mismo pescado en láminas finas tipo sashimi, sin cebolla, bañado con la leche de tigre licuada con crema de ají amarillo."]},{"id":"lomo-saltado","nombre":"Lomo saltado","pais":"Perú","bandera":"🇵🇪","categoria":"Principal","emoji":"🥩","descripcion":"Tiras de lomo selladas a fuego violento en el wok con cebolla, tomate, sillao y un toque de pisco, mezcladas al final con papas fritas y servidas con arroz graneado.","historia":"Nació a fines del siglo XIX en Lima, cuando los cocineros cantoneses de las primeras chifas aplicaron el salteado en wok y el sillao a la carne y las verduras criollas. Aparece en recetarios peruanos de inicios del siglo XX como \"lomito saltado\" o \"lomito a la chorrillana\". Hoy es uno de los platos más pedidos de la cocina peruana y el emblema del mestizaje chino-criollo.","dificultad":"Media","tiempoPrepMin":25,"tiempoCoccionMin":35,"porcionesBase":4,"vegetariano":false,"picante":1,"caloriasPorPorcion":780,"maridaje":"Cerveza lager peruana bien fría: su amargor limpio corta la grasa de la fritura y refresca entre bocado y bocado.","ingredientes":[{"nombre":"lomo fino de res (solomillo)","cantidad":700,"unidad":"g","escalable":true,"nota":"limpio de nervios y grasa externa"},{"nombre":"papa (patata) amarilla o blanca","cantidad":600,"unidad":"g","escalable":true,"nota":"para cortar en bastones y freír"},{"nombre":"arroz blanco de grano largo","cantidad":300,"unidad":"g","escalable":true,"nota":"crudo; rinde para las 4 porciones"},{"nombre":"cebolla roja (morada)","cantidad":2,"unidad":"ud","escalable":true,"nota":"en gajos gruesos"},{"nombre":"tomate","cantidad":3,"unidad":"ud","escalable":true,"nota":"firmes, en gajos"},{"nombre":"ají amarillo","cantidad":1,"unidad":"ud","escalable":true,"nota":"sin venas ni semillas, en tiras"},{"nombre":"ajo","cantidad":3,"unidad":"diente","escalable":true,"nota":"2 picados para el salteado, 1 para el arroz"},{"nombre":"sillao (salsa de soya)","cantidad":4,"unidad":"cda","escalable":true,"nota":""},{"nombre":"vinagre tinto","cantidad":2,"unidad":"cda","escalable":true,"nota":"o vinagre de vino blanco"},{"nombre":"pisco","cantidad":30,"unidad":"ml","escalable":true,"nota":"opcional, para flambear"},{"nombre":"culantro (cilantro) picado","cantidad":2,"unidad":"cda","escalable":true,"nota":""},{"nombre":"comino molido","cantidad":1,"unidad":"cdta","escalable":true,"nota":""},{"nombre":"aceite vegetal","cantidad":500,"unidad":"ml","escalable":true,"nota":"para freír las papas; del salteado se usan solo 2 cda"},{"nombre":"sal","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto"},{"nombre":"pimienta negra molida","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto, generosa"}],"pasos":[{"texto":"Prepara el arroz graneado: enjuaga el arroz hasta que el agua salga casi clara, dora 1 diente de ajo picado en un poco de aceite, añade el arroz, 450 ml de agua y sal. Cuando hierva, tapa y cocina a fuego mínimo; apaga y deja reposar tapado 5 minutos más.","timerMin":20},{"texto":"Corta las papas en bastones gruesos, enjuágalas para retirar el almidón superficial y sécalas muy bien con un paño limpio."},{"texto":"Fríe las papas en el aceite a 170-175 °C hasta que estén doradas y crocantes. Escúrrelas sobre papel absorbente y sálalas al momento.","timerMin":8},{"texto":"Corta el lomo en tiras del grosor de un dedo (unos 2 x 5 cm), sécalas con papel y sazónalas con sal, pimienta y comino. Ten listos junto al fuego la cebolla en gajos, el tomate en gajos, el ají en tiras y el ajo picado: el salteado no da tiempo de picar nada."},{"texto":"Calienta el wok (o una sartén amplia de fondo grueso) a fuego máximo hasta que empiece a humear. Añade 1 cucharada de aceite y saltea la mitad de la carne: déjala quieta unos segundos para que dore y luego mueve. Retírala jugosa y repite con la otra mitad.","timerMin":4},{"texto":"Regresa toda la carne al wok con el ajo picado. Si usas pisco, viértelo por el borde e inclina el wok para flambear con cuidado hasta que la llama muera."},{"texto":"Añade la cebolla y saltea un minuto: debe quedar crocante. Suma el tomate y el ají amarillo y saltea un minuto más con movimientos de vaivén, sin que el tomate se deshaga.","timerMin":2},{"texto":"Vierte el sillao y el vinagre por el borde caliente del wok, no sobre la carne, para que se caramelicen al caer. Mezcla apenas y apaga: debe quedar un jugo abundante y brillante en el fondo."},{"texto":"Fuera del fuego, incorpora las papas fritas y el culantro con dos movimientos envolventes, justo para que se impregnen del jugo sin ensoparse."},{"texto":"Sirve de inmediato con el arroz graneado a un lado y, si te gusta, una cucharada del jugo del salteado sobre el arroz."}],"consejos":["Wok a fuego máximo y carne en tandas pequeñas: si la sartén pierde temperatura, la carne suelta jugo y se hierve gris en lugar de sellarse. Espera a que el wok vuelva a humear entre tanda y tanda.","Seca las tiras de carne con papel absorbente antes de saltear; la humedad superficial genera vapor y mata el dorado y el aroma ahumado (el \"wok hei\") que define el plato.","El sillao y el vinagre siempre por el borde caliente del wok: al resbalar por el metal se caramelizan al instante y perfuman todo el salteado; vertidos directo sobre la carne solo la mojan y la enfrían."],"variaciones":["Pollo saltado: sustituye el lomo por pechuga o pierna de pollo en tiras; sella igual a fuego máximo y reduce un punto el comino.","Lomo saltado a lo pobre: corona cada plato con un huevo frito de yema líquida y añade plátano (banana) macho frito en rodajas."]},{"id":"arepas-reina-pepiada","nombre":"Arepas reina pepiada","pais":"Venezuela","bandera":"🇻🇪","categoria":"Principal","emoji":"🫓","descripcion":"Arepa dorada y crocante por fuera, tierna por dentro, rellena hasta el borde con una ensalada cremosa de pollo deshebrado y aguacate. El contraste entre la costra caliente del maíz y el relleno frío es lo que la hace inolvidable.","historia":"Nació en 1955 en la arepera de los hermanos Álvarez en Caracas, creada en honor a Susana Duijm, la primera venezolana coronada Miss Mundo. 'Pepiada' significaba curvilínea y atractiva en la jerga caraqueña de la época. La versión original llevaba pollo, aguacate y petit pois.","dificultad":"Media","tiempoPrepMin":25,"tiempoCoccionMin":45,"porcionesBase":4,"vegetariano":false,"picante":0,"caloriasPorPorcion":630,"maridaje":"Papelón con limón bien frío (agua de panela con jugo de limón)","ingredientes":[{"nombre":"Harina de maíz precocida blanca","cantidad":320,"unidad":"g","escalable":true,"nota":"tipo P.A.N."},{"nombre":"Agua tibia","cantidad":400,"unidad":"ml","escalable":true,"nota":"para la masa"},{"nombre":"Pechuga de pollo","cantidad":500,"unidad":"g","escalable":true,"nota":"entera, sin piel"},{"nombre":"Aguacate (palta)","cantidad":2,"unidad":"ud","escalable":true,"nota":"maduros"},{"nombre":"Mayonesa","cantidad":60,"unidad":"g","escalable":true},{"nombre":"Cebolla blanca","cantidad":1,"unidad":"ud","escalable":true,"nota":"mitad para el caldo, mitad picada fina para la ensalada"},{"nombre":"Ajo","cantidad":1,"unidad":"diente","escalable":true,"nota":"para el caldo del pollo"},{"nombre":"Cilantro fresco picado","cantidad":2,"unidad":"cda","escalable":true},{"nombre":"Jugo de limón","cantidad":1,"unidad":"cda","escalable":true},{"nombre":"Aceite vegetal","cantidad":1,"unidad":"cda","escalable":true,"nota":"para la plancha o budare"},{"nombre":"Sal","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto"},{"nombre":"Pimienta negra","cantidad":null,"unidad":"","escalable":false,"nota":"al gusto"}],"pasos":[{"texto":"Pon la pechuga en una olla, cúbrela con agua fría y añade media cebolla, el diente de ajo y sal. Lleva a hervor suave y cocina hasta que esté tierna.","timerMin":20},{"texto":"Apaga el fuego y deja entibiar el pollo dentro de su caldo para que no se seque. Luego escúrrelo y deshébralo fino con las manos.","timerMin":10},{"texto":"Machaca los aguacates con un tenedor dejando algo de textura. Mezcla con la mayonesa, la media cebolla restante picada muy fina, el cilantro, el jugo de limón, sal y pimienta."},{"texto":"Incorpora el pollo deshebrado a la crema de aguacate, prueba de sal y reserva en frío cubierto con film al contacto para que no se oxide."},{"texto":"Para la masa: disuelve la sal en el agua tibia dentro de un bol y agrega la harina en lluvia mientras mezclas con la mano. Amasa hasta obtener una masa suave y homogénea.","timerMin":3},{"texto":"Deja reposar la masa tapada para que termine de hidratarse. Debe quedar lisa, sin grietas al presionarla; si se agrieta, añade agua de a poco y vuelve a amasar.","timerMin":5},{"texto":"Divide la masa en 4 bolas iguales y aplánalas girándolas entre las palmas: discos de 10-12 cm de diámetro y 1,5 cm de grosor, con bordes lisos."},{"texto":"Calienta un budare o sartén a fuego medio con una película fina de aceite. Cocina las arepas por un lado sin moverlas, hasta que formen una costra dorada.","timerMin":7},{"texto":"Voltéalas con una espátula y dora el otro lado el mismo tiempo.","timerMin":7},{"texto":"Pasa las arepas al horno a 200 °C para que terminen de cocerse por dentro: están listas cuando al golpearlas con los nudillos suenan huecas.","timerMin":10},{"texto":"Abre cada arepa por el borde con un cuchillo sin llegar al fondo (dejando bisagra), retira un poco de miga caliente y rellena generosamente con la reina pepiada."}],"consejos":["Siempre el agua antes que la harina: agrega la harina en lluvia sobre el agua y no al revés; así evitas grumos y controlas la textura exacta de la masa.","La arepa está lista cuando suena hueca al golpearla; si tras dorarse no suena, dale horno y no más plancha, porque en la plancha se quema por fuera y queda cruda por dentro.","Deja entibiar el pollo dentro de su propio caldo antes de deshebrarlo: se mantiene jugoso y las hebras absorben mejor la crema de aguacate."],"variaciones":["Versión original de 1955: añade petit pois (guisantes) cocidos a la mezcla, tal como la servían los hermanos Álvarez.","Arepa sifrina: la misma reina pepiada coronada con queso amarillo rallado antes de cerrar."]},{"id":"churros-con-chocolate-a-la-taza","nombre":"Churros con chocolate a la taza","pais":"España","bandera":"🇪🇸","categoria":"Postre","emoji":"🍫","descripcion":"Bastones de masa escaldada, crujientes por fuera y tiernos por dentro, fritos al momento y rebozados en azúcar. Se mojan en un chocolate espesado con maicena, tan denso que sostiene el churro en pie.","historia":"La teoría más citada atribuye los churros a los pastores trashumantes españoles, que freían esta masa sencilla en el campo; el nombre vendría de la oveja churra, cuyos cuernos recuerdan su forma. Las churrerías se popularizaron en Madrid durante el siglo XIX, y la costumbre de mojarlos en chocolate a la taza, herencia del cacao llegado de América, los convirtió en desayuno de domingo y remate obligado de verbena.","dificultad":"Media","tiempoPrepMin":25,"tiempoCoccionMin":20,"porcionesBase":4,"vegetariano":true,"picante":0,"caloriasPorPorcion":680,"maridaje":"El propio chocolate a la taza forma parte del plato; como acompañamiento extra, un café cortado","ingredientes":[{"nombre":"harina de trigo común","cantidad":250,"unidad":"g","escalable":true},{"nombre":"agua","cantidad":250,"unidad":"ml","escalable":true},{"nombre":"sal fina","cantidad":4,"unidad":"g","escalable":true,"nota":"una cucharadita rasa"},{"nombre":"aceite de girasol u oliva suave","cantidad":750,"unidad":"ml","escalable":true,"nota":"para freír"},{"nombre":"azúcar","cantidad":60,"unidad":"g","escalable":true,"nota":"para rebozar los churros"},{"nombre":"canela molida","cantidad":1,"unidad":"cdta","escalable":true,"nota":"opcional, para mezclar con el azúcar"},{"nombre":"leche entera","cantidad":500,"unidad":"ml","escalable":true,"nota":"para el chocolate"},{"nombre":"chocolate negro (60-70% cacao)","cantidad":150,"unidad":"g","escalable":true},{"nombre":"maicena (fécula de maíz)","cantidad":15,"unidad":"g","escalable":true},{"nombre":"azúcar","cantidad":30,"unidad":"g","escalable":true,"nota":"para el chocolate"},{"nombre":"sal","cantidad":null,"unidad":"pizca","escalable":false,"nota":"una pizca para el chocolate, al gusto"}],"pasos":[{"texto":"Empieza por el chocolate: disuelve la maicena en 100 ml de leche fría sin que queden grumos. Calienta el resto de la leche con los 30 g de azúcar y la pizca de sal hasta que humee, sin hervir."},{"texto":"Fuera del fuego, añade el chocolate troceado y remueve hasta fundirlo. Incorpora la leche con maicena, vuelve a fuego suave y cuece removiendo sin parar hasta que espese y nape con cuerpo la cuchara. Resérvalo tapado: espesará un poco más al reposar.","timerMin":5},{"texto":"Para la masa, pon a hervir el agua con la sal. Cuando rompa a hervir con fuerza, aparta del fuego y vuelca la harina de golpe, toda de una vez."},{"texto":"Remueve enérgicamente con cuchara de madera hasta obtener una masa densa, sin grumos ni restos de harina seca, que se despegue de las paredes del cazo."},{"texto":"Deja templar la masa tapada con un paño: recién hecha quema al manejarla y, demasiado fría, no fluye por la churrera.","timerMin":10},{"texto":"Carga la masa en una churrera o en una manga pastelera resistente con boquilla rizada de estrella. Nunca uses boquilla lisa."},{"texto":"Calienta el aceite en una sartén honda o cazo ancho a 190 °C: un trocito de masa debe burbujear al instante sin quemarse.","timerMin":5},{"texto":"Forma tiras de 12-15 cm directamente sobre el aceite, cortando la masa con unas tijeras. Fríe en tandas de 4-5 churros, girándolos, hasta que estén dorados y crujientes.","timerMin":3},{"texto":"Escúrrelos sobre papel absorbente y rebózalos aún calientes en el azúcar, mezclado con la canela si te gusta."},{"texto":"Sirve el chocolate bien caliente en tazas y lleva los churros a la mesa recién hechos, para mojar sin espera."}],"consejos":["La boquilla rizada de estrella no es estética: un churro de superficie lisa atrapa vapor dentro y puede reventar en el aceite caliente, salpicando. Es una cuestión de seguridad.","Mantén el aceite a 190 °C y fríe pocas unidades por tanda; si la temperatura cae, el churro absorbe grasa y queda correoso en lugar de crujiente.","Retira el chocolate del fuego cuando aún parezca un punto más líquido de lo que buscas: la maicena sigue espesando al reposar y recuperas el punto exacto de taza."],"variaciones":["Porras madrileñas: añade 5 g de bicarbonato a la masa y algo más de agua para una versión más gruesa, hueca y esponjosa, formada en espiral grande.","Churros rellenos (estilo argentino): usa una boquilla más ancha y, ya fritos y fríos, inyéctalos con dulce de leche usando manga con boquilla larga."]},{"id":"flan-de-huevo-con-caramelo","nombre":"Flan de huevo con caramelo","pais":"España / Latinoamérica","bandera":"🇪🇸","categoria":"Postre","emoji":"🍮","descripcion":"Cuajada sedosa de huevo y leche infusionada con limón y canela, cubierta por un caramelo ámbar que se vuelve salsa al desmoldar. Se cuece lento al baño maría y se sirve bien frío.","historia":"Desciende de la tyropatina romana, una cuajada de huevos y leche que Apicio recogía ya en el siglo I. En la Edad Media tomó su nombre del latín 'flado' (torta plana) a través del francés 'flaon', y con la colonización española cruzó el Atlántico, donde cada país lo adoptó como postre casero por excelencia.","dificultad":"Media","tiempoPrepMin":30,"tiempoCoccionMin":60,"porcionesBase":8,"vegetariano":true,"picante":0,"caloriasPorPorcion":320,"maridaje":"Vino dulce Moscatel bien frío; sin alcohol, un café de olla","ingredientes":[{"nombre":"leche entera","cantidad":1000,"unidad":"ml","escalable":true},{"nombre":"huevos (tamaño M/L)","cantidad":8,"unidad":"ud","escalable":true},{"nombre":"azúcar","cantidad":200,"unidad":"g","escalable":true,"nota":"para la mezcla de flan"},{"nombre":"azúcar","cantidad":150,"unidad":"g","escalable":true,"nota":"para el caramelo"},{"nombre":"agua","cantidad":30,"unidad":"ml","escalable":true,"nota":"para el caramelo"},{"nombre":"piel de limón","cantidad":1,"unidad":"ud","escalable":true,"nota":"solo la parte amarilla; reserva unas gotas del zumo para el caramelo"},{"nombre":"canela en rama","cantidad":1,"unidad":"ud","escalable":true}],"pasos":[{"texto":"Pon la leche en un cazo con la piel de limón y la rama de canela. Caliéntala hasta el primer hervor, apaga el fuego y déjala infusionar tapada.","timerMin":10},{"texto":"Prepara el caramelo: en un cazo de fondo claro mezcla los 150 g de azúcar con el agua y unas gotas de zumo de limón. Cuece a fuego medio sin remover (solo gira el cazo) hasta obtener un ámbar medio.","timerMin":8},{"texto":"Reparte el caramelo caliente en la flanera o en 8 moldes individuales, girándolos para cubrir bien el fondo. Trabaja rápido: endurece en segundos."},{"texto":"Precalienta el horno a 160 °C con calor arriba y abajo, sin ventilador. Pon a calentar agua aparte para el baño maría."},{"texto":"Bate los huevos con los 200 g de azúcar usando varillas, lo justo para integrar y sin levantar espuma: las burbujas se convierten en agujeros dentro del flan."},{"texto":"Retira la piel de limón y la canela, y vierte la leche templada en hilo fino sobre los huevos mientras remueves. Cuela la mezcla dos veces y repártela en los moldes caramelizados."},{"texto":"Monta el baño maría: coloca los moldes dentro de una bandeja honda de horno, mete la bandeja en el horno y vierte el agua caliente en ella hasta cubrir dos tercios de la altura de los moldes. Tapa los moldes con papel de aluminio sin sellarlos."},{"texto":"Hornea hasta que el flan esté firme por los bordes y tiemble apenas en el centro al moverlo. El agua del baño debe humear, pero nunca hervir a borbotones.","timerMin":55},{"texto":"Saca los moldes del agua, deja que pierdan el calor a temperatura ambiente y refrigéralos un mínimo de 4 horas, mejor de un día para otro.","timerMin":240},{"texto":"Para desmoldar, pasa la punta de un cuchillo por todo el borde, coloca encima un plato con algo de fondo e invierte con un gesto seco. Deja que el caramelo líquido caiga sobre el flan."}],"consejos":["Cuela la mezcla dos veces y, si queda espuma en la superficie de los moldes, retírala apoyando un trozo de papel de cocina: es la diferencia entre un flan liso y uno picado.","Si el agua del baño maría rompe a hervir, añade de inmediato un chorro de agua fría o baja el horno a 150 °C; el hervor es lo que llena el flan de agujeros.","Retira el caramelo del fuego un tono antes del que buscas: el calor residual del cazo lo sigue oscureciendo y en diez segundos pasa de ámbar a amargo."],"variaciones":["Flan de coco: sustituye 400 ml de leche por leche de coco y añade 50 g de coco rallado a la mezcla antes de hornear.","Flan napolitano (México): bate 190 g de queso crema con los huevos para una textura más densa y cremosa."]}],"saber":{"tecnicas":[{"nombre":"El sofrito","resumen":"Base aromática de la cocina hispana: cebolla, ajo y otros vegetales cocinados lentamente en aceite hasta que pierden el agua y concentran su sabor. Un sofrito apurado sabe a crudo; uno bien hecho transforma todo el plato. Es cuestión de tiempo y fuego bajo, no de técnica complicada.","claves":["Fuego medio-bajo y paciencia: entre 10 y 30 minutos según la receta","Salar la cebolla al principio ayuda a que sude y no se queme","Añadir el ajo después de la cebolla para que no se arrebate ni amargue","El tomate va al final y se cocina hasta que el aceite se separe y brille"]},{"nombre":"La bechamel","resumen":"Salsa madre de leche espesada con un roux de mantequilla y harina a partes iguales. La proporción orientativa es 60 g de mantequilla y 60 g de harina por litro de leche para napar, y más harina para croquetas. La clave es cocinar la harina antes de añadir la leche para que no sepa a crudo.","claves":["Cocinar el roux 2-3 minutos removiendo antes de incorporar la leche","Leche caliente sobre roux frío (o al revés) evita grumos","Remover sin parar con varillas y cocer al menos 8-10 minutos a fuego suave","Sazonar al final con sal, pimienta y un toque de nuez moscada"]},{"nombre":"Emulsionar","resumen":"Unir de forma estable dos líquidos que no se mezclan, normalmente grasa y agua, dispersando uno en el otro en gotas finísimas: mayonesa, alioli, vinagretas o montar una salsa con mantequilla. El secreto es incorporar la grasa poco a poco mientras se agita con energía, apoyándose en un emulsionante como la yema de huevo o la mostaza.","claves":["Añadir el aceite en hilo fino y constante, sobre todo al principio","Ingredientes a la misma temperatura, idealmente ambiente","Yema, mostaza o ajo majado actúan como emulsionantes y estabilizan","Si se corta, empezar con una yema nueva e ir incorporando la mezcla cortada poco a poco"]},{"nombre":"El punto de sal","resumen":"Sazonar no es un paso final sino un proceso: se sala por capas durante la cocción y se ajusta al final probando. La sal bien aplicada no hace que la comida sepa salada, sino que sepa más a sí misma. Probar antes de servir es la regla de oro que separa al aficionado del profesional.","claves":["Salar en varias etapas, no todo de golpe al final","El agua de cocer pasta o verdura debe estar francamente salada (unos 10 g/L)","Los platos fríos y los que se reducen piden ajuste: el frío apaga la sal, la reducción la concentra","Si te pasas, compensa con ácido (limón, vinagre) o amplía la base sin sal"]},{"nombre":"Sellar carne","resumen":"Dorar la superficie de la carne a fuego fuerte para provocar la reacción de Maillard, que genera costra, color y sabor profundo. No 'sella los jugos' como dice el mito, pero sí construye el sabor del plato y de sus fondos. Exige sartén muy caliente, carne seca y no mover la pieza antes de tiempo.","claves":["Secar la carne con papel antes: la humedad hierve en vez de dorar","Sartén o plancha bien caliente y poca grasa con punto de humo alto","No amontonar piezas ni moverlas hasta que se despeguen solas","Dejar reposar la carne tras la cocción para que redistribuya los jugos"]},{"nombre":"El caramelo","resumen":"Azúcar fundido y llevado entre 160 y 180 °C hasta obtener color ámbar y sabor tostado, base de flanes, salsas y crocantes. El margen entre caramelo perfecto y quemado es de segundos, así que hay que trabajar con atención total y retirar del fuego un punto antes del color deseado. Puede hacerse en seco (solo azúcar) o con un poco de agua para mayor control.","claves":["En caramelo en seco, no remover: mover la sartén con giros suaves","Con agua, no agitar hasta que tome color para evitar que cristalice","Retirar del fuego cuando esté un tono más claro de lo buscado: sigue cocinándose","Cuidado extremo: el caramelo supera los 160 °C y produce quemaduras graves"]},{"nombre":"Mise en place","resumen":"Tener todo en su sitio antes de encender el fuego: ingredientes pesados, cortados y ordenados, utensilios a mano y la receta leída completa. Es la disciplina que permite cocinar con fluidez y sin sobresaltos, especialmente en preparaciones rápidas como salteados o emulsiones. En cocina profesional no es opcional: es el sistema de trabajo.","claves":["Leer la receta entera antes de tocar un solo ingrediente","Pesar y cortar todo antes de empezar la cocción","Agrupar los ingredientes por orden de uso en la receta","Limpiar sobre la marcha: la mesa despejada es parte de la mise en place"]},{"nombre":"El punto del arroz","resumen":"Cada preparación pide un punto distinto: suelto para guarnición, cremoso para risotto, seco y en capa fina para paella. La proporción de líquido, el tipo de grano y si se remueve o no durante la cocción determinan el resultado. Como referencia, arroz blanco suelto: 2 partes de agua por 1 de arroz, unos 15-18 minutos, y reposo tapado al final.","claves":["Para arroz suelto, lavar el grano antes; para risotto o paella, nunca (el almidón es el punto)","En paella no se remueve tras repartir el arroz; en risotto se remueve casi constantemente","Respetar la proporción de líquido y no destapar durante la cocción del arroz blanco","Reposo de 5 minutos fuera del fuego: termina la cocción y asienta el grano"]}],"conversiones":[{"ingrediente":"harina de trigo","tazaG":130,"cucharadaG":8},{"ingrediente":"azúcar blanco","tazaG":210,"cucharadaG":12.5},{"ingrediente":"azúcar glas","tazaG":125,"cucharadaG":8},{"ingrediente":"arroz","tazaG":200,"cucharadaG":12},{"ingrediente":"mantequilla","tazaG":230,"cucharadaG":14},{"ingrediente":"aceite","tazaG":225,"cucharadaG":13.5},{"ingrediente":"cacao en polvo","tazaG":105,"cucharadaG":6},{"ingrediente":"maicena","tazaG":130,"cucharadaG":8},{"ingrediente":"miel","tazaG":350,"cucharadaG":21},{"ingrediente":"pan rallado","tazaG":110,"cucharadaG":7},{"ingrediente":"queso rallado","tazaG":100,"cucharadaG":6},{"ingrediente":"sal fina","tazaG":300,"cucharadaG":18}],"temperaturas":[{"nombre":"muy suave","celsius":120,"fahrenheit":250,"gas":"1/2-1","usos":"merengues, secar frutas, cocciones largas"},{"nombre":"suave","celsius":150,"fahrenheit":300,"gas":"2","usos":"flanes, guisos al horno, carnes lentas"},{"nombre":"moderado","celsius":180,"fahrenheit":350,"gas":"4","usos":"bizcochos, galletas, tartas, gratinados suaves"},{"nombre":"medio-alto","celsius":200,"fahrenheit":400,"gas":"6","usos":"pollo asado, verduras asadas, hojaldre"},{"nombre":"alto","celsius":220,"fahrenheit":425,"gas":"7","usos":"pan, empanadas, gratinar rápido"},{"nombre":"muy alto","celsius":250,"fahrenheit":480,"gas":"9","usos":"pizza, dorados intensos, sellados finales"}],"equivalencias":[{"de":"1 cucharada (cda)","a":"15 ml"},{"de":"1 cucharadita (cdta)","a":"5 ml"},{"de":"1 taza","a":"250 ml"},{"de":"1 vaso de agua","a":"200 ml"},{"de":"1 huevo M (sin cáscara)","a":"50 g aprox. (30 g clara + 20 g yema)"},{"de":"1 diente de ajo","a":"5 g aprox."},{"de":"zumo de 1 limón","a":"40-50 ml"},{"de":"1 pizca","a":"0,3-0,5 g (lo que cabe entre dos dedos)"},{"de":"levadura seca de panadería","a":"1 g seca = 3 g de levadura fresca"},{"de":"1 lámina de gelatina","a":"2 g (cuaja unos 100-125 ml de líquido)"}]},"temporada":{"meses":[{"mes":1,"nombre":"Enero","productos":[{"nombre":"Naranja","tipo":"fruta","emoji":"🍊"},{"nombre":"Mandarina","tipo":"fruta","emoji":"🍊"},{"nombre":"Kiwi","tipo":"fruta","emoji":"🥝"},{"nombre":"Limón","tipo":"fruta","emoji":"🍋"},{"nombre":"Alcachofa","tipo":"verdura","emoji":"🌿"},{"nombre":"Coliflor","tipo":"verdura","emoji":"🥦"},{"nombre":"Acelga","tipo":"verdura","emoji":"🥬"},{"nombre":"Puerro","tipo":"verdura","emoji":"🧅"}],"consejo":"Aprovecha el precio bajo de los cítricos: compra por cajas y congela el zumo de naranja en cubiteras."},{"mes":2,"nombre":"Febrero","productos":[{"nombre":"Naranja","tipo":"fruta","emoji":"🍊"},{"nombre":"Fresa","tipo":"fruta","emoji":"🍓"},{"nombre":"Limón","tipo":"fruta","emoji":"🍋"},{"nombre":"Aguacate","tipo":"fruta","emoji":"🥑"},{"nombre":"Brócoli","tipo":"verdura","emoji":"🥦"},{"nombre":"Espinaca","tipo":"verdura","emoji":"🥬"},{"nombre":"Repollo","tipo":"verdura","emoji":"🥬"},{"nombre":"Habas","tipo":"verdura","emoji":"🫛"}],"consejo":"Compra habas y espinacas en su mejor momento y evita el tomate de invernadero, caro e insípido."},{"mes":3,"nombre":"Marzo","productos":[{"nombre":"Fresa","tipo":"fruta","emoji":"🍓"},{"nombre":"Naranja","tipo":"fruta","emoji":"🍊"},{"nombre":"Papaya","tipo":"fruta","emoji":"🥭"},{"nombre":"Limón","tipo":"fruta","emoji":"🍋"},{"nombre":"Espárrago","tipo":"verdura","emoji":"🌱"},{"nombre":"Guisante","tipo":"verdura","emoji":"🫛"},{"nombre":"Alcachofa","tipo":"verdura","emoji":"🌿"},{"nombre":"Lechuga","tipo":"verdura","emoji":"🥬"}],"consejo":"Llegan las primeras fresas: cómpralas maduras solo para consumir en el día y espera a abril para mejores precios."},{"mes":4,"nombre":"Abril","productos":[{"nombre":"Fresa","tipo":"fruta","emoji":"🍓"},{"nombre":"Níspero","tipo":"fruta","emoji":"🍑"},{"nombre":"Mango","tipo":"fruta","emoji":"🥭"},{"nombre":"Plátano","tipo":"fruta","emoji":"🍌"},{"nombre":"Espárrago","tipo":"verdura","emoji":"🌱"},{"nombre":"Habas","tipo":"verdura","emoji":"🫛"},{"nombre":"Cebolleta","tipo":"verdura","emoji":"🧅"},{"nombre":"Acelga","tipo":"verdura","emoji":"🥬"}],"consejo":"El espárrago está en plena temporada: escáldalo y congélalo en porciones para tener reserva el resto del año."},{"mes":5,"nombre":"Mayo","productos":[{"nombre":"Cereza","tipo":"fruta","emoji":"🍒"},{"nombre":"Albaricoque","tipo":"fruta","emoji":"🍑"},{"nombre":"Fresa","tipo":"fruta","emoji":"🍓"},{"nombre":"Melón","tipo":"fruta","emoji":"🍈"},{"nombre":"Calabacín","tipo":"verdura","emoji":"🥒"},{"nombre":"Judía verde","tipo":"verdura","emoji":"🫛"},{"nombre":"Lechuga","tipo":"verdura","emoji":"🥬"},{"nombre":"Zanahoria","tipo":"verdura","emoji":"🥕"}],"consejo":"Compra cerezas firmes y con el rabo verde, y congela las fresas más maduras para batidos y mermelada."},{"mes":6,"nombre":"Junio","productos":[{"nombre":"Sandía","tipo":"fruta","emoji":"🍉"},{"nombre":"Melocotón","tipo":"fruta","emoji":"🍑"},{"nombre":"Cereza","tipo":"fruta","emoji":"🍒"},{"nombre":"Arándano","tipo":"fruta","emoji":"🫐"},{"nombre":"Tomate","tipo":"verdura","emoji":"🍅"},{"nombre":"Pimiento","tipo":"verdura","emoji":"🫑"},{"nombre":"Pepino","tipo":"verdura","emoji":"🥒"},{"nombre":"Berenjena","tipo":"verdura","emoji":"🍆"}],"consejo":"Empieza la fruta de hueso: compra melocotones algo firmes y déjalos madurar en casa, nunca en la nevera."},{"mes":7,"nombre":"Julio","productos":[{"nombre":"Sandía","tipo":"fruta","emoji":"🍉"},{"nombre":"Melón","tipo":"fruta","emoji":"🍈"},{"nombre":"Ciruela","tipo":"fruta","emoji":"🍑"},{"nombre":"Mango","tipo":"fruta","emoji":"🥭"},{"nombre":"Tomate","tipo":"verdura","emoji":"🍅"},{"nombre":"Elote (maíz)","tipo":"verdura","emoji":"🌽"},{"nombre":"Calabacín","tipo":"verdura","emoji":"🥒"},{"nombre":"Nopal","tipo":"verdura","emoji":"🌵"}],"consejo":"Compra la sandía entera en lugar de en porciones: sale más barata por kilo y aguanta días sin abrir."},{"mes":8,"nombre":"Agosto","productos":[{"nombre":"Higo","tipo":"fruta","emoji":"🍇"},{"nombre":"Melocotón","tipo":"fruta","emoji":"🍑"},{"nombre":"Sandía","tipo":"fruta","emoji":"🍉"},{"nombre":"Pera","tipo":"fruta","emoji":"🍐"},{"nombre":"Berenjena","tipo":"verdura","emoji":"🍆"},{"nombre":"Pimiento","tipo":"verdura","emoji":"🫑"},{"nombre":"Tomate","tipo":"verdura","emoji":"🍅"},{"nombre":"Pepino","tipo":"verdura","emoji":"🥒"}],"consejo":"El tomate está en su pico de sabor y precio: compra de sobra y congela salsa casera en porciones para el invierno."},{"mes":9,"nombre":"Septiembre","productos":[{"nombre":"Uva","tipo":"fruta","emoji":"🍇"},{"nombre":"Manzana","tipo":"fruta","emoji":"🍎"},{"nombre":"Guayaba","tipo":"fruta","emoji":"🍈"},{"nombre":"Mora","tipo":"fruta","emoji":"🫐"},{"nombre":"Calabaza","tipo":"verdura","emoji":"🎃"},{"nombre":"Maíz","tipo":"verdura","emoji":"🌽"},{"nombre":"Acelga","tipo":"verdura","emoji":"🥬"},{"nombre":"Pimiento","tipo":"verdura","emoji":"🫑"}],"consejo":"Aprovecha el final del pimiento de temporada: ásalos en tanda y congélalos ya pelados y en tiras."},{"mes":10,"nombre":"Octubre","productos":[{"nombre":"Granada","tipo":"fruta","emoji":"🍎"},{"nombre":"Caqui","tipo":"fruta","emoji":"🍅"},{"nombre":"Castaña","tipo":"fruta","emoji":"🌰"},{"nombre":"Membrillo","tipo":"fruta","emoji":"🍐"},{"nombre":"Boniato (camote)","tipo":"verdura","emoji":"🍠"},{"nombre":"Setas","tipo":"verdura","emoji":"🍄"},{"nombre":"Coliflor","tipo":"verdura","emoji":"🥦"},{"nombre":"Calabaza","tipo":"verdura","emoji":"🎃"}],"consejo":"Compra membrillo y calabaza para cocinar en tanda: el dulce de membrillo y el puré de calabaza se conservan meses."},{"mes":11,"nombre":"Noviembre","productos":[{"nombre":"Naranja","tipo":"fruta","emoji":"🍊"},{"nombre":"Mandarina","tipo":"fruta","emoji":"🍊"},{"nombre":"Kiwi","tipo":"fruta","emoji":"🥝"},{"nombre":"Chirimoya","tipo":"fruta","emoji":"🍈"},{"nombre":"Espinaca","tipo":"verdura","emoji":"🥬"},{"nombre":"Puerro","tipo":"verdura","emoji":"🧅"},{"nombre":"Zanahoria","tipo":"verdura","emoji":"🥕"},{"nombre":"Brócoli","tipo":"verdura","emoji":"🥦"}],"consejo":"Vuelven los cítricos: compra mandarinas por malla y evita fresas y frutos rojos, que ya van fuera de temporada."},{"mes":12,"nombre":"Diciembre","productos":[{"nombre":"Naranja","tipo":"fruta","emoji":"🍊"},{"nombre":"Piña","tipo":"fruta","emoji":"🍍"},{"nombre":"Guayaba","tipo":"fruta","emoji":"🍈"},{"nombre":"Pomelo","tipo":"fruta","emoji":"🍊"},{"nombre":"Lombarda","tipo":"verdura","emoji":"🥬"},{"nombre":"Alcachofa","tipo":"verdura","emoji":"🌿"},{"nombre":"Coles de Bruselas","tipo":"verdura","emoji":"🥬"},{"nombre":"Camote","tipo":"verdura","emoji":"🍠"}],"consejo":"Encarga con antelación la lombarda y la piña para las fiestas: la semana de Navidad los precios suben con fuerza."}]}};
+'use strict';
+/* ============ Utilidades ============ */
+const $ = (sel, raiz) => (raiz || document).querySelector(sel);
+const $$ = (sel, raiz) => Array.from((raiz || document).querySelectorAll(sel));
+const esc = (s) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function aviso(texto) {
+  const caja = $('#avisos');
+  const el = document.createElement('div');
+  el.className = 'aviso';
+  el.textContent = texto;
+  caja.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .4s'; }, 2400);
+  setTimeout(() => el.remove(), 2900);
+}
+
+/* Fracciones de cocina: 1.5 → 1½ */
+function formatearCantidad(valor) {
+  if (valor == null || isNaN(valor)) return '';
+  if (valor >= 100) return String(Math.round(valor / 5) * 5);
+  if (valor >= 10) return String(Math.round(valor));
+  // por debajo de 10: tercios y cuartos
+  const tercios = Math.round(valor * 3) / 3;
+  const cuartos = Math.round(valor * 4) / 4;
+  const usarTercios = Math.abs(valor - tercios) < Math.abs(valor - cuartos) - 1e-9;
+  const v = usarTercios ? tercios : cuartos;
+  const entero = Math.floor(v + 1e-9);
+  const resto = v - entero;
+  const FR = [[1 / 3, '⅓'], [2 / 3, '⅔'], [0.25, '¼'], [0.5, '½'], [0.75, '¾']];
+  let frac = '';
+  for (const [f, s] of FR) { if (Math.abs(resto - f) < 0.04) { frac = s; break; } }
+  if (!frac && resto > 0.04) return String(Math.round(v * 100) / 100);
+  if (entero === 0 && frac) return frac;
+  if (entero === 0) return '0';
+  return entero + frac;
+}
+
+const minutosBonitos = (m) => m >= 60
+  ? Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) + '′' : '')
+  : m + '′';
+
+/* ============ Tema ============ */
+const TEMA_KEY = 'sobremesa:tema';
+const mediaOscuro = window.matchMedia('(prefers-color-scheme: dark)');
+function temaEfectivo() {
+  const marcado = document.documentElement.getAttribute('data-theme');
+  if (marcado) return marcado;
+  return mediaOscuro.matches ? 'dark' : 'light';
+}
+function aplicarTemaGuardado() {
+  const guardado = localStorage.getItem(TEMA_KEY);
+  if (guardado === 'dark' || guardado === 'light') {
+    document.documentElement.setAttribute('data-theme', guardado);
+  }
+  $('#tema-icono').textContent = temaEfectivo() === 'dark' ? '☾' : '☀';
+}
+$('#btn-tema').addEventListener('click', () => {
+  const nuevo = temaEfectivo() === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', nuevo);
+  localStorage.setItem(TEMA_KEY, nuevo);
+  $('#tema-icono').textContent = nuevo === 'dark' ? '☾' : '☀';
+});
+aplicarTemaGuardado();
+
+/* ============ Sonido del temporizador ============ */
+let audioCtx = null;
+function campana() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    [0, 0.35, 0.7].forEach((t, i) => {
+      const osc = audioCtx.createOscillator();
+      const gan = audioCtx.createGain();
+      osc.connect(gan); gan.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = i === 2 ? 1174.66 : 880; // La5, La5, Re6
+      const t0 = audioCtx.currentTime + t;
+      gan.gain.setValueAtTime(0.0001, t0);
+      gan.gain.exponentialRampToValueAtTime(0.22, t0 + 0.02);
+      gan.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.3);
+      osc.start(t0); osc.stop(t0 + 0.32);
+    });
+  } catch (e) { /* sin audio, sin drama */ }
+}
+
+/* ============ Vapor de la portada ============ */
+(function vapor() {
+  const lienzo = $('#vapor');
+  if (!lienzo || reduceMotion) return;
+  const ctx = lienzo.getContext('2d');
+  let ancho = 0, alto = 0, visible = true, particulas = [];
+
+  function medir() {
+    const caja = lienzo.parentElement.getBoundingClientRect();
+    ancho = lienzo.width = Math.floor(caja.width);
+    alto = lienzo.height = Math.floor(caja.height);
+  }
+  function crear(n) {
+    particulas = [];
+    for (let i = 0; i < n; i++) {
+      particulas.push({
+        x: ancho * (0.26 + Math.random() * 0.48),
+        y: alto * (0.5 + Math.random() * 0.8),
+        r: 60 + Math.random() * 90,
+        v: 0.12 + Math.random() * 0.2,
+        fase: Math.random() * Math.PI * 2,
+        alfa: 0.012 + Math.random() * 0.016,
+      });
+    }
+  }
+  function tinta() {
+    return temaEfectivo() === 'dark' ? '233,234,225' : '44,78,158';
+  }
+  let marco = 0;
+  function pintar() {
+    if (!visible || document.hidden) { requestAnimationFrame(pintar); return; }
+    marco++;
+    ctx.clearRect(0, 0, ancho, alto);
+    const rgb = tinta();
+    for (const p of particulas) {
+      p.y -= p.v;
+      p.x += Math.sin(marco / 90 + p.fase) * 0.35;
+      if (p.y < -p.r) { p.y = alto + p.r; p.x = ancho * (0.26 + Math.random() * 0.48); }
+      const desvanecer = Math.min(1, Math.max(0, p.y / (alto * 0.55)));
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+      g.addColorStop(0, 'rgba(' + rgb + ',' + (p.alfa * desvanecer) + ')');
+      g.addColorStop(1, 'rgba(' + rgb + ',0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    }
+    requestAnimationFrame(pintar);
+  }
+  medir(); crear(12); pintar();
+  window.addEventListener('resize', () => { medir(); crear(12); });
+  new IntersectionObserver((es) => { visible = es[0].isIntersecting; }).observe(lienzo);
+})();
+
+/* ============ Aparición al hacer scroll ============ */
+(function () {
+  if (reduceMotion) { $$('.aparece').forEach(e => e.classList.add('visto')); return; }
+  const io = new IntersectionObserver((entradas) => {
+    entradas.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visto'); io.unobserve(en.target); } });
+  }, { threshold: 0.12 });
+  $$('.aparece').forEach(e => io.observe(e));
+})();
+
+/* ============ Datos derivados ============ */
+const RECETAS = DATA.recetas;
+const porId = Object.fromEntries(RECETAS.map(r => [r.id, r]));
+const PAISES = [...new Set(RECETAS.map(r => r.pais))].sort((a, b) => a.localeCompare(b, 'es'));
+const tiempoTotal = (r) => r.tiempoPrepMin + r.tiempoCoccionMin;
+
+$('#cifra-recetas').textContent = RECETAS.length;
+$('#cifra-paises').textContent = PAISES.length;
+$('#cifra-pasos').textContent = RECETAS.reduce((n, r) => n + r.pasos.length, 0);
+
+const selPais = $('#filtro-pais');
+PAISES.forEach(p => {
+  const op = document.createElement('option');
+  op.value = p; op.textContent = p;
+  selPais.appendChild(op);
+});
+
+/* ============ Insignias ============ */
+const claseDif = { 'Fácil': 'insignia-facil', 'Media': 'insignia-media', 'Elaborada': 'insignia-elaborada' };
+function insigniasDe(r, completas) {
+  let h = '';
+  h += '<span class="insignia insignia-tiempo">⏱ ' + minutosBonitos(tiempoTotal(r)) + '</span>';
+  h += '<span class="insignia ' + claseDif[r.dificultad] + '">' + esc(r.dificultad) + '</span>';
+  if (r.vegetariano) h += '<span class="insignia insignia-veg">🌿 Vegetariana</span>';
+  if (r.picante > 0) h += '<span class="insignia insignia-picante">' + '🌶'.repeat(Math.min(3, r.picante)) + '</span>';
+  if (completas && r.caloriasPorPorcion) h += '<span class="insignia insignia-tiempo">' + Math.round(r.caloriasPorPorcion) + ' kcal/ración</span>';
+  return h;
+}
+
+/* ============ Recetario: filtros y rejilla ============ */
+const filtro = { texto: '', cat: 'Todas', pais: '', dif: '', veg: false, rapidas: false };
+
+function coincide(r) {
+  if (filtro.cat !== 'Todas' && r.categoria !== filtro.cat) return false;
+  if (filtro.pais && r.pais !== filtro.pais) return false;
+  if (filtro.dif && r.dificultad !== filtro.dif) return false;
+  if (filtro.veg && !r.vegetariano) return false;
+  if (filtro.rapidas && tiempoTotal(r) >= 45) return false;
+  if (filtro.texto) {
+    const t = filtro.texto.toLowerCase();
+    const pajar = (r.nombre + ' ' + r.pais + ' ' + r.descripcion + ' ' +
+      r.ingredientes.map(i => i.nombre).join(' ')).toLowerCase();
+    if (!pajar.includes(t)) return false;
+  }
+  return true;
+}
+
+function pintarRejilla() {
+  const rejilla = $('#rejilla-platos');
+  const visibles = RECETAS.filter(coincide);
+  $('#resultado-linea').textContent = visibles.length === RECETAS.length
+    ? RECETAS.length + ' recetas en el cuaderno'
+    : visibles.length + ' de ' + RECETAS.length + ' recetas';
+  if (!visibles.length) {
+    rejilla.innerHTML = '<div class="sin-resultados"><b>La nevera está vacía</b>Con esos filtros no queda nada. Afloja alguno y volvemos a cocinar.</div>';
+    return;
+  }
+  rejilla.innerHTML = visibles.map(r => (
+    '<article class="plato" role="button" tabindex="0" data-id="' + esc(r.id) + '" aria-label="Abrir receta: ' + esc(r.nombre) + '">' +
+      '<div class="plato-ceramica" aria-hidden="true"><span>' + r.emoji + '</span></div>' +
+      '<p class="plato-region">' + r.bandera + ' ' + esc(r.pais) + ' · ' + esc(r.categoria) + '</p>' +
+      '<h3>' + esc(r.nombre) + '</h3>' +
+      '<p class="plato-desc">' + esc(r.descripcion) + '</p>' +
+      '<div class="plato-meta">' + insigniasDe(r, false) + '</div>' +
+    '</article>'
+  )).join('');
+}
+
+$('#buscador').addEventListener('input', (e) => { filtro.texto = e.target.value.trim(); pintarRejilla(); });
+$('#chips-categoria').addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip'); if (!chip) return;
+  $$('#chips-categoria .chip').forEach(c => c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'));
+  filtro.cat = chip.dataset.cat; pintarRejilla();
+});
+selPais.addEventListener('change', () => { filtro.pais = selPais.value; pintarRejilla(); });
+$('#filtro-dificultad').addEventListener('change', (e) => { filtro.dif = e.target.value; pintarRejilla(); });
+$('#chip-veg').addEventListener('click', (e) => {
+  filtro.veg = !filtro.veg; e.currentTarget.setAttribute('aria-pressed', String(filtro.veg)); pintarRejilla();
+});
+$('#chip-rapidas').addEventListener('click', (e) => {
+  filtro.rapidas = !filtro.rapidas; e.currentTarget.setAttribute('aria-pressed', String(filtro.rapidas)); pintarRejilla();
+});
+$('#rejilla-platos').addEventListener('click', (e) => {
+  const tarjeta = e.target.closest('.plato'); if (tarjeta) abrirFicha(tarjeta.dataset.id);
+});
+$('#rejilla-platos').addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const tarjeta = e.target.closest('.plato'); if (!tarjeta) return;
+  e.preventDefault(); abrirFicha(tarjeta.dataset.id);
+});
+
+/* ============ Gestión de temporizadores ============ */
+const cronometros = new Map(); // elemento -> {intervalo, restante}
+function detenerCrono(el) {
+  const c = cronometros.get(el);
+  if (c) { clearInterval(c.intervalo); cronometros.delete(el); }
+}
+function detenerTodosLosCronos() {
+  for (const el of [...cronometros.keys()]) detenerCrono(el);
+}
+const mmss = (seg) => {
+  const m = Math.floor(seg / 60), s = seg % 60;
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+};
+
+function chipTemporizador(minutos) {
+  const b = document.createElement('button');
+  b.className = 'timer-chip';
+  b.type = 'button';
+  const etiquetaInicial = '⏱ ' + minutosBonitos(minutos) + ' · empezar';
+  b.textContent = etiquetaInicial;
+  b.addEventListener('click', () => {
+    if (b.classList.contains('fin')) {
+      b.classList.remove('fin'); b.textContent = etiquetaInicial; return;
+    }
+    if (cronometros.has(b)) { // cancelar
+      detenerCrono(b); b.classList.remove('corriendo'); b.textContent = etiquetaInicial; return;
+    }
+    let restante = Math.round(minutos * 60);
+    b.classList.add('corriendo');
+    b.textContent = '⏸ ' + mmss(restante);
+    const intervalo = setInterval(() => {
+      restante--;
+      if (restante <= 0) {
+        detenerCrono(b);
+        b.classList.remove('corriendo'); b.classList.add('fin');
+        b.textContent = '🔔 ¡Listo! (tocar para reiniciar)';
+        campana(); aviso('⏱ Tiempo cumplido');
+        return;
+      }
+      b.textContent = '⏸ ' + mmss(restante);
+    }, 1000);
+    cronometros.set(b, { intervalo });
+  });
+  return b;
+}
+
+/* ============ Ficha de receta ============ */
+let recetaAbierta = null;
+let comensales = 4;
+let enfoquePrevio = null;
+
+function bloquearFondo(si) { document.body.style.overflow = si ? 'hidden' : ''; }
+
+function pintarIngredientes() {
+  const r = recetaAbierta;
+  const factor = comensales / r.porcionesBase;
+  $('#num-comensales').innerHTML = '<b>' + comensales + '</b> comensal' + (comensales === 1 ? '' : 'es');
+  $('#lista-ingredientes').innerHTML = r.ingredientes.map((ing, i) => {
+    const cant = (ing.escalable && ing.cantidad != null)
+      ? formatearCantidad(ing.cantidad * factor) + (ing.unidad ? ' ' + esc(ing.unidad) : '')
+      : (ing.cantidad != null ? formatearCantidad(ing.cantidad) + (ing.unidad ? ' ' + esc(ing.unidad) : '') : 'al gusto');
+    const nota = ing.nota ? ' <small>(' + esc(ing.nota) + ')</small>' : '';
+    return '<li><label><input type="checkbox" data-i="' + i + '">' +
+      '<span class="ing-cant">' + cant + '</span>' +
+      '<span class="ing-nombre">' + esc(ing.nombre) + nota + '</span></label></li>';
+  }).join('');
+}
+
+function abrirFicha(id) {
+  const r = porId[id]; if (!r) return;
+  recetaAbierta = r;
+  comensales = r.porcionesBase;
+  enfoquePrevio = document.activeElement;
+
+  $('#ficha-emoji').textContent = r.emoji;
+  $('#ficha-region').textContent = r.bandera + ' ' + r.pais + ' · ' + r.categoria + ' · receta para compartir';
+  $('#ficha-titulo').textContent = r.nombre;
+  $('#ficha-desc').textContent = r.descripcion;
+  $('#ficha-insignias').innerHTML = insigniasDe(r, true);
+  pintarIngredientes();
+
+  const pasos = $('#pasos');
+  pasos.innerHTML = '';
+  r.pasos.forEach((p, i) => {
+    const li = document.createElement('li');
+    li.className = 'paso';
+    li.innerHTML =
+      '<div class="paso-num">' + String(i + 1).padStart(2, '0') + '</div>' +
+      '<div class="paso-cuerpo"><label><input type="checkbox">' +
+      '<span class="paso-texto">' + esc(p.texto) + '</span></label></div>';
+    const casilla = li.querySelector('input');
+    casilla.addEventListener('change', () => li.classList.toggle('hecho', casilla.checked));
+    if (p.timerMin) {
+      const extra = document.createElement('div');
+      extra.className = 'paso-extra';
+      extra.appendChild(chipTemporizador(p.timerMin));
+      li.querySelector('.paso-cuerpo').appendChild(extra);
+    }
+    pasos.appendChild(li);
+  });
+
+  $('#ficha-historia').textContent = r.historia;
+  $('#ficha-consejos').innerHTML = r.consejos.map(c => '<li>' + esc(c) + '</li>').join('');
+  $('#ficha-variaciones').innerHTML = r.variaciones.map(v => '<li>' + esc(v) + '</li>').join('');
+  $('#ficha-maridaje').textContent = r.maridaje || '—';
+
+  $('#velo').classList.add('abierto');
+  $('#ficha').classList.add('abierta');
+  $('#ficha-scroll').scrollTop = 0;
+  bloquearFondo(true);
+  $('#ficha-cerrar').focus();
+}
+
+function cerrarFicha() {
+  salirModoCocina();
+  detenerTodosLosCronos();
+  $('#ficha').classList.remove('abierta');
+  $('#velo').classList.remove('abierto');
+  bloquearFondo(false);
+  recetaAbierta = null;
+  if (enfoquePrevio && enfoquePrevio.focus) enfoquePrevio.focus();
+}
+
+$('#ficha-cerrar').addEventListener('click', cerrarFicha);
+$('#menos-comensales').addEventListener('click', () => { if (comensales > 1) { comensales--; pintarIngredientes(); } });
+$('#mas-comensales').addEventListener('click', () => { if (comensales < 16) { comensales++; pintarIngredientes(); } });
+$('#btn-imprimir').addEventListener('click', () => window.print());
+
+/* ============ Modo cocina ============ */
+let pasoActual = 0;
+let bloqueoPantalla = null;
+
+async function pedirPantallaEncendida() {
+  try { bloqueoPantalla = await navigator.wakeLock.request('screen'); } catch (e) { /* opcional */ }
+}
+function soltarPantalla() {
+  if (bloqueoPantalla) { bloqueoPantalla.release().catch(() => {}); bloqueoPantalla = null; }
+}
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && $('#modo-cocina').classList.contains('activo')) pedirPantallaEncendida();
+});
+
+let cronoCocina = null;
+function limpiarCronoCocina() {
+  if (cronoCocina) { clearInterval(cronoCocina); cronoCocina = null; }
+  $('#mc-timer-num').classList.remove('fin');
+}
+
+function pintarPasoCocina() {
+  const r = recetaAbierta; if (!r) return;
+  const p = r.pasos[pasoActual];
+  $('#mc-contador').textContent = 'Paso ' + (pasoActual + 1) + ' / ' + r.pasos.length;
+  $('#mc-progreso').style.width = Math.round(((pasoActual + 1) / r.pasos.length) * 100) + '%';
+  $('#mc-paso-num').textContent = String(pasoActual + 1).padStart(2, '0');
+  $('#mc-texto').textContent = p.texto;
+  limpiarCronoCocina();
+  const zona = $('#mc-timer');
+  if (p.timerMin) {
+    zona.hidden = false;
+    $('#mc-timer-num').textContent = mmss(Math.round(p.timerMin * 60));
+    $('#mc-timer-btn').textContent = '▶ Empezar';
+  } else {
+    zona.hidden = true;
+  }
+  $('#mc-anterior').disabled = pasoActual === 0;
+  $('#mc-siguiente').textContent = pasoActual === r.pasos.length - 1 ? '✓ Terminar' : 'Siguiente →';
+}
+
+$('#mc-timer-btn').addEventListener('click', () => {
+  const p = recetaAbierta && recetaAbierta.pasos[pasoActual];
+  if (!p || !p.timerMin) return;
+  const num = $('#mc-timer-num');
+  if (cronoCocina) { // cancelar
+    limpiarCronoCocina();
+    num.textContent = mmss(Math.round(p.timerMin * 60));
+    $('#mc-timer-btn').textContent = '▶ Empezar';
+    return;
+  }
+  let restante = Math.round(p.timerMin * 60);
+  num.classList.remove('fin');
+  num.textContent = mmss(restante);
+  $('#mc-timer-btn').textContent = '✕ Cancelar';
+  cronoCocina = setInterval(() => {
+    restante--;
+    if (restante <= 0) {
+      limpiarCronoCocina();
+      num.textContent = '00:00';
+      num.classList.add('fin');
+      $('#mc-timer-btn').textContent = '↺ Repetir';
+      campana(); aviso('⏱ Paso ' + (pasoActual + 1) + ': tiempo cumplido');
+      return;
+    }
+    num.textContent = mmss(restante);
+  }, 1000);
+});
+
+function entrarModoCocina() {
+  if (!recetaAbierta) return;
+  pasoActual = 0;
+  $('#modo-cocina').classList.add('activo');
+  pintarPasoCocina();
+  pedirPantallaEncendida();
+  $('#mc-siguiente').focus();
+}
+function salirModoCocina() {
+  limpiarCronoCocina();
+  soltarPantalla();
+  $('#modo-cocina').classList.remove('activo');
+}
+$('#btn-modo-cocina').addEventListener('click', entrarModoCocina);
+$('#mc-salir').addEventListener('click', salirModoCocina);
+$('#mc-anterior').addEventListener('click', () => { if (pasoActual > 0) { pasoActual--; pintarPasoCocina(); } });
+$('#mc-siguiente').addEventListener('click', () => {
+  if (!recetaAbierta) return;
+  if (pasoActual < recetaAbierta.pasos.length - 1) { pasoActual++; pintarPasoCocina(); }
+  else { salirModoCocina(); aviso('🍽 ¡A la mesa! Receta terminada'); }
+});
+
+/* ============ Lista de la compra ============ */
+const COMPRA_KEY = 'sobremesa:compra';
+let compra = [];
+try { compra = JSON.parse(localStorage.getItem(COMPRA_KEY) || '[]'); } catch (e) { compra = []; }
+
+function guardarCompra() {
+  localStorage.setItem(COMPRA_KEY, JSON.stringify(compra));
+  const n = compra.filter(i => !i.hecho).length;
+  const badge = $('#contador-compra');
+  badge.hidden = n === 0;
+  badge.textContent = n;
+}
+
+function pintarCompra() {
+  const cuerpo = $('#cajon-cuerpo');
+  if (!compra.length) {
+    cuerpo.innerHTML = '<p class="compra-vacia"><span class="em">🧺</span>La cesta está vacía.<br>Abre una receta y pulsa «Añadir a la compra».</p>';
+    return;
+  }
+  const grupos = {};
+  compra.forEach((it, idx) => {
+    (grupos[it.receta] = grupos[it.receta] || []).push([it, idx]);
+  });
+  cuerpo.innerHTML = Object.entries(grupos).map(([nombre, items]) =>
+    '<div class="compra-grupo"><h3>' + esc(nombre) + '</h3><ul>' +
+    items.map(([it, idx]) =>
+      '<li><label><input type="checkbox" data-idx="' + idx + '"' + (it.hecho ? ' checked' : '') + '>' +
+      '<span class="ing-cant">' + esc(it.cant) + '</span>' +
+      '<span>' + esc(it.nombre) + '</span></label></li>'
+    ).join('') + '</ul></div>'
+  ).join('');
+}
+
+$('#cajon-cuerpo').addEventListener('change', (e) => {
+  const casilla = e.target.closest('input[type="checkbox"]'); if (!casilla) return;
+  const it = compra[Number(casilla.dataset.idx)];
+  if (it) { it.hecho = casilla.checked; guardarCompra(); pintarCompra(); }
+});
+
+$('#btn-a-compra').addEventListener('click', () => {
+  const r = recetaAbierta; if (!r) return;
+  const factor = comensales / r.porcionesBase;
+  compra = compra.filter(it => it.rid !== r.id); // sustituir si ya estaba
+  r.ingredientes.forEach(ing => {
+    const cant = (ing.escalable && ing.cantidad != null)
+      ? formatearCantidad(ing.cantidad * factor) + (ing.unidad ? ' ' + ing.unidad : '')
+      : (ing.cantidad != null ? formatearCantidad(ing.cantidad) + (ing.unidad ? ' ' + ing.unidad : '') : 'al gusto');
+    compra.push({ rid: r.id, receta: r.nombre, nombre: ing.nombre, cant, hecho: false });
+  });
+  guardarCompra(); pintarCompra();
+  aviso('🧺 ' + r.nombre + ' → a la compra (' + comensales + ' comensales)');
+});
+
+function abrirCajon() { pintarCompra(); $('#cajon').classList.add('abierto'); }
+function cerrarCajon() { $('#cajon').classList.remove('abierto'); }
+$('#btn-abrir-compra').addEventListener('click', abrirCajon);
+$('#btn-cerrar-cajon').addEventListener('click', cerrarCajon);
+
+$('#btn-vaciar-compra').addEventListener('click', () => {
+  if (!compra.length) return;
+  compra = []; guardarCompra(); pintarCompra(); aviso('Cesta vaciada');
+});
+
+$('#btn-copiar-compra').addEventListener('click', async () => {
+  if (!compra.length) { aviso('No hay nada que copiar'); return; }
+  const grupos = {};
+  compra.forEach(it => { (grupos[it.receta] = grupos[it.receta] || []).push(it); });
+  const texto = 'LA COMPRA — Sobremesa\n\n' + Object.entries(grupos).map(([nombre, items]) =>
+    '· ' + nombre + '\n' + items.map(it => '  ' + (it.hecho ? '✓' : '□') + ' ' + it.cant + ' ' + it.nombre).join('\n')
+  ).join('\n\n');
+  try {
+    await navigator.clipboard.writeText(texto);
+    aviso('⧉ Lista copiada al portapapeles');
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = texto; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); aviso('⧉ Lista copiada al portapapeles'); }
+    catch (e2) { aviso('No se pudo copiar en este navegador'); }
+    ta.remove();
+  }
+});
+guardarCompra();
+
+/* ============ Sorpresa: ¿qué cocino hoy? ============ */
+let sorpresaElegida = null;
+
+function marcarChipGrupo(grupo, chip) {
+  $$('.chip', grupo).forEach(c => c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'));
+}
+$('#sorpresa-tiempo').addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip'); if (chip) marcarChipGrupo($('#sorpresa-tiempo'), chip);
+});
+$('#sorpresa-tipo').addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip'); if (chip) marcarChipGrupo($('#sorpresa-tipo'), chip);
+});
+
+function abrirSorpresa() {
+  enfoquePrevio = document.activeElement;
+  $('#modal-sorpresa').classList.add('abierta');
+  $('#velo').classList.add('abierto');
+  bloquearFondo(true);
+  $('#sorpresa-resultado').classList.remove('visible');
+  $('#btn-abrir-sorpresa').hidden = true;
+  $('#ruleta').textContent = '🍲';
+  $('#btn-girar').focus();
+}
+function cerrarSorpresa() {
+  $('#modal-sorpresa').classList.remove('abierta');
+  $('#velo').classList.remove('abierto');
+  bloquearFondo(false);
+  if (enfoquePrevio && enfoquePrevio.focus) enfoquePrevio.focus();
+}
+$('#btn-sorpresa').addEventListener('click', abrirSorpresa);
+$('#btn-cerrar-sorpresa').addEventListener('click', cerrarSorpresa);
+
+$('#btn-girar').addEventListener('click', () => {
+  const maxMin = Number($('#sorpresa-tiempo .chip[aria-pressed="true"]').dataset.min);
+  const tipo = $('#sorpresa-tipo .chip[aria-pressed="true"]').dataset.tipo;
+  let candidatas = RECETAS.filter(r => tiempoTotal(r) <= maxMin && (!tipo || r.categoria === tipo));
+  if (!candidatas.length) candidatas = RECETAS.filter(r => !tipo || r.categoria === tipo);
+  const elegida = candidatas[Math.floor(Math.random() * candidatas.length)];
+  sorpresaElegida = elegida;
+
+  const revelar = () => {
+    $('#ruleta').textContent = elegida.emoji;
+    $('#sorpresa-nombre').textContent = elegida.bandera + ' ' + elegida.nombre;
+    $('#sorpresa-desc').textContent = minutosBonitos(tiempoTotal(elegida)) + ' · ' + elegida.dificultad + ' — ' + elegida.descripcion;
+    $('#sorpresa-resultado').classList.add('visible');
+    $('#btn-abrir-sorpresa').hidden = false;
+  };
+  if (reduceMotion) { revelar(); return; }
+  $('#sorpresa-resultado').classList.remove('visible');
+  $('#btn-abrir-sorpresa').hidden = true;
+  const emojis = RECETAS.map(r => r.emoji);
+  let vueltas = 0;
+  const ruleta = setInterval(() => {
+    $('#ruleta').textContent = emojis[vueltas % emojis.length];
+    vueltas++;
+    if (vueltas > 14) { clearInterval(ruleta); revelar(); }
+  }, 75);
+});
+
+$('#btn-abrir-sorpresa').addEventListener('click', () => {
+  const id = sorpresaElegida && sorpresaElegida.id;
+  cerrarSorpresa();
+  if (id) abrirFicha(id);
+});
+
+/* ============ Temporada ============ */
+const MESES = [...DATA.temporada.meses].sort((a, b) => a.mes - b.mes);
+let mesActivo = new Date().getMonth() + 1;
+
+function pintarMeses() {
+  $('#meses').innerHTML = MESES.map(m =>
+    '<button class="chip" role="tab" data-mes="' + m.mes + '" aria-pressed="' + (m.mes === mesActivo) + '">' +
+    esc(m.nombre) + '</button>'
+  ).join('');
+}
+function pintarTemporada() {
+  const m = MESES.find(x => x.mes === mesActivo) || MESES[0];
+  $('#productos').innerHTML = m.productos.map(p =>
+    '<div class="producto ' + esc(p.tipo) + '">' +
+      '<span class="em" aria-hidden="true">' + p.emoji + '</span>' +
+      '<div><b>' + esc(p.nombre) + '</b><small>' + esc(p.tipo) + '</small></div>' +
+    '</div>'
+  ).join('');
+  $('#consejo-mercado').textContent = m.consejo;
+}
+$('#meses').addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip'); if (!chip) return;
+  mesActivo = Number(chip.dataset.mes);
+  pintarMeses(); pintarTemporada();
+});
+pintarMeses(); pintarTemporada();
+
+/* ============ Técnicas ============ */
+$('#rejilla-tecnicas').innerHTML = DATA.saber.tecnicas.map(t =>
+  '<div class="tecnica aparece visto"><h3>' + esc(t.nombre) + '</h3>' +
+  '<p>' + esc(t.resumen) + '</p>' +
+  '<ul>' + t.claves.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul></div>'
+).join('');
+
+/* ============ Medidas ============ */
+const CONVERSIONES = DATA.saber.conversiones;
+const selIng = $('#conv-ingrediente');
+selIng.innerHTML = CONVERSIONES.map((c, i) => '<option value="' + i + '">' + esc(c.ingrediente) + '</option>').join('');
+
+function pintarConversion() {
+  const c = CONVERSIONES[Number(selIng.value) || 0];
+  const cantidad = parseFloat($('#conv-cantidad').value) || 0;
+  const porUnidad = $('#conv-unidad').value === 'taza' ? c.tazaG : c.cucharadaG;
+  const gramos = cantidad * porUnidad;
+  const bonito = gramos >= 100 ? Math.round(gramos) : Math.round(gramos * 10) / 10;
+  $('#conv-resultado').innerHTML = '<b>' + bonito + ' g</b> de ' + esc(c.ingrediente.toLowerCase()) +
+    '<small>' + (Math.round(porUnidad * 10) / 10) + ' g por ' + ($('#conv-unidad').value === 'taza' ? 'taza' : 'cucharada') + '</small>';
+}
+['input', 'change'].forEach(ev => {
+  $('#conv-cantidad').addEventListener(ev, pintarConversion);
+  $('#conv-unidad').addEventListener(ev, pintarConversion);
+  selIng.addEventListener(ev, pintarConversion);
+});
+pintarConversion();
+
+const TEMPERATURAS = DATA.saber.temperaturas;
+function gasCercano(c) {
+  let mejor = TEMPERATURAS[0];
+  for (const t of TEMPERATURAS) if (Math.abs(t.celsius - c) < Math.abs(mejor.celsius - c)) mejor = t;
+  return mejor;
+}
+function pintarTemp(desde) {
+  const inC = $('#temp-c'), inF = $('#temp-f');
+  if (desde === 'c') {
+    const c = parseFloat(inC.value);
+    if (!isNaN(c)) inF.value = Math.round(c * 9 / 5 + 32);
+  } else {
+    const f = parseFloat(inF.value);
+    if (!isNaN(f)) inC.value = Math.round((f - 32) * 5 / 9);
+  }
+  const c = parseFloat(inC.value);
+  if (!isNaN(c)) {
+    const t = gasCercano(c);
+    $('#temp-resultado').innerHTML = '<b>' + Math.round(c) + ' °C</b> — horno ' + esc(t.nombre.toLowerCase()) +
+      '<small>gas ' + esc(t.gas) + ' · ' + esc(t.usos.toLowerCase()) + '</small>';
+  }
+}
+$('#temp-c').addEventListener('input', () => pintarTemp('c'));
+$('#temp-f').addEventListener('input', () => pintarTemp('f'));
+pintarTemp('c');
+
+$('#tabla-temperaturas').innerHTML = TEMPERATURAS.map(t =>
+  '<tr><td>' + esc(t.nombre) + '</td><td class="num">' + t.celsius + '</td>' +
+  '<td class="num">' + t.fahrenheit + '</td><td class="num">' + esc(t.gas) + '</td>' +
+  '<td>' + esc(t.usos) + '</td></tr>'
+).join('');
+
+$('#lista-equivalencias').innerHTML = DATA.saber.equivalencias.map(eq =>
+  '<li><span>' + esc(eq.de) + '</span><b>' + esc(eq.a) + '</b></li>'
+).join('');
+
+/* ============ Teclado global ============ */
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if ($('#modo-cocina').classList.contains('activo')) { salirModoCocina(); return; }
+  if ($('#ficha').classList.contains('abierta')) { cerrarFicha(); return; }
+  if ($('#modal-sorpresa').classList.contains('abierta')) { cerrarSorpresa(); return; }
+  if ($('#cajon').classList.contains('abierto')) { cerrarCajon(); }
+});
+$('#velo').addEventListener('click', () => {
+  if ($('#ficha').classList.contains('abierta')) cerrarFicha();
+  else if ($('#modal-sorpresa').classList.contains('abierta')) cerrarSorpresa();
+});
+
+/* ============ Arranque ============ */
+pintarRejilla();
+
+</script>
+</body>
+</html>
