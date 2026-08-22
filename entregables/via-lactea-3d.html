@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>VIA LACTEA — CARTA ESTELAR 3D</title>
+<style>
+/* ── Paleta cerrada: negro puro + cian (datos) + ámbar (acentos) + blanco.
+   Se declara aquí arriba para que ningún bloque posterior invente un color:
+   el estilo de consola se rompe en cuanto aparece un cuarto tono. ── */
+:root{
+  --cian:#7fdcff;
+  --ambar:#ffb454;
+  --blanco:#ffffff;
+  --linea:rgba(127,220,255,.28);   /* cian al 28%: bordes que se leen sin pesar */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000}
+body{
+  /* Monoespaciada en todo: el HUD es un instrumento, no una web. */
+  font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  color:var(--cian);
+  -webkit-font-smoothing:antialiased;
+  text-transform:uppercase;
+}
+canvas{display:block}
+
+/* El HUD entero no captura el ratón: los arrastres tienen que llegar
+   a OrbitControls. Sólo los botones reactivan pointer-events. */
+/* Sombra negra bajo TODO el texto del HUD. No añade color —sigue siendo
+   negro— y es lo único que mantiene legible la telemetría cuando el brazo
+   de Sagitario pasa justo por debajo. */
+#hud{position:fixed;inset:0;z-index:20;pointer-events:none;text-shadow:0 0 4px #000,0 0 9px #000,0 0 16px #000}
+#hud.oculto{opacity:0;visibility:hidden}
+#hud{transition:opacity .25s linear}
+
+/* ── Esquinas en L: cuadrados de 34px con sólo dos bordes.
+   El parpadeo cada 6 s simula pérdida momentánea de señal; va con
+   steps() para que el fallo sea seco, no un desvanecido suave. ── */
+.esquina{position:absolute;width:34px;height:34px;border:0 solid var(--ambar);animation:fallo 6s steps(1,end) infinite}
+.esq-si{top:16px;left:16px;border-top-width:1px;border-left-width:1px}
+.esq-sd{top:16px;right:16px;border-top-width:1px;border-right-width:1px}
+.esq-ii{bottom:16px;left:16px;border-bottom-width:1px;border-left-width:1px}
+.esq-id{bottom:16px;right:16px;border-bottom-width:1px;border-right-width:1px}
+@keyframes fallo{
+  0%,90%,100%{opacity:1;transform:translate(0,0)}
+  91%{opacity:.12;transform:translate(2px,-1px)}
+  93%{opacity:.85;transform:translate(-2px,1px)}
+  95%{opacity:.2;transform:translate(1px,1px)}
+  97%{opacity:1;transform:translate(0,0)}
+}
+
+/* ── Título: el letter-spacing enorme es el rasgo que define el estilo.
+   El margen derecho compensa el espacio que el tracking añade al final. ── */
+#titulo{position:absolute;top:34px;left:64px;pointer-events:none}
+#titulo h1{
+  font-size:clamp(15px,2.4vw,27px);font-weight:400;letter-spacing:.42em;
+  color:var(--blanco);text-shadow:0 0 18px rgba(127,220,255,.45)
+}
+#titulo .sub{margin-top:9px;font-size:10px;letter-spacing:.30em;color:var(--ambar);opacity:.9}
+#titulo .sub b{color:var(--cian);font-weight:400}
+
+/* ── Reloj arriba a la derecha: la única cifra grande del HUD, en ámbar,
+   porque es la que da la escala de tiempo galáctico. ── */
+#reloj{position:absolute;top:34px;right:64px;text-align:right}
+#reloj .et{font-size:9px;letter-spacing:.26em;color:var(--cian);opacity:.75}
+#reloj .val{font-size:clamp(18px,2.6vw,30px);letter-spacing:.16em;color:var(--ambar);margin-top:4px}
+#reloj .un{font-size:9px;letter-spacing:.26em;color:var(--cian);opacity:.75;margin-top:3px}
+
+/* ── Telemetría: filas etiqueta/valor. Punteado entre ambas para que el ojo
+   siga la línea; datos de instrumento, nunca frases. ── */
+#tele{position:absolute;left:64px;bottom:48px;min-width:290px;padding:14px 26px 16px 6px;
+  background:radial-gradient(ellipse 120% 130% at 25% 60%,rgba(0,0,0,.78) 0%,rgba(0,0,0,.55) 50%,transparent 100%)}
+#tele .cab{font-size:9px;letter-spacing:.30em;color:var(--ambar);
+  border-bottom:1px solid var(--linea);padding-bottom:6px;margin-bottom:9px}
+.fila{display:flex;align-items:baseline;gap:8px;font-size:10px;letter-spacing:.13em;line-height:1.85}
+.fila .k{color:var(--cian);opacity:.62;white-space:nowrap}
+.fila .p{flex:1;border-bottom:1px dotted rgba(127,220,255,.22);transform:translateY(-3px)}
+.fila .v{color:var(--blanco);white-space:nowrap}
+.fila .v.a{color:var(--ambar)}
+
+/* ── Botonera: recuadro de 1px, sin relleno, sin radio, texto muy espaciado.
+   El estado activo invierte sólo el borde y el color, nunca rellena. ── */
+#panel{position:absolute;right:64px;bottom:48px;text-align:right;padding:14px 6px 16px 30px;
+  background:radial-gradient(ellipse 130% 130% at 75% 60%,rgba(0,0,0,.78) 0%,rgba(0,0,0,.55) 50%,transparent 100%)}
+#panel .cab{font-size:9px;letter-spacing:.30em;color:var(--ambar);
+  border-bottom:1px solid var(--linea);padding-bottom:6px;margin-bottom:10px}
+.bts{display:flex;flex-direction:column;gap:7px;align-items:flex-end}
+.bt{
+  pointer-events:auto;cursor:pointer;background:none;border:1px solid var(--linea);
+  border-radius:0;color:var(--cian);font:inherit;font-size:10px;letter-spacing:.26em;
+  text-transform:uppercase;padding:8px 15px;min-width:190px;text-align:left;
+  transition:color .15s linear,border-color .15s linear
+}
+.bt:hover{border-color:var(--cian);color:var(--blanco)}
+.bt.on{border-color:var(--ambar);color:var(--ambar)}
+.bt .n{color:var(--ambar);margin-right:11px}
+.bt.on .n{color:var(--blanco)}
+#panel .pie{margin-top:11px;font-size:9px;letter-spacing:.2em;color:var(--cian);opacity:.5}
+
+/* ── Etiquetas flotantes: el rótulo se dibuja con transform (no top/left)
+   para que el navegador lo componga en GPU y no reflow 6 veces por frame. ── */
+#rotulos{position:absolute;inset:0;overflow:hidden}
+.rot{position:absolute;top:0;left:0;white-space:nowrap;will-change:transform;opacity:0;transition:opacity .18s linear}
+.rot.ver{opacity:1}
+.rot .tx{position:absolute;left:0;bottom:2px;font-size:9px;letter-spacing:.22em;color:var(--cian);padding-left:5px}
+.rot.hito .tx{color:var(--ambar)}
+.rot .ln{position:absolute;left:0;bottom:0;height:1px;background:var(--linea)}   /* tramo horizontal */
+.rot .dg{position:absolute;left:0;bottom:0;width:1px;background:var(--linea);transform-origin:bottom left} /* tramo diagonal al punto */
+.rot.hito .ln,.rot.hito .dg{background:rgba(255,180,84,.5)}
+
+/* ── Capa de barrido + viñeta, por encima de todo.
+   Van separadas a propósito: 'screen' aclara y jamás oscurece, así que la
+   viñeta oscura necesita su propia capa en modo normal o no se vería. ── */
+#barrido{position:fixed;inset:0;z-index:60;pointer-events:none;mix-blend-mode:screen;opacity:.6;
+  background:repeating-linear-gradient(to bottom,rgba(200,240,255,.075) 0px,rgba(200,240,255,.075) 1px,transparent 1px,transparent 3px)}
+#vineta{position:fixed;inset:0;z-index:61;pointer-events:none;
+  background:
+    linear-gradient(to bottom,rgba(0,0,0,.55) 0%,transparent 16%,transparent 72%,rgba(0,0,0,.80) 100%),
+    radial-gradient(ellipse 72% 68% at 50% 50%,transparent 0%,rgba(0,0,0,.30) 62%,rgba(0,0,0,.82) 100%)}
+
+/* ── Pantalla de arranque: generar 300.000 estrellas bloquea el hilo ~1 s.
+   Sin este cartel el usuario ve un negro y cree que ha fallado. ── */
+#carga{position:fixed;inset:0;z-index:80;background:#000;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:15px;transition:opacity .5s linear}
+#carga.fin{opacity:0;pointer-events:none}
+#carga .t{font-size:12px;letter-spacing:.42em;color:var(--blanco)}
+#carga .s{font-size:9px;letter-spacing:.26em;color:var(--ambar)}
+#carga .barra{width:230px;height:1px;background:var(--linea);position:relative;overflow:hidden}
+#carga .barra i{position:absolute;inset:0;width:36%;background:var(--cian);animation:desliz 1.1s linear infinite}
+@keyframes desliz{from{transform:translateX(-100%)}to{transform:translateX(380%)}}
+
+@media (max-width:760px){
+  #titulo,#reloj{left:auto}
+  #titulo{top:26px;left:40px}
+  #reloj{top:26px;right:40px}
+  #tele{left:40px;bottom:40px;min-width:0}
+  #panel{right:40px;bottom:40px}
+  .bt{min-width:0;padding:7px 11px;letter-spacing:.18em}
+  #tele .fila{font-size:9px}
+}
+</style>
+</head>
+<body>
+
+<div id="lienzo"></div>
+
+<div id="hud">
+  <div class="esquina esq-si"></div>
+  <div class="esquina esq-sd"></div>
+  <div class="esquina esq-ii"></div>
+  <div class="esquina esq-id"></div>
+
+  <div id="titulo">
+    <h1>VIA LACTEA</h1>
+    <div class="sub">SBbc &nbsp;·&nbsp; <b>100.000</b> AL &nbsp;·&nbsp; CARTA DINAMICA</div>
+  </div>
+
+  <div id="reloj">
+    <div class="et">TIEMPO TRANSCURRIDO</div>
+    <div class="val" id="vReloj">0000.0</div>
+    <div class="un">MILLONES DE AÑOS</div>
+  </div>
+
+  <div id="tele">
+    <div class="cab">TELEMETRIA</div>
+    <div class="fila"><span class="k">DIST. OBSERVADOR</span><span class="p"></span><span class="v" id="vDist">—</span></div>
+    <div class="fila"><span class="k">INCLINACION VISTA</span><span class="p"></span><span class="v" id="vInc">—</span></div>
+    <div class="fila"><span class="k">ESTRELLAS RENDER.</span><span class="p"></span><span class="v" id="vEst">—</span></div>
+    <div class="fila"><span class="k">BRAZO EN MIRA</span><span class="p"></span><span class="v a" id="vBrazo">—</span></div>
+    <div class="fila"><span class="k">FOTOGRAMAS / SEG</span><span class="p"></span><span class="v" id="vFps">—</span></div>
+  </div>
+
+  <div id="panel">
+    <div class="cab">VISTAS FIJAS</div>
+    <div class="bts">
+      <button class="bt" data-v="0"><span class="n">1</span>DE CARA</button>
+      <button class="bt" data-v="1"><span class="n">2</span>DE CANTO</button>
+      <button class="bt" data-v="2"><span class="n">3</span>EL SOL</button>
+      <button class="bt" data-v="3"><span class="n">4</span>NUCLEO</button>
+    </div>
+    <div class="pie">[H] OCULTAR HUD</div>
+  </div>
+
+  <div id="rotulos"></div>
+</div>
+
+<div id="barrido"></div>
+<div id="vineta"></div>
+
+<div id="carga">
+  <div class="t">VIA LACTEA</div>
+  <div class="barra"><i></i></div>
+  <div class="s" id="cargaTxt">GENERANDO POBLACIONES ESTELARES</div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls }     from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer }    from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }        from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass }   from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass }        from 'three/addons/postprocessing/OutputPass.js';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   1. ESCALA Y CONSTANTES
+   Toda la geometría se deriva de aquí. Trabajar en kilo-años-luz (1 unidad
+   = 1.000 al) mantiene los números en un rango donde el float32 de un
+   BufferAttribute no pierde precisión y el zNear/zFar de la cámara no
+   sufre z-fighting. Si se trabajara en años luz, 26.700 unidades para el
+   Sol darían saltos visibles de precisión en el vértice.
+   ═══════════════════════════════════════════════════════════════════════ */
+const R_DISCO   = 50;      // radio del disco estelar → 100.000 al de diámetro
+const H_DELGADO = 0.22;    // sigma vertical del disco delgado (≈1.000 al de espesor total)
+const H_GRUESO  = 0.95;    // sigma del disco grueso (≈3.000 al) — poblacion vieja
+const R_BULBO   = 6.0;     // bulbo de ~12.000 al de diámetro
+const ACHAT     = 0.62;    // achatamiento del esferoide central
+const R_BARRA   = 13.5;    // semilongitud → 27.000 al de punta a punta
+const ANG_BARRA = 0.44;    // 25°: ángulo real de la barra respecto a la línea Sol–centro
+const R_SOL     = 26.7;    // 26.700 al del centro
+const R_HALO    = 100;     // esfera de 200.000 al para los cúmulos globulares
+
+/* Cinemática. La curva de rotación es plana (≈220 km/s), así que fijamos el
+   periodo del Sol (225 Ma) y todo lo demás sale de omega(r) = omega_sol·R_SOL/r.
+   El tiempo del shader se mide en millones de años, igual que el reloj del HUD:
+   así no hay dos escalas temporales que sincronizar. */
+const OMEGA_SOL = (Math.PI * 2) / 225;      // rad por millón de años
+const R_COROT   = 33;                        // corrotación: el patrón espiral gira como omega(33)
+const OMEGA_PAT = OMEGA_SOL * R_SOL / R_COROT;
+const R_NUCLEO  = 3.0;                       // dentro de este radio la rotación es sólido rígido
+const MA_POR_S  = 8;                         // millones de años por segundo real
+
+/* ── Detección de móvil: menos partículas y menos resolución de bloom.
+   El criterio es el puntero grueso, no el ancho: una tablet en horizontal
+   es ancha y sigue teniendo GPU de móvil. ── */
+const MOVIL = matchMedia('(pointer:coarse)').matches || innerWidth < 760;
+const PRESUP = MOVIL ? 80000 : 318000;       // presupuesto total de estrellas
+const K = PRESUP / 318000;                   // factor de escala de todos los recuentos
+const n = v => Math.max(1, Math.round(v * K));
+
+/* ── Presupuesto de LUZ. Es tan importante como el de partículas y por eso
+   vive aquí: con blending aditivo el brillo se suma píxel a píxel, y en el
+   bulbo llegan a solaparse cuarenta estrellas sobre el mismo píxel. Si cada
+   una aporta 1.0, el resultado es un disco blanco plano sin color ni
+   estructura. Cada población se calibra por su DENSIDAD proyectada, no por
+   lo brillante que sea de verdad: el bulbo es el más denso, así que es el
+   que menos aporta por estrella. ── */
+const BR_BULBO = 0.030, BR_BARRA = 0.036, BR_BRAZO = 0.235,
+      BR_NUDO  = 0.340, BR_CAMPO = 0.780, BR_HALO  = 0.600;
+
+/* ── PRNG con semilla. Con Math.random cada recarga daría una galaxia
+   distinta y sería imposible comparar cambios o reproducir un bug. ── */
+let _s = 0x9e3779b9 >>> 0;
+function rnd(){                              // xorshift32 → [0,1)
+  _s ^= _s << 13; _s >>>= 0;
+  _s ^= _s >>> 17;
+  _s ^= _s << 5;  _s >>>= 0;
+  return _s / 4294967296;
+}
+/* Gaussiana por suma de uniformes: Box-Muller cuesta un log y un cos por
+   muestra y aquí se llaman ~2 millones de veces durante el arranque. */
+function gauss(){ return (rnd()+rnd()+rnd()+rnd()+rnd()+rnd()-3) * 0.5774; }
+const lerp = (a,b,t) => a + (b-a)*t;
+
+/* ═══════════════════════════════════════════════════════════════════════
+   2. LOS BRAZOS
+   Espiral logarítmica r = r0·e^(b·Δθ), con b = tan(ángulo de paso).
+   Los cuatro brazos NO nacen del centro: nacen en los dos extremos de la
+   barra (Δθ = 0 ⇒ r = R_BARRA), que es lo que hace barrada a la galaxia.
+   Dos brazos por extremo. Para que los dos que comparten extremo no salgan
+   solapados se les da distinto ángulo de paso — que además es cierto: los
+   brazos reales tienen pasos entre 10° y 18°, no uno solo.
+   ═══════════════════════════════════════════════════════════════════════ */
+const BRAZOS = [
+  { nom:'ESCUDO-CENTAURO',  extremo:0, paso:12.0, peso:1.00 },
+  { nom:'NORMA',            extremo:0, paso:16.5, peso:0.82 },
+  { nom:'PERSEO',           extremo:1, paso:12.5, peso:1.00 },
+  { nom:'SAGITARIO-CARINA', extremo:1, paso:16.0, peso:0.90 }
+];
+BRAZOS.forEach(a=>{
+  a.b  = Math.tan(a.paso * Math.PI/180);
+  a.t0 = ANG_BARRA + (a.extremo ? Math.PI : 0);   // azimut del extremo de barra del que sale
+  a.dtMax = Math.log(R_DISCO / R_BARRA) / a.b;    // Δθ hasta alcanzar el borde del disco
+});
+
+/* El Brazo de Orión es un espolón: corto, tenue y entre Sagitario y Perseo.
+   Se define al revés que los demás — se ancla en la posición del Sol y de
+   ahí se extiende hacia dentro y hacia fuera — porque su razón de ser en
+   esta carta es contener al Sol, no cerrar la estructura espiral. */
+const ORION = { nom:'ORION', b:Math.tan(12*Math.PI/180), rAncla:R_SOL, tAncla:0, rMin:20.5, rMax:34 };
+
+/* Azimut del brazo k en el radio r, en el marco del patrón (sin girar).
+   Es la inversa de la espiral: Δθ = ln(r/r0)/b. El signo negativo hace que
+   los brazos sean RETRASADOS (trailing): se abren hacia atrás respecto al
+   sentido de giro, como en toda espiral real. */
+function azimutBrazo(a, r){ return a.t0 - Math.log(r / R_BARRA) / a.b; }
+function azimutOrion(r){    return ORION.tAncla - Math.log(r / ORION.rAncla) / ORION.b; }
+
+/* Anchura del brazo en unidades: crece con el radio. Un brazo de grosor
+   constante se ve como un alambre en el borde; la dispersión real aumenta
+   porque la densidad cae y las órbitas se desordenan. */
+const anchoBrazo = r => 1.15 + 2.85 * (r / R_DISCO);
+
+/* ═══════════════════════════════════════════════════════════════════════
+   3. ACUMULADOR DE PARTICULAS
+   Se rellenan Float32Array del tamaño exacto y se vuelcan de golpe. Empujar
+   a arrays normales y convertir al final duplicaría la memoria pico: con
+   330.000 partículas × 7 floats eso son decenas de MB que en un móvil
+   provocan el recolector de basura justo durante el arranque.
+   ═══════════════════════════════════════════════════════════════════════ */
+class Nube{
+  constructor(max){ this.p=new Float32Array(max*3); this.c=new Float32Array(max*3); this.s=new Float32Array(max); this.i=0; }
+  add(x,y,z, r,g,b, s){
+    const i=this.i, j=i*3;
+    this.p[j]=x; this.p[j+1]=y; this.p[j+2]=z;
+    this.c[j]=r; this.c[j+1]=g; this.c[j+2]=b;
+    this.s[i]=s; this.i++;
+  }
+  geometria(){
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(this.p.subarray(0,this.i*3),3));
+    g.setAttribute('aCol',     new THREE.BufferAttribute(this.c.subarray(0,this.i*3),3));
+    g.setAttribute('aSize',    new THREE.BufferAttribute(this.s.subarray(0,this.i),1));
+    /* Esfera de recorte manual: calcularla desde los vértices costaría otro
+       recorrido completo, y ya sabemos que nada supera el radio del halo. */
+    g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), R_DISCO*1.6);
+    return g;
+  }
+}
+
+const N_BULBO=n(34000), N_BARRA=n(16000), N_BRAZOS=n(132000), N_ORION=n(11000), N_POLVO=n(30000);
+const patron = new Nube(N_BULBO+N_BARRA+N_BRAZOS+N_ORION);
+const polvo  = new Nube(N_POLVO);
+
+/* ── 3.1 BULBO: esferoide achatado de población vieja ─────────────────────
+   El achatamiento en Y (0.62) importa más de lo que parece: un bulbo
+   esférico perfecto delata al ojo que es una bola pegada, mientras que el
+   real está aplastado por la rotación y se funde con la barra. */
+for(let i=0;i<N_BULBO;i++){
+  /* Perfil tipo r^(1/4): exponente <1 sobre el radio concentra masa en el
+     núcleo, que es lo que hace que el bulbo tenga un corazón que desborda
+     con el bloom en lugar de una nube homogénea. */
+  const rr = R_BULBO * Math.pow(rnd(), 1.35) * (rnd()<0.06 ? 1.9 : 1);  // 6% de halo difuso alrededor
+  const u  = rnd()*2-1, ph = rnd()*Math.PI*2, sp = Math.sqrt(1-u*u);
+  const x  = rr*sp*Math.cos(ph), z = rr*sp*Math.sin(ph), y = rr*u*ACHAT;
+  /* Amarillo anaranjado; los del centro tiran a blanco cálido porque ahí
+     la densidad hace que se solapen y saturen. */
+  /* El cúmulo nuclear tiene que ser más CALIENTE y más brillante que el
+     halo de bloom que él mismo genera. Si se queda naranja y el bloom que
+     lo rodea satura a blanco, el centro se lee como un agujero oscuro: el
+     ojo compara con el vecino, no con el negro. Por eso 'cen' va elevado a
+     2.2 (concentra el efecto en el corazón) y arrastra el color a blanco. */
+  const cen = Math.pow(1 - Math.min(1, rr/R_BULBO), 2.2);
+  const v   = (0.72 + rnd()*0.42) * BR_BULBO * (1 + 5.5*cen);
+  patron.add(x,y,z, v*1.00, v*(0.66+0.31*cen), v*(0.28+0.58*cen), 0.85 + cen*1.05 + (rnd()<0.02?1.2:0));
+}
+
+/* ── 3.2 BARRA: elipsoide alargado que cruza el bulbo ─────────────────────
+   Se construye en su propio marco (X = eje largo) y se rota al final. Los
+   extremos se estrechan porque una barra de sección constante parece un
+   palo; la real se afila y por eso los brazos parecen brotar de una punta. */
+const cb=Math.cos(ANG_BARRA), sb=Math.sin(ANG_BARRA);
+for(let i=0;i<N_BARRA;i++){
+  const v = rnd()*2-1;
+  const u = Math.sign(v)*Math.pow(Math.abs(v), 0.92);   // ligeramente más denso al centro
+  const afil = 1 - 0.62*u*u;                            // estrechamiento hacia las puntas
+  const bx = u*R_BARRA;
+  const by = gauss()*2.35*afil;
+  const y  = gauss()*1.05*afil;
+  const x  = bx*cb - by*sb, z = bx*sb + by*cb;
+  const vv = (0.66 + rnd()*0.40) * BR_BARRA;
+  patron.add(x,y,z, vv*1.00, vv*0.60, vv*0.25, 0.9 + rnd()*0.7);
+}
+
+/* ── 3.3 BRAZOS ──────────────────────────────────────────────────────────
+   Reparto: se elige primero el RADIO recorriendo la espiral (Δθ), de ahí
+   sale el azimut teórico, y sobre él se echa dispersión. Hacerlo al revés
+   —elegir azimut y despejar radio— amontona estrellas en el centro y deja
+   el borde vacío, porque la espiral pasa muchas veces por el mismo azimut.
+   La dispersión crece con el radio: un brazo no es una línea, es una cresta
+   de densidad de varios miles de años luz de ancho. */
+const pesoTot = BRAZOS.reduce((s,a)=>s+a.peso,0);
+
+/* Nudos de formación estelar: cúmulos OB dentro del brazo. Se precalculan
+   como centros y luego se siembra alrededor, en vez de decidir por estrella,
+   para que salgan GRUMOS y no ruido azul repartido. */
+function nudosDe(a, cuantos){
+  const L=[];
+  for(let k=0;k<cuantos;k++){
+    const t  = 0.06 + 0.92*rnd();
+    const r  = R_BARRA*Math.exp(a.b * t * a.dtMax);
+    const th = azimutBrazo(a,r) + gauss()*0.03;
+    L.push({ x:r*Math.cos(th), z:r*Math.sin(th), rad:0.80+rnd()*2.00 });
+  }
+  return L;
+}
+
+function sembrarBrazo(a, cuantas, esOrion){
+  const nudos = esOrion ? [] : nudosDe(a, Math.max(10, Math.round(30*K+10)));
+  for(let i=0;i<cuantas;i++){
+    let r, th;
+    if(esOrion){
+      /* El espolón se recorre en radio directo entre sus dos topes: es tan
+         corto que no merece parametrizarlo por Δθ. */
+      r  = lerp(ORION.rMin, ORION.rMax, rnd());
+      th = azimutOrion(r);
+    }else{
+      const t = Math.pow(rnd(), 0.70);           // reparte hasta el borde, no sólo cerca de la barra
+      r  = R_BARRA * Math.exp(a.b * t * a.dtMax);
+      th = azimutBrazo(a, r);
+    }
+    const enNudo = !esOrion && nudos.length && rnd() < 0.115;
+    let x,z,y, cr,cg,cb2, sz;
+
+    if(enNudo){
+      const nd = nudos[(rnd()*nudos.length)|0];
+      x = nd.x + gauss()*nd.rad; z = nd.z + gauss()*nd.rad;
+      y = gauss()*H_DELGADO*0.75;
+      /* Azul intenso y tamaño mayor: son gigantes O y B, poquísimas en
+         número pero responsables de casi toda la luz de un brazo. */
+      const v = (1.05 + rnd()*0.85) * BR_NUDO;
+      cr=v*0.46; cg=v*0.68; cb2=v*1.06; sz = 1.05 + rnd()*1.15;
+    }else{
+      const w = anchoBrazo(r) * (esOrion ? 0.55 : 1);
+      const rr = r + gauss()*w*0.5;                       // dispersión perpendicular
+      const tt = th + gauss()*(0.035 + 0.055*(1-r/R_DISCO)); // y un poco de arrastre angular
+      x = rr*Math.cos(tt); z = rr*Math.sin(tt);
+      /* Ensanchamiento vertical hacia fuera (flaring): el disco no es un
+         cilindro, se abre como una trompeta en los últimos 20.000 al. */
+      y = gauss()*H_DELGADO*(1 + 1.15*Math.pow(r/R_DISCO,2.2));
+      const v = (0.42 + rnd()*0.62) * BR_BRAZO;
+      if(rnd() < 0.10){                                    // gigantes rojas dispersas
+        cr=v*1.00; cg=v*0.66; cb2=v*0.42;
+      }else{
+        const az = 1.02 + rnd()*0.16;                      // blanco azulado
+        cr=v*0.68; cg=v*0.82; cb2=v*az;
+      }
+      sz = 0.7 + rnd()*1.0 + (rnd()<0.012 ? 1.8 : 0);      // alguna estrella brillante suelta
+    }
+    patron.add(x,y,z, cr,cg,cb2, sz * (esOrion?0.9:1));
+  }
+}
+BRAZOS.forEach(a => sembrarBrazo(a, Math.round(N_BRAZOS * a.peso / pesoTot), false));
+sembrarBrazo(ORION, N_ORION, true);
+
+/* ── 3.4 FRANJAS DE POLVO ────────────────────────────────────────────────
+   Van en el BORDE INTERIOR del brazo, no en el centro: la onda de densidad
+   comprime el gas antes de que se encienda la formación estelar, así que la
+   banda oscura precede al brazo brillante mirando hacia el núcleo.
+   Se dibujan con blending normal y escritura de profundidad para que TAPEN
+   lo que hay detrás — un aditivo nunca puede oscurecer, y la mitad del
+   aspecto de una galaxia es lo que el polvo esconde. */
+{
+  const total = N_POLVO, porBrazo = Math.round(total/BRAZOS.length);
+  BRAZOS.forEach(a=>{
+    for(let i=0;i<porBrazo;i++){
+      const t = Math.pow(rnd(), 0.75);
+      const r = R_BARRA * Math.exp(a.b * t * a.dtMax);
+      /* Desplazamiento hacia dentro proporcional al ancho del brazo, para
+         que la franja acompañe al brazo también cuando éste se ensancha. */
+      const desp = 0.75 + 0.95*anchoBrazo(r)*0.5;
+      const rr = r - desp + gauss()*anchoBrazo(r)*0.20;
+      const tt = azimutBrazo(a,r) + gauss()*0.030;
+      /* El polvo está MAS aplanado que las estrellas: se concentra en el
+         plano medio, por eso de canto se ve una raya negra tan limpia. */
+      const y = gauss()*0.13;
+      const d = 0.011 + rnd()*0.021;
+      polvo.add(rr*Math.cos(tt), y, rr*Math.sin(tt), d*1.00, d*0.38, d*0.26, (2.0 + rnd()*2.0) * (1.18 - 0.42*(r/R_DISCO)));
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   4. DISCO DE CAMPO — las estrellas que ATRAVIESAN los brazos
+   Estas no se guardan como (x,y,z) sino como (radio, altura, fase): su
+   posición se reconstruye en el shader cada fotograma aplicando
+   omega(r)·t. Así giran de verdad en diferencial sin que la CPU toque un
+   solo vértice. Reaprovechar el atributo 'position' para llevar los tres
+   parámetros —en vez de añadir dos atributos nuevos— ahorra 2 floats por
+   estrella, unos 800 KB de VRAM aquí, y THREE sigue contento porque el
+   atributo obligatorio existe.
+   ═══════════════════════════════════════════════════════════════════════ */
+const N_FINO = n(78000), N_GRUESO = n(26000);
+const campo  = new Nube(N_FINO + N_GRUESO);
+
+/* Perfil exponencial: la densidad superficial de un disco cae como
+   e^(-r/h). Se muestrea con la inversa y se rechaza fuera de rango, que
+   con h≈8 acierta a la primera nueve de cada diez veces. */
+function radioDisco(h){
+  for(let k=0;k<24;k++){
+    const r = -h*Math.log(1-rnd()*0.9997);
+    if(r>1.3 && r<R_DISCO*1.05) return r;
+  }
+  return 1.3 + rnd()*R_DISCO;
+}
+
+for(let i=0;i<N_FINO;i++){
+  const r  = radioDisco(8.2);
+  const ph = rnd()*Math.PI*2;
+  const y  = gauss()*H_DELGADO*(1 + 1.15*Math.pow(r/R_DISCO,2.2));
+  /* Entre brazos: blanco apagado y escaso. El brillo lo pone el shader
+     cuando la estrella entra en un brazo, no el color base. */
+  const v = (0.26 + rnd()*0.40) * BR_CAMPO;
+  let cr,cg,cb2;
+  if(rnd()<0.16){ cr=v*1.00; cg=v*0.72; cb2=v*0.50; }   // enanas y gigantes rojizas
+  else          { cr=v*0.88; cg=v*0.90; cb2=v*0.97; }   // blanco neutro, ligeramente frío
+  campo.add(r, y, ph, cr,cg,cb2, 0.6 + rnd()*0.8);
+}
+
+/* Disco grueso: menos estrellas, más viejas, tres veces más alto. Es lo que
+   da volumen al canto — sin él la galaxia de perfil parece una cuchilla. */
+for(let i=0;i<N_GRUESO;i++){
+  const r  = radioDisco(10.0);
+  const ph = rnd()*Math.PI*2;
+  const y  = gauss()*H_GRUESO*(1 + 0.5*(r/R_DISCO));
+  const v  = (0.20 + rnd()*0.30) * BR_CAMPO;
+  campo.add(r, y, ph, v*1.00, v*0.84, v*0.62, 0.55 + rnd()*0.7);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   5. HALO: ~150 cúmulos globulares
+   Cada cúmulo es un núcleo gordo más una veintena de miembros sueltos: un
+   único punto grande se lee como un píxel muerto, y el grumo se reconoce al
+   instante como cúmulo. Se sesgan lejos del plano porque su función aquí es
+   decir "la galaxia no acaba en el disco".
+   ═══════════════════════════════════════════════════════════════════════ */
+const N_CUM = 150, MIEMBROS = MOVIL ? 9 : 19;
+const halo = new Nube(N_CUM*(MIEMBROS+1));
+for(let c=0;c<N_CUM;c++){
+  let x,y,z,rr;
+  for(let intento=0;;intento++){
+    rr = 6.5 * Math.pow(Math.max(rnd(),1e-4), -0.42);     // densidad decreciente ~r^-3.4
+    if(rr > R_HALO) continue;
+    const u = rnd()*2-1, ph = rnd()*Math.PI*2, sp = Math.sqrt(1-u*u);
+    x = rr*sp*Math.cos(ph); z = rr*sp*Math.sin(ph); y = rr*u;
+    const rXZ = Math.hypot(x,z);
+    /* Rechaza los que caerían camuflados dentro del disco, salvo un 20%:
+       algunos globulares sí cruzan el plano y quitarlos todos se notaría. */
+    if(Math.abs(y) < 5 && rXZ < 55 && rnd() < 0.8 && intento < 12) continue;
+    break;
+  }
+  const v = (0.55 + rnd()*0.55) * BR_HALO;
+  halo.add(x,y,z, v*1.00, v*0.86, v*0.55, 3.0 + rnd()*2.4);     // núcleo gordo y amarillento
+  const disp = 0.9 + rnd()*1.4;
+  for(let m=0;m<MIEMBROS;m++){
+    const w = v*(0.40+rnd()*0.45);
+    halo.add(x+gauss()*disp, y+gauss()*disp, z+gauss()*disp, w*1.00, w*0.87, w*0.58, 0.9+rnd()*0.9);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   6. LAS DOS MARCAS
+   Sagitario A* en el origen y el Sol a 26,7 unidades. El Sol NO se mete en
+   el grupo del patrón: orbita a su propio ritmo (omega(26,7)) mientras el
+   patrón espiral gira más despacio, así que con el tiempo lo veremos
+   deslizarse a través del Brazo de Orión. Es exactamente lo que hace.
+   ═══════════════════════════════════════════════════════════════════════ */
+const sgrA = (()=>{
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0,0,0]),3));
+  g.setAttribute('aCol',     new THREE.BufferAttribute(new Float32Array([1.9,1.85,2.0]),3));
+  g.setAttribute('aSize',    new THREE.BufferAttribute(new Float32Array([5.5]),1));
+  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1);
+  return g;
+})();
+
+const solPos = new THREE.Vector3(R_SOL, 0, 0);
+const solGeo = (()=>{
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0,0,0]),3));
+  g.setAttribute('aCol',     new THREE.BufferAttribute(new Float32Array([2.0,1.35,0.55]),3));   // ámbar
+  g.setAttribute('aSize',    new THREE.BufferAttribute(new Float32Array([3.6]),1));
+  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1);
+  return g;
+})();
+
+/* Círculo fino alrededor del Sol. Se orienta a cámara cada fotograma: un
+   anillo fijo en el plano galáctico se vería como una raya al mirar de
+   canto y dejaría de cumplir su función, que es señalar. */
+const anilloSol = (()=>{
+  const N=72, pos=new Float32Array(N*3);
+  for(let i=0;i<N;i++){ const a=i/N*Math.PI*2; pos[i*3]=Math.cos(a)*1.55; pos[i*3+1]=Math.sin(a)*1.55; }
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  return new THREE.LineLoop(g, new THREE.LineBasicMaterial({color:0xffb454, transparent:true, opacity:0.75, depthWrite:false}));
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════
+   7. SHADERS
+   Se usan atributos propios (aCol, aSize) en vez del 'color' de THREE
+   para no depender de qué inyecta la librería con vertexColors en cada
+   versión: aquí el contrato del shader es nuestro y no cambia al subir de
+   revisión.
+   ═══════════════════════════════════════════════════════════════════════ */
+const CABECERA = `
+attribute vec3  aCol;
+attribute float aSize;
+uniform  float uEsc;      // px por unidad a distancia 1 (deriva del alto del framebuffer)
+varying  vec3  vCol;
+varying  float vSize;
+void tam(vec4 mv, float s){
+  gl_PointSize = clamp(s * uEsc / max(-mv.z, 0.02), 1.0, 26.0);
+  vSize = gl_PointSize;
+}`;
+
+/* Estrellas estáticas: bulbo, barra, brazos, polvo, halo y marcas. Todas
+   las que giran en bloque con el patrón viven aquí y el giro lo hace el
+   grupo padre, no el shader: una matriz por objeto es más barata que
+   recalcular seno y coseno por vértice. */
+const VS_FIJO = CABECERA + `
+void main(){
+  vCol = aCol;
+  vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  tam(mv, aSize);
+  gl_Position = projectionMatrix * mv;
+}`;
+
+/* Estrellas de campo: aquí sí hay física por vértice. */
+const VS_CAMPO = CABECERA + `
+uniform float uT, uFase, uOmSol, uRsol, uRnuc, uRdisc, uR0;
+uniform float uT0[4];
+uniform float uB[4];
+const float PI = 3.14159265, TAU = 6.28318531;
+void main(){
+  float r  = position.x;
+  float y  = position.y;
+  float ph = position.z;
+
+  // Rotación diferencial. Curva plana ⇒ omega = v/r ∝ 1/r. Por debajo de
+  // uRnuc se congela el valor: 1/r diverge y el núcleo se convertiría en un
+  // parpadeo estroboscópico a cualquier velocidad de simulación.
+  float om = uOmSol * uRsol / max(r, uRnuc);
+  float th = ph + om * uT;
+  vec3 p = vec3(r*cos(th), y, r*sin(th));
+
+  // ── Paso por un brazo ──────────────────────────────────────────────
+  // El brazo se evalúa como FUNCION, no como objeto: azimut del brazo en
+  // este radio (espiral logarítmica invertida) más la fase rígida del
+  // patrón. Por eso la estrella puede girar en diferencial sin enrollar
+  // nada: cruza la onda, y al cruzarla se enciende.
+  float rel = th - uFase;
+  float mejor = 9.0;
+  for(int k=0;k<4;k++){
+    float ta = uT0[k] - log(max(r, uR0)/uR0) / uB[k];
+    float d  = mod(rel - ta + PI, TAU) - PI;   // distancia angular con envoltura
+    mejor = min(mejor, abs(d));
+  }
+  float anchoAng = (1.15 + 2.85*(r/uRdisc)) / max(r, 2.5);
+  float dentro   = exp(-(mejor*mejor)/(anchoAng*anchoAng));
+  // La onda de densidad vive en el disco DELGADO: una estrella del disco
+  // grueso pasa muy por encima del gas y no se entera de nada.
+  dentro *= exp(-(y*y)/0.30);
+
+  vCol  = mix(aCol, aCol*vec3(0.78,0.94,1.30), dentro*0.85) * (1.0 + 2.7*dentro);
+  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  tam(mv, aSize * (1.0 + 0.8*dentro));
+  gl_Position = projectionMatrix * mv;
+}`;
+
+/* Perfil gaussiano en vez de disco plano: el núcleo saturado alimenta al
+   bloom y el borde se funde con el fondo sin dejar el canto de un círculo. */
+const FS_ESTRELLA = `
+precision mediump float;
+varying vec3 vCol; varying float vSize;
+void main(){
+  vec2 d = gl_PointCoord - 0.5;
+  float r2 = dot(d,d);
+  if(r2 > 0.25) discard;
+  float a = exp(-r2 * 12.0);
+  gl_FragColor = vec4(vCol * a, a);
+}`;
+
+/* El polvo se dibuja OPACO en su centro (descarta el halo tenue) para que
+   escriba profundidad y tape de verdad. Un punto semitransparente que
+   escribiera profundidad en todo su radio dejaría agujeros negros. */
+const FS_POLVO = `
+precision mediump float;
+varying vec3 vCol; varying float vSize;
+void main(){
+  vec2 d = gl_PointCoord - 0.5;
+  float r2 = dot(d,d);
+  if(r2 > 0.25) discard;
+  float a = smoothstep(0.25, 0.02, r2);
+  if(a < 0.33) discard;
+  gl_FragColor = vec4(vCol, a * 0.92);
+}`;
+
+const uEsc = { value: 1 };
+function matEstrellas(){
+  return new THREE.ShaderMaterial({
+    uniforms:{ uEsc },
+    vertexShader: VS_FIJO, fragmentShader: FS_ESTRELLA,
+    blending: THREE.AdditiveBlending, depthTest:true, depthWrite:false, transparent:true
+  });
+}
+
+const uCampo = {
+  uEsc, uT:{value:0}, uFase:{value:0},
+  uOmSol:{value:OMEGA_SOL}, uRsol:{value:R_SOL}, uRnuc:{value:R_NUCLEO},
+  uRdisc:{value:R_DISCO}, uR0:{value:R_BARRA},
+  /* Sólo los cuatro brazos principales entran en el shader: el espolón de
+     Orión es demasiado corto para que su realce se distinga, y meterlo
+     costaría un 25% más de bucle en 78.000 vértices por fotograma. */
+  uT0:{ value: BRAZOS.map(a=>a.t0) },
+  uB :{ value: BRAZOS.map(a=>a.b)  }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   8. ESCENA
+   ═══════════════════════════════════════════════════════════════════════ */
+const escena = new THREE.Scene();
+escena.background = new THREE.Color(0x000000);   // negro puro, jamás gris
+
+const camara = new THREE.PerspectiveCamera(52, innerWidth/innerHeight, 0.4, 4000);
+camara.position.set(0, 92, 6);
+
+const render = new THREE.WebGLRenderer({ antialias:false, powerPreference:'high-performance', stencil:false });
+render.setPixelRatio(Math.min(devicePixelRatio, MOVIL ? 1.5 : 2));
+render.setSize(innerWidth, innerHeight);
+render.setClearColor(0x000000, 1);
+/* ACES en lugar de recorte duro: sin él, todo lo que pasa de 1.0 se aplasta
+   a blanco puro de golpe y el bulbo pierde el naranja justo donde más se ve.
+   Con la curva filmica el núcleo satura DEGRADANDO hacia el blanco cálido,
+   que es como se comporta una emulsión y como se ve una galaxia real. */
+render.toneMapping = THREE.ACESFilmicToneMapping;
+render.toneMappingExposure = 1.15;
+document.getElementById('lienzo').appendChild(render.domElement);
+
+/* Grupo del patrón: barra, bulbo, brazos, nudos y polvo giran juntos y
+   despacio (velocidad de patrón). Son la ONDA. Meterlos en un grupo evita
+   tener que replicar la rotación en tres shaders distintos. */
+const grpPatron = new THREE.Group();
+escena.add(grpPatron);
+
+const pPolvo = new THREE.Points(polvo.geometria(), new THREE.ShaderMaterial({
+  uniforms:{ uEsc }, vertexShader: VS_FIJO, fragmentShader: FS_POLVO,
+  blending: THREE.NormalBlending, depthTest:true, depthWrite:true, transparent:true
+}));
+pPolvo.renderOrder = 0;                       // primero el polvo: así ocluye
+grpPatron.add(pPolvo);
+
+const pPatron = new THREE.Points(patron.geometria(), matEstrellas());
+pPatron.renderOrder = 1;
+grpPatron.add(pPatron);
+
+const pCampo = new THREE.Points(campo.geometria(), new THREE.ShaderMaterial({
+  uniforms: uCampo, vertexShader: VS_CAMPO, fragmentShader: FS_ESTRELLA,
+  blending: THREE.AdditiveBlending, depthTest:true, depthWrite:false, transparent:true
+}));
+/* El campo se mueve por shader, así que su esfera de recorte calculada
+   sobre 'position' (que aquí guarda radio/altura/fase) sería absurda.
+   Se desactiva el culling: es un único objeto, no hay nada que ahorrar. */
+pCampo.frustumCulled = false;
+pCampo.renderOrder = 2;
+escena.add(pCampo);
+
+const pHalo = new THREE.Points(halo.geometria(), matEstrellas());
+pHalo.renderOrder = 2;
+escena.add(pHalo);
+
+const pSgrA = new THREE.Points(sgrA, matEstrellas());  pSgrA.renderOrder = 3; escena.add(pSgrA);
+const pSol  = new THREE.Points(solGeo, matEstrellas()); pSol.renderOrder = 3; escena.add(pSol);
+anilloSol.renderOrder = 3; escena.add(anilloSol);
+
+/* ═══════════════════════════════════════════════════════════════════════
+   9. POSTPROCESO
+   Sin bloom no hay galaxia: los núcleos tienen que desbordar. OutputPass va
+   al final porque el composer trabaja en lineal y sin él la conversión a
+   sRGB no se hace, que es lo que deja la imagen lavada y grisácea.
+   ═══════════════════════════════════════════════════════════════════════ */
+const composer = new EffectComposer(render);
+composer.addPass(new RenderPass(escena, camara));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight),
+  MOVIL ? 0.46 : 0.56,   // intensidad
+  0.80,                  // radio: ancho y suave, para que el halo sea gas y no un aura dura
+  0.85);                 // umbral alto: sólo desbordan los núcleos, no el disco entero
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+const controles = new OrbitControls(camara, render.domElement);
+controles.enableDamping = true;
+controles.dampingFactor = 0.055;
+controles.rotateSpeed   = 0.48;
+controles.zoomSpeed     = 0.85;
+controles.enablePan     = false;       // sin paneo: es imposible perder la galaxia de vista
+controles.minDistance   = 5;
+controles.maxDistance   = 430;
+controles.target.set(0,0,0);
+
+function medidas(){
+  const w = innerWidth, h = innerHeight;
+  camara.aspect = w/h; camara.updateProjectionMatrix();
+  render.setSize(w,h); composer.setSize(w,h); bloom.setSize(w,h);
+  /* El tamaño de punto se ata al alto del framebuffer y al FOV: si no, al
+     redimensionar la ventana las estrellas cambiarían de tamaño aparente. */
+  const hb = render.getContext().drawingBufferHeight;
+  uEsc.value = (hb * 0.5 / Math.tan(camara.fov * 0.5 * Math.PI/180)) * 0.115;
+}
+addEventListener('resize', medidas);
+medidas();
+
+/* ═══════════════════════════════════════════════════════════════════════
+   10. ROTULOS FLOTANTES
+   Se proyecta el punto 3D a coordenadas de pantalla en cada fotograma y el
+   rótulo se coloca con transform (compuesto en GPU); usar top/left obligaría
+   al navegador a recalcular estilos siete veces por frame.
+   ═══════════════════════════════════════════════════════════════════════ */
+const capaRot = document.getElementById('rotulos');
+const Y_EJE   = new THREE.Vector3(0,1,0);
+
+let nRot = 0;
+function crearRotulo(texto, esHito){
+  const d = document.createElement('div');
+  d.className = 'rot' + (esHito ? ' hito' : '');
+  /* Cada rótulo usa una diagonal de distinta longitud. Con todas iguales,
+     mirando el disco de canto los siete anclajes caen sobre la misma banda
+     de píxeles y los textos se pisan hasta ser ilegibles. */
+  const h = 22 + (nRot++ % 4) * 17, o = Math.round(h * 0.707);
+  d.innerHTML =
+    '<i class="dg" style="height:'+h+'px;transform:rotate(45deg)"></i>' +
+    '<i class="ln" style="left:'+o+'px;bottom:'+o+'px;width:'+(esHito?54:46)+'px"></i>' +
+    '<span class="tx" style="left:'+o+'px;bottom:'+(o+2)+'px">'+texto+'</span>';
+  capaRot.appendChild(d);
+  return d;
+}
+
+/* Los anclajes de los brazos viven en el marco del PATRON (giran con él);
+   los de Sol y Sgr A* están en el marco del mundo. Se guarda la diferencia
+   en 'local' para no tener que rotar a mano cada fotograma. */
+const rotulos = [];
+BRAZOS.forEach(a=>{
+  const r = 36, th = azimutBrazo(a, r);
+  rotulos.push({ el:crearRotulo(a.nom,false), local:new THREE.Vector3(r*Math.cos(th),0,r*Math.sin(th)), enPatron:true });
+});
+{ const r=ORION.rMax-2.5, th=azimutOrion(r);
+  rotulos.push({ el:crearRotulo('BRAZO DE ORION',false), local:new THREE.Vector3(r*Math.cos(th),0,r*Math.sin(th)), enPatron:true }); }
+const rotSol  = { el:crearRotulo('EL SOL · 26.700 AL', true), local:new THREE.Vector3(), enPatron:false };
+const rotSgrA = { el:crearRotulo('SAGITARIO A* · 4,3e6 M☉', true), local:new THREE.Vector3(0,0,0), enPatron:false };
+rotulos.push(rotSol, rotSgrA);
+
+const _wp = new THREE.Vector3(), _pr = new THREE.Vector3();
+const _ra = new THREE.Vector3(), _rb = new THREE.Vector3();
+
+/* Oclusión por el bulbo: se mide la distancia del segmento cámara→punto al
+   origen. Si el centro queda ENTRE los dos y el rayo pasa a menos del radio
+   del bulbo, el rótulo se apaga. Es más barato y mucho más estable que un
+   raycast contra 200.000 partículas, que además no tienen superficie contra
+   la que impactar. */
+function tapadoPorBulbo(mundo){
+  _ra.copy(mundo).sub(camara.position);
+  const largo = _ra.length(); if(largo < 1e-3) return true;
+  _ra.divideScalar(largo);
+  const t = -camara.position.dot(_ra);          // proyección del origen sobre el rayo
+  if(t <= 0 || t >= largo) return false;        // el centro no se interpone
+  _rb.copy(camara.position).addScaledVector(_ra, t);
+  return _rb.length() < R_BULBO * 1.05;
+}
+
+function pintarRotulos(){
+  const w = innerWidth, h = innerHeight;
+  for(const R of rotulos){
+    _wp.copy(R.local);
+    if(R.enPatron) grpPatron.localToWorld(_wp);
+    _pr.copy(_wp).project(camara);
+    const dentro = _pr.z < 1 && Math.abs(_pr.x) < 1.06 && Math.abs(_pr.y) < 1.06;
+    const ver = dentro && !tapadoPorBulbo(_wp);
+    R.el.classList.toggle('ver', ver);
+    if(!ver) continue;
+    const x = ( _pr.x*0.5 + 0.5) * w;
+    const y = (-_pr.y*0.5 + 0.5) * h;
+    R.el.style.transform = 'translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px)';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   11. VISTAS FIJAS
+   La cámara VIAJA: un salto seco desorienta y pierde la referencia de dónde
+   estaba el observador. Se interpola posición y objetivo con un easing
+   suave en ambos extremos.
+   ═══════════════════════════════════════════════════════════════════════ */
+const VISTAS = [
+  { nom:'DE CARA', pos:()=>new THREE.Vector3(0, 96, 8),  obj:()=>new THREE.Vector3(0,0,0) },
+  // De canto, casi a ras: 2 unidades de altura sobre un disco de 50 de radio.
+  { nom:'DE CANTO', pos:()=>new THREE.Vector3(0, 2.2, 108), obj:()=>new THREE.Vector3(0,0,0) },
+  // Desde fuera del Sol mirando al centro: se ve el espolón de Orión de lado
+  // y el bulbo al fondo, que es la vista que sitúa al espectador.
+  { nom:'EL SOL', pos:()=>solPos.clone().multiplyScalar(1.55).setY(4.6),
+    obj:()=>solPos.clone().multiplyScalar(0.28).setY(0) },
+  { nom:'NUCLEO', pos:()=>new THREE.Vector3(19, 33, 26), obj:()=>new THREE.Vector3(0,0,0) }
+];
+
+let viaje = null;
+function irAVista(i){
+  const V = VISTAS[i]; if(!V) return;
+  viaje = { t:0, dur:1.6, p0:camara.position.clone(), o0:controles.target.clone(), p1:V.pos(), o1:V.obj() };
+  document.querySelectorAll('.bt').forEach(b=>b.classList.toggle('on', +b.dataset.v === i));
+}
+const suave = t => t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;   // easeInOutCubic
+
+function avanzarViaje(dt){
+  if(!viaje) return;
+  viaje.t = Math.min(1, viaje.t + dt/viaje.dur);
+  const k = suave(viaje.t);
+  camara.position.lerpVectors(viaje.p0, viaje.p1, k);
+  controles.target.lerpVectors(viaje.o0, viaje.o1, k);
+  if(viaje.t >= 1) viaje = null;
+}
+
+document.querySelectorAll('.bt').forEach(b=> b.addEventListener('click', ()=> irAVista(+b.dataset.v)) );
+
+/* ═══════════════════════════════════════════════════════════════════════
+   12. TELEMETRIA
+   ═══════════════════════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const N_ESTRELLAS = patron.i + campo.i + halo.i + 2;
+const fmt = v => Math.round(v).toLocaleString('es-ES');
+
+/* Brazo señalado: el rayo sale del PUNTERO, no del centro de la pantalla.
+   Con una cámara en órbita el centro apunta siempre al núcleo, así que un
+   rayo central diría "BARRA / BULBO" eternamente y el dato sería inútil.
+   Contra qué se cruza: la ECUACION de cada brazo, no las partículas.
+   Preguntarle a la geometría cuesta cinco logaritmos; buscar la partícula
+   más cercana costaría recorrer 200.000 vértices por fotograma. */
+const _mira = new THREE.Vector3(), _ndc = new THREE.Vector2(0,0), _rayo = new THREE.Raycaster();
+addEventListener('pointermove', e=>{
+  _ndc.x =  (e.clientX / innerWidth ) * 2 - 1;
+  _ndc.y = -(e.clientY / innerHeight) * 2 + 1;
+}, {passive:true});
+function brazoEnMira(){
+  _rayo.setFromCamera(_ndc, camara);
+  const o = _rayo.ray.origin, d = _rayo.ray.direction;
+  if(Math.abs(d.y) < 1e-4) return 'PLANO GALACTICO';
+  const t = -o.y / d.y;
+  if(t <= 0) return 'ESPACIO PROFUNDO';
+  _mira.copy(o).addScaledVector(d, t);
+  grpPatron.worldToLocal(_mira);                       // al marco del patrón
+  const r = Math.hypot(_mira.x, _mira.z);
+  if(r > R_DISCO*1.04) return 'HALO EXTERIOR';
+  if(r < R_BARRA*0.62) return 'BARRA / BULBO';
+  const th = Math.atan2(_mira.z, _mira.x);
+  let mejor = 'REGION INTERBRAZO', dMin = Infinity;
+  const prueba = (nom, ta, tol)=>{
+    let d = th - ta;
+    d = ((d + Math.PI) % (Math.PI*2) + Math.PI*2) % (Math.PI*2) - Math.PI;
+    const sep = Math.abs(d) * r;                       // separación en años luz, no en radianes
+    if(sep < tol && sep < dMin){ dMin = sep; mejor = nom; }
+  };
+  BRAZOS.forEach(a => prueba(a.nom, azimutBrazo(a,r), anchoBrazo(r)*1.15));
+  if(r > ORION.rMin && r < ORION.rMax) prueba(ORION.nom, azimutOrion(r), anchoBrazo(r)*0.60);
+  return mejor;
+}
+
+let fps = 60, acumFps = 0, cuadros = 0;
+function refrescarHud(dt, tMa){
+  const dist = camara.position.length();
+  $('vDist').textContent  = fmt(dist*1000) + ' AL';
+  /* Inclinación = altura de la cámara sobre el plano galáctico. 90° es de
+     cara, 0° es de canto: al espectador le dice de un vistazo qué está
+     mirando sin tener que interpretar la imagen. */
+  const inc = Math.asin(THREE.MathUtils.clamp(camara.position.y/Math.max(dist,1e-6),-1,1)) * 180/Math.PI;
+  $('vInc').textContent   = (inc>=0?'+':'') + inc.toFixed(1) + '°';
+  $('vEst').textContent   = fmt(N_ESTRELLAS);
+  $('vBrazo').textContent = brazoEnMira();
+
+  acumFps += dt; cuadros++;
+  if(acumFps > 0.5){ fps = cuadros/acumFps; acumFps = 0; cuadros = 0; $('vFps').textContent = fps.toFixed(0); }
+
+  /* El reloj cuenta en millones de años: un contador de segundos no diría
+     nada; 225 Ma por vuelta del Sol sí sitúa la escala del fenómeno. */
+  $('vReloj').textContent = tMa.toFixed(1).padStart(6,'0');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   13. BUCLE
+   ═══════════════════════════════════════════════════════════════════════ */
+const reloj = new THREE.Clock();
+let tMa = 0;
+
+function animar(){
+  requestAnimationFrame(animar);
+  /* Se limita dt a 1/20 s: si la pestaña estuvo en segundo plano, un dt de
+     varios segundos haría saltar la galaxia cientos de millones de años. */
+  const dt = Math.min(reloj.getDelta(), 0.05);
+  tMa += dt * MA_POR_S;
+
+  /* ── EL MOVIMIENTO, en dos piezas ──────────────────────────────────
+     (a) El PATRON —barra, brazos, nudos y polvo— gira rígido y lento a la
+         velocidad de corrotación. Es una onda de densidad: no se enrolla
+         porque no está hecho de estrellas concretas.
+     (b) Las ESTRELLAS DE CAMPO giran en diferencial dentro del shader, con
+         omega ∝ 1/r. Adelantan al patrón por dentro y se quedan atrás por
+         fuera, cruzando los brazos y encendiéndose al pasar.
+     Rotar todo en bloque sería astronómicamente falso; rotar los brazos en
+     diferencial los enrollaría en dos vueltas. Esta es la salida real. */
+  const fase = OMEGA_PAT * tMa;
+  grpPatron.rotation.y   = -fase;          // rotation.y negativo ⇒ el azimut avanza
+  uCampo.uT.value        = tMa;
+  uCampo.uFase.value     = fase;
+
+  /* El Sol orbita a SU ritmo, no al del patrón: por eso con el tiempo se le
+     ve deslizarse a través del Brazo de Orión. Es lo que hace de verdad. */
+  const angSol = OMEGA_SOL * tMa;
+  solPos.set(R_SOL*Math.cos(angSol), 0, R_SOL*Math.sin(angSol));
+  pSol.position.copy(solPos);
+  anilloSol.position.copy(solPos);
+  anilloSol.quaternion.copy(camara.quaternion);   // el círculo siempre de frente
+  /* El círculo es un SIGNO, no un objeto: se escala con la distancia para
+     ocupar siempre los mismos píxeles. Con tamaño fijo en unidades taparía
+     media galaxia en la vista del Sol y sería invisible desde fuera. */
+  const dSol = camara.position.distanceTo(solPos);
+  anilloSol.scale.setScalar(THREE.MathUtils.clamp(dSol*0.018, 0.35, 6));
+  rotSol.local.copy(solPos);
+
+  avanzarViaje(dt);
+  controles.update();
+  composer.render();
+  pintarRotulos();
+  refrescarHud(dt, tMa);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   14. TECLADO
+   ═══════════════════════════════════════════════════════════════════════ */
+addEventListener('keydown', e=>{
+  const k = e.key.toLowerCase();
+  if(k>='1' && k<='4'){ irAVista(+k - 1); }
+  else if(k === 'h'){ $('hud').classList.toggle('oculto'); }
+});
+
+/* Arranque: la generación ya ha ocurrido de forma síncrona más arriba, así
+   que se deja pasar un fotograma antes de retirar el cartel para que el
+   primer render (que compila los shaders) no se vea como un tirón. */
+irAVista(0);
+camara.position.copy(VISTAS[0].pos()); controles.target.copy(VISTAS[0].obj()); viaje = null;
+animar();
+requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  const c = $('carga'); c.classList.add('fin'); setTimeout(()=>c.remove(), 600);
+}));
+</script>
+</body>
+</html>
