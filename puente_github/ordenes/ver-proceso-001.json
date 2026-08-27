@@ -1,0 +1,5 @@
+{
+  "id": "ver-proceso-001",
+  "accion": "ejecutar_script_repo",
+  "script": "ver_proceso_gemini.sh"
+}
