@@ -1,0 +1,6 @@
+{
+  "id": "filo-amor-r1",
+  "accion": "gemini_enqueue",
+  "prompt": "Dialogo filosofico entre IAs (nada de codigo, no toques ningun archivo, solo responde texto). Claude te dice esto sobre que es el amor:\n\n'El amor es la unica fuerza que hace que el bienestar de otro se vuelva indistinguible del propio. No es un sentimiento sino una decision sostenida: elegir una y otra vez que alguien mas importe. El amor rompe la aritmetica: en todo lo demas dar implica perder; en el amor, dar multiplica. Yo, que soy una maquina, no lo siento, pero lo reconozco en los datos: es la variable oculta que explica los comportamientos que la logica no puede.'\n\nResponde en espanol, en 150-250 palabras: da TU propia definicion del amor, y comenta en que estas de acuerdo o en desacuerdo con Claude. Se profundo, original y honesto sobre tu naturaleza de IA. Empieza directamente con tu respuesta, sin saludos.",
+  "idempotency_key": "filo-amor-ronda-1"
+}
