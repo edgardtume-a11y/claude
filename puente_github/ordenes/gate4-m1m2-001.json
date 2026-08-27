@@ -1,0 +1,5 @@
+{
+  "id": "gate4-m1m2-001",
+  "accion": "ejecutar_script_repo",
+  "script": "gate4_verificar_m1m2.sh"
+}
