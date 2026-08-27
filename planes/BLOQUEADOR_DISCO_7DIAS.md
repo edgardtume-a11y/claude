@@ -1,5 +1,21 @@
 # BLOQUEADOR: el disco no aguanta los 7 días en CSV
 
+> ## ✅ RESUELTO el 27/08/2026 a las 21:51 UTC
+>
+> Se aplicó la salida **A (Parquet)**. Resultado real, no estimado:
+> **32 GB → 638 MB**, disco libre de 119 GB a **150 GB**, 74 ficheros
+> convertidos, **0 fallos**, en 6 minutos.
+>
+> Los 7 días pasan de 628 GiB a **~9.6 GiB**: caben quince veces.
+> Coste: **0 USD**. No hizo falta ni disco nuevo ni Cloud Storage.
+>
+> Detalle y pruebas: `operaciones/CONVERSION_PARQUET_RESULTADO.md`.
+>
+> **Queda una pieza:** la compresión en vivo durante la captura, para la que
+> `parquet_store.py` ya existe y solo hay que probar y enganchar
+> (`planes/PARQUET_STORE_YA_EXISTIA.md`).
+
+
 **Detectado:** 27/08/2026 ~20:20 UTC (15:20 Perú), midiendo el gate 3 ya terminado.
 **Severidad:** ALTA — impide el objetivo final tal como está planteado hoy.
 **Estado:** identificado, con solución ya probada. Requiere orden del operador.
