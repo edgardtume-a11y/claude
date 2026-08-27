@@ -1,0 +1,9 @@
+{
+  "id": "gate4-vivo-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:30:42Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== huella de las mejoras en el arranque ===\nevent_loop=uvloop version=0.22.1\ngc_frozen=41652\nlow_latency_runtime thread_switch_s=0.001 gc_thresholds=(50000, 100, 100) fine_timer_1ms=False foreground_qos=False foreground_qos_error=None\n\n=== proceso vivo y consumo ===\n29069 /home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/.venv/bin/python -m binance_collector.dual_main --symbol BTCUSDT --output-dir /home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m/capture --dashboard-port 0 --dom-levels 100 --healthy-seconds 1800 --ready-timeout 180 --session-id f4349129e5d84949b1a0445991d8ae2a --parent-pid 29067 --session-file /home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m/control/session.json --ready-file /home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m/control/READY.json --stop-file /home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m/control/STOP.json --heartbeat-file /home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m/control/HEARTBEAT.json --no-browser --log-level INFO --log-file /home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m/capture/jean_flow_metrics.jsonl\n  29069       00:40  9.1  0.1 60192\n\n=== crece la captura? ===\n25M\t/home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m/capture\n2\n\n=== ultimas lineas del arranque ===\nLIVE_STARTED supervisor_pid=29067 engine_pid=29069 hb_pid=29068 run=/home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m\nCONFIRMAR_VIVO_OK\n"
+  }
+}
