@@ -1,0 +1,5 @@
+{
+  "id": "revisar-rot-001",
+  "accion": "ejecutar_script_repo",
+  "script": "revisar_rotador.sh"
+}
