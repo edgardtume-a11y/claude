@@ -1,0 +1,9 @@
+{
+  "id": "gate3-fallos-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:26:46Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== veredicto global ===\ncertification: \"FAIL\"\n\n=== comprobaciones que NO pasan: 2 ===\n\n--- markets.usdm_futures.thresholds.book_apply_p99\n{\n  \"basis\": \"worst_p99_post_warmup\",\n  \"clock_domain\": \"monotonic\",\n  \"latest_value_ms\": 2.751,\n  \"limit_ms\": 5.0,\n  \"min_samples\": 100,\n  \"pass\": false,\n  \"present\": true,\n  \"required\": true,\n  \"sample_count\": 10000,\n  \"worst_value_ms\": 6.282,\n  \"worst_value_ms_incl_warmup\": 6.282\n}\n\n--- markets.usdm_futures.thresholds.book_pipeline_p99\n{\n  \"basis\": \"worst_p99_post_warmup\",\n  \"clock_domain\": \"monotonic\",\n  \"latest_value_ms\": 3.068,\n  \"limit_ms\": 5.0,\n  \"min_samples\": 100,\n  \"pass\": false,\n  \"present\": true,\n  \"required\": true,\n  \"sample_count\": 10000,\n  \"worst_value_ms\": 7.399,\n  \"worst_value_ms_incl_warmup\": 7.399\n}\n\n=== latencias del bucle de eventos (los dos mercados) ===\n\nFALLOS_METRICS_OK\n"
+  }
+}
