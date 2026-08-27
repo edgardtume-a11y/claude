@@ -1,0 +1,9 @@
+{
+  "id": "ab-actividad-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T21:02:04Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== ACTIVIDAD POR MINUTO: gate 3 (sin uvloop) vs gate 4 (con uvloop) ===\n\n--- spot   base=296 min   gate4=30 min\n  websocket_messages     base=   2291.2/min  gate4=   1508.9/min   -34.1%  gate 4 MENOS cargado\n  depth_diff_messages    base=    599.9/min  gate4=    599.2/min    -0.1%  carga equivalente\n  agg_trade_messages     base=   1091.4/min  gate4=    310.6/min   -71.5%  gate 4 MENOS cargado\n  csv_rows_written       base=  52656.4/min  gate4=  35862.8/min   -31.9%  gate 4 MENOS cargado\n\n--- usdm_futures   base=296 min   gate4=30 min\n  websocket_messages     base=   2550.7/min  gate4=   1481.5/min   -41.9%  gate 4 MENOS cargado\n  depth_diff_messages    base=    588.2/min  gate4=    587.9/min    -0.0%  carga equivalente\n  agg_trade_messages     base=   1381.7/min  gate4=    351.6/min   -74.6%  gate 4 MENOS cargado\n  csv_rows_written       base= 112816.8/min  gate4=  63338.4/min   -43.9%  gate 4 MENOS cargado\n\n=== event_loop_lag: peor p99 del run ===\n  spot            base=19.8 ms   gate4=19.0 ms   (limite de auditoria 20 ms)\n  usdm_futures    base=19.8 ms   gate4=19.0 ms   (limite de auditoria 20 ms)\n\n=== veredicto formal de las auditorias del gate 4 ===\n  (auditorias aun corriendo)\n\nACTIVIDAD_OK\n"
+  }
+}
