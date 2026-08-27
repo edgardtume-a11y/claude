@@ -1,0 +1,22 @@
+{
+  "id": "mejoras-uvloop-gc-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:22:04Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-27T20:22:04Z",
+    "duplicate": false,
+    "execution_models": [],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-5226a7e9204cbe09170d86ae3714efacdf1a61fe",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "preflight_primary",
+    "requested_model": "gemini-3.7-flash",
+    "status": "pending",
+    "updated_at": "2026-08-27T20:22:04Z"
+  }
+}
