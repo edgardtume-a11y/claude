@@ -1,0 +1,5 @@
+{
+  "id": "gate4-prueba-001",
+  "accion": "ejecutar_script_repo",
+  "script": "gate4_corregir_prueba.py"
+}
