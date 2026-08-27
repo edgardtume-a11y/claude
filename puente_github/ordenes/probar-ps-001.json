@@ -1,0 +1,5 @@
+{
+  "id": "probar-ps-001",
+  "accion": "ejecutar_script_repo",
+  "script": "probar_parquet_store.sh"
+}
