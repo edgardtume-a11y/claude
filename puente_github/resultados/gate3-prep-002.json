@@ -1,0 +1,9 @@
+{
+  "id": "gate3-prep-002",
+  "ok": true,
+  "procesado_utc": "2026-08-27T14:30:04Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "RUN=/home/trading/jean-flow-exec/staging_runs/20260827T143004Z_tokyo_n2_capture_gate3_2h\nSID=c37b7c55fca84a6cb08afb8bb43d1a08\nOLD_SID=713de91508ab489980fc8b1f14fd3664\nPREP_GATE3_OK\n"
+  }
+}
