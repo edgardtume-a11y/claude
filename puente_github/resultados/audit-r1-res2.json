@@ -1,0 +1,30 @@
+{
+  "id": "audit-r1-res2",
+  "ok": true,
+  "procesado_utc": "2026-08-27T18:02:46Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-27T17:56:03Z",
+    "duplicate": true,
+    "execution_models": [
+      "gemini-3.7-flash"
+    ],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "finished_at": "2026-08-27T17:59:55Z",
+    "id": "jfr-70491330d250acd4e3fc5e2edf4ed905a2645d4d",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "execution",
+    "requested_model": "gemini-3.7-flash",
+    "response": "### 1. Hipótesis técnica de la cola larga (p50: 2,05 ms vs p99: 23,93 ms)\nLa disparidad p50/p99 con latencia base excelente (~2 ms en Tokio) apunta a tres factores combinados:\n1. **Ráfagas de difusión y TCP packet coalescing del exchange:** Durante picos de volatilidad, Binance envía múltiples frames acumulados. El socket acumula datos y el loop procesa lotes grandes secuencialmente.\n2. **Pausas de GC de CPython (Gen 1/Gen 2):** La creación masiva y descarte de dicts/objetos temporales al parsear JSON/deltas detiene momentáneamente el hilo principal.\n3. **Bloqueo del Event Loop por CPU bursts:** La acumulación simultánea de `book_apply` retrasa el `recv` del WebSocket en la cola interna de `asyncio`.\n\n---\n\n### 2. Causa de `writer_yield_p99 > 5 ms` y mitigación sin reescribir\n* **Causa raíz:** Vaciado monopolístico de la cola. Si el writer procesa ráfagas completas en un bucle síncrono `while not queue.empty(): ...` o serializa bloques grandes sin devolver el control, retiene el hilo único de ejecución e impide que los lectores atiendan el socket.\n* **Corrección quirúrgica:** Introducir **chunking con yield cooperativo forzado**. Procesar un límite fijo de mensajes (p. ej., batch de 50 items o cuota de 1 ms) e intercalar obligatoriamente un `await asyncio.sleep(0)` para ceder el control de vuelta al loop antes de continuar con la cola.\n\n---\n\n### 3. `launcher.py` (2.921 líneas): Refactorizar post-certificación\n**Después de certificar.** `launcher.py` orquesta el ciclo de vida y configuración; no reside en la ruta crítica (*hot path*) de procesamiento L2. Refactorizar 3k líneas ahora introduce alto riesgo de regresiones operativas sin aportar ninguna mejora a las métricas de latencia p99. Debe congelarse hasta superar el gate de métricas en la VM n2 dedicada.\n\n---\n\n### 4. Tres mejoras prioritarias (Retorno / Riesgo)\n\n1. **Ajuste de GC y contención de allocations (Alto retorno / Riesgo mínimo):**\n   * Desactivar o elevar umbrales de recolección (`gc.set_threshold(50000, 10, 10)` o `gc.disable()` con recolección manual fuera de horas pico) y prealocar estructuras clave para eliminar micro-pausas.\n2. **Yield determinista en el pipeline del writer (Alto retorno / Riesgo bajo):**\n   * Limitar el tamaño de bloque procesado por tick y garantizar `await asyncio.sleep(0)` tras ráfagas para fijar `writer_yield_p99 < 5.0 ms`.\n3. **Adopción de `uvloop` y binding de afinidad de CPU (Medio retorno / Riesgo bajo):**\n   * Sustituir el event loop por defecto por `uvloop` y fijar afinidad de hilos/procesos (`taskset` / `os.sched_setaffinity`) a núcleos físicos de la instancia n2 para evitar migración de contexto.",
+    "served_model": "gemini-3.7-flash",
+    "served_models": [
+      "gemini-3.7-flash"
+    ],
+    "status": "done",
+    "updated_at": "2026-08-27T18:02:46Z"
+  }
+}
