@@ -1,0 +1,9 @@
+{
+  "id": "gate3-ventanas-003",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:31:46Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "fichero: 31046919 bytes\nsecciones del registro: ['counters', 'gauges', 'latency_ms']\n  latency_ms: p99->[] interes->['book_apply', 'book_pipeline_total']\n    ejemplo book_apply = {\"count\": 49, \"count_total\": 49, \"evicted\": 0, \"p50\": 0.204, \"p95\": 0.842, \"p99\": 1.015, \"max\": 1.015}\n    ejemplo book_pipeline_total = {\"count\": 49, \"count_total\": 49, \"evicted\": 0, \"p50\": 0.543, \"p95\": 1.08, \"p99\": 1.256, \"max\": 1.256}\n\nvalores de p99 encontrados: 0\nVENTANAS_V3_SIN_DATOS\n"
+  }
+}
