@@ -1,0 +1,9 @@
+{
+  "id": "revisar-conversor-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T21:27:14Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== 1) ¿existe y compila? ===\n-rwx------ 1 trading trading 15558 Aug 27 21:23 /home/trading/jean-flow-exec/herramientas/convertir_parquet.py\nCOMPILA\nlineas: 398\n\n=== 2) las cinco salvaguardas, una por una ===\n  S1 aborta si hay captura activa: PRESENTE\n  S2 solo bajo staging_runs: PRESENTE\n  S2 usa realpath: PRESENTE\n  S4 solo borra .csv: PRESENTE\n  S5 comprueba espacio libre: PRESENTE\n  manifiesto atomico: PRESENTE\n  verifica igualdad de tablas: PRESENTE\n  borrado solo con la bandera: PRESENTE\n\n=== 3) LO MAS IMPORTANTE: donde borra, y que lo protege ===\n119:                os.unlink(ruta_tmp)\n317:                    os.remove(ruta_parquet)\n332:                        os.remove(ruta_csv)\n--- contexto de cada borrado (5 lineas antes) ---\n  --- linea 119 ---\n                os.fsync(f.fileno())\n            os.replace(ruta_tmp, ruta_manifiesto)\n        except Exception:\n            if os.path.exists(ruta_tmp):\n                try:\n                    os.unlink(ruta_tmp)\n  --- linea 317 ---\n            if not verificado:\n                total_fallos += 1\n                # Borrar el parquet recién creado para no dejar archivos corruptos o incompletos\n                if os.path.exists(ruta_parquet):\n                    try:\n                        os.remove(ruta_parquet)\n  --- linea 332 ---\n                # Salvaguarda S3: Sólo se borra si la verificación pasó en esta misma ejecución\n                # Salvaguarda S4: Debe cumplir estrictamente es_seguro_borrar_csv\n                if args.borrar:\n                    if es_seguro_borrar_csv(ruta_csv, capture_dir):\n                        try:\n                            os.remove(ruta_csv)\n\n=== 4) ¿por defecto borra? (la respuesta debe ser NO) ===\nPREVIA_OK\n"
+  }
+}
