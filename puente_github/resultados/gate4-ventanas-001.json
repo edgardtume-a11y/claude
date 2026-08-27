@@ -1,0 +1,9 @@
+{
+  "id": "gate4-ventanas-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T21:01:00Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "muestras de p99 leidas: 2848\nduracion de la ventana: 30.0 min\n\n=== GATE 4 (CON uvloop + gc.freeze) contra la linea base ===\n\nspot.book_apply\n  peor p99 del gate 4 : 0.996 ms\n  ultima ventana      : p50=0.104 p99=0.996 max=4.766 n=17986\n  base gate 3         : mejor=1.400  mediana=2.768  peor=3.561\n  --> MEJOR QUE TODOS los tramos base (29% bajo el mejor)\n  limite de certificacion 5.0 ms: PASA\n\nspot.book_pipeline_total\n  peor p99 del gate 4 : 1.310 ms\n  ultima ventana      : p50=0.492 p99=1.31 max=5.1 n=17986\n  base gate 3         : mejor=1.804  mediana=3.200  peor=4.226\n  --> MEJOR QUE TODOS los tramos base (27% bajo el mejor)\n  limite de certificacion 5.0 ms: PASA\n\nspot.event_loop_lag\n  peor p99 del gate 4 : 19.000 ms\n  ultima ventana      : p50=0.0 p99=3.0 max=15.0 n=90032\n\nspot.writer_cooperative_yield\n  peor p99 del gate 4 : 2.199 ms\n  ultima ventana      : p50=0.574 p99=2.199 max=13.154 n=1785\n\nusdm_futures.book_apply\n  peor p99 del gate 4 : 2.347 ms\n  ultima ventana      : p50=0.248 p99=2.337 max=6.436 n=17649\n  base gate 3         : mejor=3.185  mediana=4.642  peor=6.282\n  --> MEJOR QUE TODOS los tramos base (26% bajo el mejor)\n  limite de certificacion 5.0 ms: PASA\n\nusdm_futures.book_pipeline_total\n  peor p99 del gate 4 : 2.770 ms\n  ultima ventana      : p50=0.602 p99=2.706 max=11.094 n=17649\n  base gate 3         : mejor=3.602  mediana=5.192  peor=7.399\n  --> MEJOR QUE TODOS los tramos base (23% bajo el mejor)\n  limite de certificacion 5.0 ms: PASA\n\nusdm_futures.event_loop_lag\n  peor p99 del gate 4 : 19.000 ms\n  ultima ventana      : p50=0.0 p99=3.0 max=15.0 n=90032\n\nusdm_futures.writer_cooperative_yield\n  peor p99 del gate 4 : 2.466 ms\n  ultima ventana      : p50=0.573 p99=2.393 max=10.896 n=9362\n\nGATE4_VENTANAS_OK\n"
+  }
+}
