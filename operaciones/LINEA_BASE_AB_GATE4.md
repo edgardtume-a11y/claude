@@ -1,6 +1,6 @@
 # Línea base del A/B: contra qué se mide uvloop
 
-**Fecha:** 27/08/2026, ~21:05 UTC (16:05 Perú)
+**Fecha:** 27/08/2026, ~20:35 UTC (15:35 Perú)
 **Origen:** gate 3, máquina n2-standard-8 de Tokio, 4 h 45 min, sin uvloop.
 **Uso:** es el "antes" contra el que se juzga el gate 4 (con uvloop + `gc.freeze`).
 
@@ -46,7 +46,7 @@ el solape Asia–Europa; las últimas, en una franja tranquila.
 
 Esto tiene una consecuencia incómoda y hay que decirla:
 
-> El gate 4 corre de ~20:58 a ~21:28 UTC. En el gate 3, la franja horaria más
+> El gate 4 corre de ~20:30 a ~21:00 UTC. En el gate 3, la franja horaria más
 > parecida son justo **las dos últimas ventanas: las más tranquilas de todas**
 > (3.19 y 3.21 en `book_apply`; 3.75 y 3.60 en `pipeline`).
 >
