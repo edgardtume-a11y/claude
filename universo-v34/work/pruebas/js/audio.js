@@ -221,6 +221,9 @@ export class SGAudio {
 
   uiBeep()  { this._blip(1180, 0.07, 'sine', 0.05); }
   uiHover() { this._blip(760, 0.05, 'sine', 0.03); }
+  /* V3.4 fix: _fairingSep() llamaba a un método inexistente desde V3.3 —
+     un TypeError por misión que abortaba el frame de la separación */
+  uiSelect() { this._blip(980, 0.09, 'triangle', 0.05); this._blip(1470, 0.07, 'sine', 0.04, 0.07); }
   countdownTick(n) {
     if (n <= 1) { this._blip(1320, 0.12, 'square', 0.06); this._blip(1320, 0.12, 'square', 0.06, 0.16); }
     else this._blip(880, 0.1, 'square', 0.05);

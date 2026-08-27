@@ -4021,7 +4021,9 @@ class Experience {
   /* dev watchdog: automatic phases must hand over within budget (P0 §5) */
   _watchdog() {
     if (!(this.debugOn || this._autotest) || this._wdFired) return;
-    const WD = { intro: 12.5, approach: 11, countdown: 10, ascent: 9, ascentSpace: 16, orbit: 15.5, charge: 6.5, warp: 6 };
+    /* orbit budget 20 s (V3.4): under software rendering the dt clamp (0.1 s)
+       stretches the 6.8 s departure tick — real GPUs stay well under budget */
+    const WD = { intro: 12.5, approach: 11, countdown: 10, ascent: 9, ascentSpace: 16, orbit: 20, charge: 6.5, warp: 6 };
     const NEXT = { intro: 'approach', approach: 'facility', countdown: 'ascent', ascent: 'ascentSpace', ascentSpace: 'orbit', orbit: 'charge', charge: 'warp', warp: 'hub' };
     const max = WD[this.chapter];
     const inChapter = this.mt - this._chBase;   /* mt may start at a base (ascentSpace: 6.4) */
@@ -4417,6 +4419,7 @@ class Experience {
   _beginDeparture() {
     if (this._depT) return;
     this._depT = 0.0001;
+    this._depStartMt = this.mt;          /* V3.4: wall-clock cinematic (P0 §1) */
     this._depDone = false;
     this.ui.banner('SG DEPARTURE BURN', 1400);
     this.ui.sgos('SG.OS // DEPARTURE BURN');
@@ -4426,7 +4429,12 @@ class Experience {
   }
   _departureTick(dt) {
     if (!this._depT || this._depDone) return;
-    this._depT = Math.min(1, this._depT + dt / 6.8);
+    /* V3.4: the climb-out is a CINEMATIC — it follows the monotonic chapter
+       clock so a slow frame can never stretch it (the dt clamp was doubling
+       its length under software rendering and tripping the orbit watchdog).
+       QA/shot holds keep the incremental form so their clamps stay in charge. */
+    if (this._qaDep != null || this._shot) this._depT = Math.min(1, this._depT + dt / 6.8);
+    else this._depT = Math.min(1, Math.max(this._depT, (this.mt - (this._depStartMt || 0)) / 6.8));
     /* thin blue burn from the ship while we climb out */
     if (this.ship && this.ship.visible && Math.random() < dt * 40) {
       const sp = this.ship.getWorldPosition(this._tmpV3 || (this._tmpV3 = new T.Vector3()));

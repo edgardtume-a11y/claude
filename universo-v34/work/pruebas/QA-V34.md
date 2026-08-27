@@ -53,8 +53,13 @@ por qué, sin declararlo PASS §153).
 - Licencias/créditos: PASS (ASSET-CREDITS.md)
 - Performance medido: PASS (PERFORMANCE-V34.md — medido, no estimado)
 - Screenshots reales: PASS (35 PNG en qa-evidence/)
-- Hosting ZIP probado: PASS (extraído a un directorio limpio y servido por
-  HTTP real; boot completo + Tierra FILE verificados sobre ese árbol)
+- Hosting ZIP probado: PASS — `universo-sebas-granda-V3.4-HOSTING.zip`
+  extraído a `/tmp/hosting-test` (directorio limpio, sin nada del entorno de
+  desarrollo), servido por HTTP real en el puerto 8735, y verificado con
+  `?autotest=skip`: `FULL MISSION PASS`, `three source: vendor` (three.js
+  cargado desde `vendor/three.module.js` incluido, NO desde CDN),
+  `earth: {day:file, night:file, clouds:file, spec:file}` (Tierra real, no
+  procedural), 0 errores reales de consola.
 
 ## 3. GALAXY HUB — DEFINICIÓN DE TERMINADO (adicional §62)
 

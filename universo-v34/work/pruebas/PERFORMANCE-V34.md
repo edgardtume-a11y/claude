@@ -11,18 +11,44 @@ triángulos, texturas, programas y memoria — y las DIFERENCIAS entre tiers.
 Los valores exactos por escena están en `qa-evidence/perf.json` (medidos con
 `renderer.info` acumulado durante 2 s con autoReset desactivado).
 
-## Resultados (1920×1080 salvo indicación; SwiftShader software)
+## Resultados (1920×1080 salvo indicación; SwiftShader software; calidad
+fijada ANTES del boot vía localStorage para que la geometría se construya
+ya en el tier correcto — nunca un cambio de calidad a mitad de escena)
 
-| Escena | Tier | FPS (software) | Draw calls/pass | Triángulos/pass | Texturas | Programas |
-|---|---|---|---|---|---|---|
-| (ver perf.json — tabla generada en la medición final) |
+| Escena | Tier | FPS (software) | Draw calls/frame | Triángulos/frame | Texturas | Programas | Sombras | Bloom | DPR |
+|---|---|---|---|---|---|---|---|---|---|
+| Facility hero | ULTRA | 32.0 | 310 | 117 336 | 28 | 30 | ON | ON | 1.0 |
+| Earth orbit hero | ULTRA | 20.4 | 39 | 24 440 | 32 | 34 | ON | ON | 1.0 |
+| Galaxy Hub | ULTRA | 22.9 | 77 | 4 356 | 29 | 37 | ON | ON | 1.0 |
+| Facility hero | PERF | 30.4 | 270 | 55 350 | 23 | 28 | OFF | OFF | 1.0 |
+| Earth orbit hero | PERF | 22.8 | 34 | 24 430 | 27 | 32 | OFF | OFF | 1.0 |
+| Galaxy Hub | PERF | 20.8 | 59 | 4 321 | 24 | 35 | OFF | OFF | 1.0 |
+| Earth orbit hero | MOBILE 390×844 | 23.9 | 28 | 24 418 | 27 | 32 | OFF | OFF | 0.85 |
+| Galaxy Hub | MOBILE 390×844 | 20.3 | 52 | 4 168 | 24 | 35 | OFF | OFF | 0.85 |
+
+Metodología: `renderer.info` acumulado con `autoReset=false`, dividido por
+frames visuales REALES contados vía `requestAnimationFrame` (no por
+`info.render.frame`, que cuenta cada sub-pase interno del post — bloom
+activo invoca `renderer.render()` ~9 veces por frame visual vs 2 sin bloom;
+dividir por esa cifra habría deflactado el promedio de ULTRA de forma
+engañosa — detectado y corregido durante esta misma medición). Datos
+crudos: `qa-evidence/perf.json`.
 
 Lectura clave:
-- ULTRA con post (bloom selectivo ×3) mantiene 13-26 fps EN SOFTWARE puro a
-  1080p — en GPU real esto se traduce con holgura en el objetivo 55-60 (§125).
-- PERF apaga sombras/bloom y baja DPR: los draw calls caen y el frame-time de
-  software mejora ~2× — la escalera de calidad hace trabajo real.
-- MOBILE (390×844) usa texturas 2K de Tierra, menos partículas y DPR 1.4.
+- ULTRA en SOFTWARE puro (SwiftShader, sin GPU) sostiene 20-32 fps en la
+  facility y 20-23 fps en Earth Hero / Hub a 1080p con sombras y bloom
+  activos — en GPU real (órdenes de magnitud más rápida en rasterización)
+  esto tiene margen amplio para el objetivo 55-60 fps (§125).
+- La escalera de calidad hace trabajo REAL y medible: PERF reduce
+  triángulos de facility en ~53 % (117k→55k) apagando el detalle hero
+  (`_detailHero()`) y usando menos segmentos de terreno; sombras y bloom se
+  apagan (confirmado `shadows:false, bloom:false`).
+- La esfera de la Tierra pesa lo mismo en triángulos en todos los tiers
+  (24.4k) porque solo cambia la RESOLUCIÓN de textura (4K→2K), no la
+  geometría — coherente con el diseño (§126).
+- MOBILE detectado correctamente (`tier:"mobile"`, DPR 0.85, sombras OFF)
+  una vez el harness de prueba simula `hasTouch`/`isMobile` — confirma que
+  la detección de dispositivo en `_tier()` funciona como está escrita.
 - AUTO degrada DPR → nubes → bloom → post con histéresis de 3 s y se
   recupera al mejorar (sin oscilación) — sin cambios en V3.4.
 
