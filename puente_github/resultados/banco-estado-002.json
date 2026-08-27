@@ -1,0 +1,9 @@
+{
+  "id": "banco-estado-002",
+  "ok": true,
+  "procesado_utc": "2026-08-27T22:30:24Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "estado: EN MARCHA\nhora UTC: 22:30:24\n\n--- registro completo (ultimas 60 lineas) ---\n================================================================================\nJEAN FLOW — BANCO DE DIAGNÓSTICO DE GIL (HIPÓTESIS H1)\n================================================================================\nIntérprete Python   : /home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/.venv/bin/python\nVersión de Python   : 3.12.3\nMotor de Event Loop : uvloop\nSwitch Interval     : 0.001 s\nRitmo objetivo      : 112800 filas/min (1880.0 filas/s)\nDuración por corrida: 60.0 s\nDirectorio temporal : /home/trading/banco_gil_tmp\n================================================================================\n\nEjecutando E0 [Repetición 1/2] (Sonda sola (suelo de ruido)) durante 60.0s ...\nBANCO_ESTADO_OK\n"
+  }
+}
