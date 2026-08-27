@@ -1,0 +1,9 @@
+{
+  "id": "conversion-lanzar-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T21:45:06Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "obrero lanzado, pid=35790\nregistro: /home/trading/conversion_parquet.log\nLANZAR_OK\n"
+  }
+}
