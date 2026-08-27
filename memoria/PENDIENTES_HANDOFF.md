@@ -1,4 +1,4 @@
-# PENDIENTES — Handoff para cualquier IA (actualizado 27/08/2026 ~21:20 UTC)
+# PENDIENTES — Handoff para cualquier IA (actualizado 27/08/2026 ~22:15 UTC)
 
 Lee primero: memoria/MEMORIA_JORNADA_27AGO2026.md y _PARTE2.md, y el contexto en Notion
 (página 19 + Memoria operativa). Vía de trabajo: PUENTE GITHUB (tutoriales/TUTORIAL_PUENTE_GITHUB.md).
@@ -19,12 +19,28 @@ Lee primero: memoria/MEMORIA_JORNADA_27AGO2026.md y _PARTE2.md, y el contexto en
    `puente_github/resultados/filo-amor-r2.json`), anexarla y contrarreplicar.
    Continúa hasta que el operador diga basta.
 
-## ⛔ BLOQUEADOR NUEVO — decidir antes del gate de 24 h
-3. **El disco no aguanta los 7 días.** Medido: 3.74 GiB/h.
-   7 días = **628 GiB**; libres = **120 GiB**. La captura moriría a las ~32 h.
-   El gate de 24 h (89.8 GiB) dejaría el disco al 97 %.
-   Con Parquet: 628 GiB → **8.74 GiB**. Tres salidas evaluadas con coste en
-   `planes/BLOQUEADOR_DISCO_7DIAS.md`. **Requiere decisión del operador.**
+## ✅ BLOQUEADOR DE DISCO — RESUELTO esta noche
+3. **32 GB → 638 MB.** Disco libre de 119 GB a **150 GB**. 74 ficheros
+   convertidos a Parquet+zstd y sus CSV borrados tras verificarlos.
+   **0 fallos.** Seis minutos. Factores 49× a 76× (futuros comprime mejor
+   que spot: 74-76× frente a 58-60×).
+   - Los 7 días pasan de **628 GiB a ~9.6 GiB**: caben **quince veces**.
+   - **Reversible y probado:** se reconstruyó un CSV desde un Parquet del
+     gate 3 —1 340 365 filas, sesión c37b7c55…— y el auditor lo **certificó**
+     (`causal_replay: PASS`, `journal_integrity: PASS`, rc=0).
+   - Detalle: `operaciones/CONVERSION_PARQUET_RESULTADO.md`.
+   - Herramientas: `herramientas/convertir_parquet.py` (en la máquina),
+     `puente_github/scripts/reconstruir_csv.py` (la vuelta atrás).
+
+## ⚠️ Lo que hay que saber tras el borrado
+4. **El auditor NO lee Parquet.** `grep -c parquet audit.py` = 0; igual
+   `reconstruct.py`. Para re-auditar cualquier captura antigua hay que
+   reconstruir el CSV primero con `reconstruir_csv.py`. Funciona y tarda
+   segundos, pero **es un paso que antes no existía**. Mejora natural:
+   enseñar al auditor a leer Parquet.
+5. **La reconstrucción no es byte a byte:** difiere en comillas de cabecera y
+   fin de línea (~0.25 % del tamaño). El dato es idéntico y el auditor
+   certifica. El manifiesto guarda el sha256 de cada CSV original.
 
 ## Hallazgos que cambian el plan
 4. **Dos de las tres mejoras de la auditoría cruzada YA existían** en el código
@@ -71,6 +87,36 @@ Lee primero: memoria/MEMORIA_JORNADA_27AGO2026.md y _PARTE2.md, y el contexto en
 10. Idea de negocio del operador pendiente de responder desde temprano: "¿puedo crear mi
     empresa de alquilar un VPS con mi código para que las empresas graben sus datos?" — darle
     una respuesta seria de viabilidad cuando haya un momento tranquilo.
+
+## Trabajo técnico pendiente (por orden de valor)
+11. **Enganchar `parquet_store.py` a la rotación en vivo.** Es la pieza que
+    falta para que el gate de 7 días se comprima solo mientras graba. **No hay
+    que escribirlo**: ya existe (641 líneas) con `discover_closed_csv`,
+    `SegmentBusy` y bloqueo exclusivo. Hay que **probarlo e integrarlo**.
+    Regla: jamás borrar un CSV que el colector pueda tener abierto.
+12. **Diagnóstico de los 19 ms de `event_loop_lag`** (T2). Banco de pruebas
+    `herramientas/banco_gil.py` escrito por Gemini (19 288 bytes, 21:52) pero
+    **su ejecución no llegó a completarse**. Hipótesis a confirmar o refutar:
+    `csv.writer.writerows()` es una función en C que no libera el GIL.
+    Ver `planes/INVESTIGACION_LATENCIA_V2.md`.
+13. **Afinidad de CPU + `SO_RCVBUF`** (T3). Ninguna de las dos aparece en el
+    código. Con A/B obligatorio: tocar el planificador puede empeorar.
+14. **Auditorías spot y usdm en paralelo** (T4). Hoy corren en fila:
+    17 min → ~11. En el gate de 24 h serán horas.
+15. **Bajar el tope de `ejecutar_script_repo` de 600 s a ~120 s** para que
+    nada largo bloquee la cola del puente
+    (`operaciones/LECCION_PUENTE_SERIAL.md`).
+16. **Permisos de lo que escribe el autor.** Gemini creó `banco_gil.py` como
+    root con modo 700: el revisor no puede leerlo ni ejecutarlo. Si al autor
+    se le agota el tiempo, el trabajo se pierde entero en vez de poder
+    rematarlo. Todo lo que escriba debe quedar `trading:trading` y legible.
+
+## Decisiones que esperan al operador
+17. **¿A/B en paralelo de 48 h?** Dos procesos sobre el mismo flujo, misma
+    hora, uno con uvloop y otro sin. Es lo único que zanjaría si uvloop mejora
+    de verdad o fue el mercado flojo. **Ahora sí cabe en disco.**
+18. **¿Promover el parche de uvloop a la instalación base?** Hoy solo vive en
+    el staging del gate 4 y en `parches/uvloop_gcfreeze_dual_main.patch`.
 
 ## Reglas que nunca cambian
 - Producción automática, purga de CSV y Cloud Storage: PROHIBIDOS sin orden expresa.
