@@ -1,0 +1,5 @@
+{
+  "id": "convertir-001",
+  "accion": "ejecutar_script_repo",
+  "script": "convertir_uno.sh"
+}
