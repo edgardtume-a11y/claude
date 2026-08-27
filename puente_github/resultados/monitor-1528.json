@@ -1,0 +1,11 @@
+{
+  "id": "monitor-1528",
+  "ok": true,
+  "procesado_utc": "2026-08-27T15:29:09Z",
+  "resultado": {
+    "capturas_activas": "1",
+    "disco": "/dev/root       193G   58G  135G  31% /",
+    "load1": "0.28",
+    "nproc": 8
+  }
+}
