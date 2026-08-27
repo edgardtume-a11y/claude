@@ -1,0 +1,5 @@
+{
+  "id": "esperar-amor-001",
+  "accion": "ejecutar_script_repo",
+  "script": "esperar_gemini.py"
+}
