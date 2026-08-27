@@ -1,0 +1,5 @@
+{
+  "id": "revisar-conversor-002",
+  "accion": "ejecutar_script_repo",
+  "script": "revisar_conversor2.sh"
+}
