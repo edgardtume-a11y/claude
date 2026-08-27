@@ -1,0 +1,5 @@
+{
+  "id": "donde-esta-001",
+  "accion": "ejecutar_script_repo",
+  "script": "donde_esta_todo.sh"
+}
