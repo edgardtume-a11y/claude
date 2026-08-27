@@ -1,0 +1,30 @@
+{
+  "id": "tec-res-002",
+  "ok": true,
+  "procesado_utc": "2026-08-27T19:08:26Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-27T18:01:12Z",
+    "duplicate": true,
+    "execution_models": [
+      "gemini-3.7-flash"
+    ],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "finished_at": "2026-08-27T18:19:47Z",
+    "id": "jfr-1c64c9e538c9e085efb6f7cebcdaa695d1f6866c",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "execution",
+    "requested_model": "gemini-3.7-flash",
+    "response": "### 1. Clasificación de las 7 candidatas\n\n* **YA (Corto plazo / Alto retorno):**\n  * **uvloop:** Reemplazo directo en C (libuv) del event loop de Python. Reduce el overhead de scheduling y latencia de sockets sin tocar la lógica de negocio.\n  * **Polars:** Esencial ya para la fase LightGBM/pipeline offline. Ejecución columnar multi-hilo en Rust sobre Arrow/Parquet, eliminando cuellos de botella de memoria y ETL.\n  * **msgspec:** Parsing C/Rust con validación estricta y pre-asignación a `Structs`. Para decodificar payloads masivos de Binance L2 supera a `orjson` al evitar la creación intermedia de dicts dinámicos.\n\n* **POSPONER:**\n  * **Optuna:** Indispensable para optimizar hiperparámetros de LightGBM, pero solo cuando el dataset y las features estén consolidados.\n  * **DuckDB:** Excelente motor OLAP, pero si ya se estandariza en Polars + Parquet, su inclusión inmediata agrega redundancia operativa.\n  * **ArcticDB:** Gran base de datos sobre S3/LMDB para time-series tick-by-tick, pero Parquet local/GCS cubre la fase actual; evaluarla al escalar a multi-símbolo masivo.\n\n* **DESCARTAR:**\n  * **Nautilus Trader:** Framework HFT completo en Cython/Rust. Reescribir el colector actual dentro de su arquitectura introduce una fricción gigantesca frente a los requisitos ya certificados.\n\n---\n\n### 2. Impacto de `uvloop` en el p99 y validación A/B\n\n* **Impacto real:** Sí reducirá `writer_yield` y el ciclo de I/O de red (epoll vs selector estándar). No obstante, el p99 de `book_pipeline` suele estar dominado por la serialización y mutaciones CPU-bound (`sortedcontainers`). Si el bucle está saturado por micro-tareas, `uvloop` bajará el jitter de scheduling entre 1 y 2 ms.\n* **Riesgos:** Muy bajo en Linux x86_64; incompatibilidad potencial mínima con subprocesos o transporte TLS específico.\n* **Validación A/B segura:** Ejecutar en paralelo un segundo worker idéntico (`worker_B`) escuchando el mismo flujo de Binance pero instanciando `uvloop.install()` antes de `asyncio.run()`, comparando métricas p95/p99 y consumo de CPU vía Prometheus/logs durante 48h antes de promoverlo.\n\n---\n\n### 3. Tecnologías adicionales recomendadas\n\n1. **Cython / PyO3 (Rust bindings):** Permite compilar a binario nativo las mutaciones del libro de órdenes L2 y cálculo de depth, reduciendo `book_pipeline` p99 a submilisegundos.\n2. **Numba:** Compilador JIT para acelerar operaciones numéricas vectorizadas sobre arrays de precios/volúmenes en la generación de features sin salir de Python.\n3. **MIMalloc / Jemalloc:** Asignadores de memoria de alto rendimiento en C que mitigan la fragmentación de heap provocada por la continua creación/destrucción de mensajes WebSocket.",
+    "served_model": "gemini-3.7-flash",
+    "served_models": [
+      "gemini-3.7-flash"
+    ],
+    "status": "done",
+    "updated_at": "2026-08-27T19:08:26Z"
+  }
+}
