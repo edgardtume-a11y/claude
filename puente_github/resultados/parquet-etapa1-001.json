@@ -1,0 +1,9 @@
+{
+  "id": "parquet-etapa1-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T14:27:57Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== 1/3 instalar pyarrow ===\npyarrow 25.0.1\n=== 2/3 muestra de 50k filas del gate 1 ===\nfuente: /home/trading/jean-flow-exec/staging_runs/20260827T075205Z_tokyo_capture_gate1_30m/capture/usdm_futures/events-20260827T075554.287366Z-000001.csv\n50001 /home/trading/parquet_lab/muestra.csv\n=== 3/3 CSV -> Parquet -> CSV + verificacion ===\ntabla identica tras ida y vuelta: True\ncsv=19822897 bytes  parquet=275579 bytes  compresion=71.93x\nhash muestra original: ce4ad11df4efd1d7\nPARQUET_PRUEBA_OK\n"
+  }
+}
