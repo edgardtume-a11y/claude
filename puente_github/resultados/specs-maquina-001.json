@@ -1,0 +1,9 @@
+{
+  "id": "specs-maquina-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T17:40:10Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== CPU ===\n8\nmodel name\t: Intel(R) Xeon(R) CPU @ 2.80GHz\n8\n=== MEMORIA (GB) ===\n               total        used        free      shared  buff/cache   available\nMem:              31           1          17           0          12          30\n=== DISCO ===\n/dev/root       193G   67G  127G  35% /\n=== KERNEL / SO ===\n6.17.0-1022-gcp\nUbuntu 24.04.4 LTS\n=== UPTIME ===\nup 3 hours, 16 minutes\n=== PYTHON DEL COLECTOR ===\nPython 3.12.3\n=== SERVICIOS JEAN FLOW ===\njean-flow-router: active\njean-flow-gemini: active\njean-flow-bridge: active\ncloudflared: active\npuente-github: active\ndesktop-commander-remote: active\nSPECS_OK\n"
+  }
+}
