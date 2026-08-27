@@ -9,7 +9,7 @@ import socket
 import time
 
 SOCKET = "/run/jean-flow-router.sock"
-JOB = "jfr-ee5bac973bfe714abe0b8ba42a54346e2cfa81c5"
+JOB = "jfr-11e44eaefd5fef2dadabe9e4035c1b8db8f3ee9b"
 LIMITE_S = 540
 INTERVALO_S = 15
 

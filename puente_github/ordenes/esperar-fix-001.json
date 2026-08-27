@@ -1,0 +1,5 @@
+{
+  "id": "esperar-fix-001",
+  "accion": "ejecutar_script_repo",
+  "script": "esperar_gemini.py"
+}
