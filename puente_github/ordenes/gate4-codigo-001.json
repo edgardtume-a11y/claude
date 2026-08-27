@@ -1,0 +1,5 @@
+{
+  "id": "gate4-codigo-001",
+  "accion": "ejecutar_script_repo",
+  "script": "gate4_leer_codigo.sh"
+}
