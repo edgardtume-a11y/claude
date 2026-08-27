@@ -1,0 +1,9 @@
+{
+  "id": "inspeccionar-stop-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T19:49:03Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== LINEAS DE STOP EN launch_live.sh ===\n13:env PYTHONPATH=\"$run_path/overlay/src\" \"$python_bin\" -m binance_collector.dual_main --symbol BTCUSDT --output-dir \"$run_path/capture\" --dashboard-port 0 --dom-levels 100 --healthy-seconds 7200 --ready-timeout 180 --session-id \"$session_id\" --parent-pid \"$$\" --session-file \"$run_path/control/session.json\" --ready-file \"$run_path/control/READY.json\" --stop-file \"$run_path/control/STOP.json\" --heartbeat-file \"$run_path/control/HEARTBEAT.json\" --no-browser --log-level INFO --log-file \"$run_path/capture/jean_flow_metrics.jsonl\" >\"$run_path/capture/console.log\" 2>&1 &\n=== PIDS REGISTRADOS ===\nPID.txt: ausente\nHB_PID.txt: ausente\nLAUNCHER_PID.txt: ausente\nSESSION_ID.txt: ausente\n=== ARCHIVOS EN LA RAIZ ===\naudit\ncapture\ncontrol\nlauncher_console.log\noverlay\nINSPECCION_OK\n"
+  }
+}
