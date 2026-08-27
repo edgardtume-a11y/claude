@@ -1,0 +1,5 @@
+{
+  "id": "auditar-gate2-001",
+  "accion": "auditar_staging",
+  "staging": "/home/trading/jean-flow-exec/staging_runs/20260827T123816Z_tokyo12_capture_gate2_30m"
+}
