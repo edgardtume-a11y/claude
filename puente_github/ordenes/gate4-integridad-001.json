@@ -1,0 +1,5 @@
+{
+  "id": "gate4-integridad-001",
+  "accion": "ejecutar_script_repo",
+  "script": "gate4_integridad.sh"
+}
