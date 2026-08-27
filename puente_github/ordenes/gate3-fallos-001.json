@@ -1,0 +1,5 @@
+{
+  "id": "gate3-fallos-001",
+  "accion": "ejecutar_script_repo",
+  "script": "gate3_fallos_metrics.py"
+}
