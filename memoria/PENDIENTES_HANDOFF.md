@@ -42,3 +42,25 @@ Lee primero: memoria/MEMORIA_JORNADA_27AGO2026.md y _PARTE2.md, y el contexto en
 - Un solo orquestador por tarea. Claves idempotentes en toda orden.
 - Todo cambio de código: contrato → Gemini → revisión independiente → registro.
 - Secretos jamás en GitHub/Notion/chats.
+
+## Notas del operador (volcado 27/08 ~15:45 UTC)
+- **Marca candidata**: QUANTFLOW / Lorvellan Flow / Lorvellan Fund (por decidir).
+- **Verificado hoy**: el sistema SÍ captura el libro de órdenes completo (la auditoría journal
+  lo reconstruye tick a tick con resultado 0) — es la misma materia prima de Bookmap/ATAS/
+  ExoCharts/Volume Profile/DOM. La visualización sería con herramientas aparte, no bloqueante.
+- **Túnel Cloudflare + puente UNRESTRICTED**: se CONSERVAN — son la puerta HTTPS universal (vía #1).
+- **ArcticDB** (open source de Man Group): candidata para la capa de datos de ENTRENAMIENTO
+  (complemento/alternativa a Parquet en fase 2). Evaluar cuando toque el pipeline de features.
+- **Futuro lejano**: migrar a AWS Tokio (misma nube que Binance) → sub-milisegundo. Anotado en plan ultra.
+- **Memecoins multi-símbolo**: diseño ya registrado (N streams, grabar también perdedoras,
+  Parquet prerrequisito, ventana deslizante 4-8 semanas). Después de certificar BTC.
+- **Fase 4 (bot)**: "baja frecuencia casera" — candidatos Nautilus Trader (serio) / Freqtrade (fácil),
+  Binance Testnet para paper trading, kill switch + API keys sin permiso de retiro.
+- **Principio del operador**: cambio agresivo propuesto por una IA se contrasta con otra IA
+  hasta converger — pilar del sistema de orquestación.
+- **Proyecto aparte** (otra sesión/repo): plataforma de cursos de Derecho como plantilla
+  reutilizable para toda la carrera — el operador quiere construirla con Claude.
+- **Pendiente delicado (usuario, no urgente)**: cambio de correo en la facturación de Google
+  (quitar el de Edgard) — hacerlo con cuidado: primero agregar el nuevo administrador,
+  verificar, recién quitar el viejo. NO tocar durante certificaciones.
+- Lista de permisos allowlist para sesiones Claude ya registrada en settings (RDC lectura+proceso, Notion lectura).
