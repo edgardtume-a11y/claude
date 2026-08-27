@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es" data-sg-build="20260827-V34-01">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#04070d">
+<title>Universo Sebas Granda — SG Aerospace Launch Facility</title>
+<meta name="description" content="Universo Sebas Granda: una misión web cinematográfica en tiempo real. Lanza el cohete SG desde Medellín, alcanza órbita y explora tres galaxias: Conóceme en 60 segundos, Sebas Granda y Star Mark Agency.">
+<meta property="og:title" content="Universo Sebas Granda">
+<meta property="og:description" content="Una misión web cinematográfica: Medellín · lanzamiento · órbita · warp · tres galaxias.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260827-V34-01">
+<link rel="stylesheet" href="css/main.css?v=20260827-V34-01">
+<script>window.SG_EXPECTED_BUILD="20260827-V34-01";</script>
+<script type="importmap">
+{
+  "imports": {
+    "./js/config.js": "./js/config.js?v=20260827-V34-01",
+    "./js/i18n.js": "./js/i18n.js?v=20260827-V34-01",
+    "./js/save.js": "./js/save.js?v=20260827-V34-01",
+    "./js/audio.js": "./js/audio.js?v=20260827-V34-01",
+    "./js/ui.js": "./js/ui.js?v=20260827-V34-01",
+    "./js/weather.js": "./js/weather.js?v=20260827-V34-01",
+    "./js/astronomy.js": "./js/astronomy.js?v=20260827-V34-01",
+    "./js/celestial.js": "./js/celestial.js?v=20260827-V34-01",
+    "./js/experience.js": "./js/experience.js?v=20260827-V34-01",
+    "./js/main.js": "./js/main.js?v=20260827-V34-01",
+    "./js/earthworker.js": "./js/earthworker.js?v=20260827-V34-01",
+    "./js/boot-diagnostics.js": "./js/boot-diagnostics.js?v=20260827-V34-01",
+    "./js/sgassets.js": "./js/sgassets.js?v=20260827-V34-01"
+  }
+}
+</script>
+
+</head>
+<body>
+<div id="bg" aria-hidden="true"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<div id="ui">
+  <!-- cinematic dressing -->
+  <div id="letterbox" aria-hidden="true"><div class="lb top"></div><div class="lb bot"></div></div>
+  <div id="vignette" aria-hidden="true"></div>
+  <div id="flash" aria-hidden="true"></div>
+
+  <!-- intro -->
+  <div id="intro-layer" aria-hidden="true">
+    <div id="greetings"></div>
+    <div id="intro-title">
+      <div class="pre" id="intro-pre">BIENVENIDO A</div>
+      <div class="big">SEBAS GRANDA</div>
+    </div>
+  </div>
+
+  <!-- top bar -->
+  <header id="topbar">
+    <div id="brand" aria-label="Universo SG"><span class="sg">SG</span><span class="rest">UNIVERSO</span></div>
+    <div id="chapter-label" aria-live="polite"></div>
+    <div class="spacer"></div>
+    <div id="clock-chip" class="chip" aria-live="off">MEDELLÍN // --:--:--</div>
+    <div id="weather-chip" class="chip">
+      <span class="w-main">MEDELLÍN</span>
+      <span class="w-sub"></span>
+      <span class="src" data-src="offline">SYNC</span>
+    </div>
+    <div id="loc-chip" class="chip"></div>
+    <div id="topbtns">
+      <button id="btn-lang" class="icon-btn hit" aria-label="Idioma / Language">ES | EN</button>
+      <button id="btn-sound" class="icon-btn hit" aria-pressed="true">SOUND</button>
+      <button id="btn-log" class="icon-btn hit" aria-haspopup="dialog">LOG</button>
+      <button id="btn-settings" class="icon-btn hit" aria-haspopup="dialog">MENU</button>
+    </div>
+  </header>
+
+  <!-- discovery chips + SG.OS -->
+  <div id="chips-row">
+    <div id="discovery-chip" class="chip"></div>
+    <div id="sighting-chip" class="chip"></div>
+    <div id="sgos" role="status" aria-live="polite"></div>
+  </div>
+
+  <!-- left HUD -->
+  <div id="left-hud">
+    <div id="systems" class="hud-hidden"></div>
+    <div id="telemetry" class="hud-hidden"></div>
+  </div>
+
+  <!-- right actions -->
+  <div id="right-actions">
+    <button id="btn-scan" class="icon-btn hit hud-hidden" aria-pressed="false">SCAN</button>
+    <button id="btn-cam" class="icon-btn hit hud-hidden">CAM</button>
+    <button id="btn-photo" class="icon-btn hit hud-hidden">PHOTO</button>
+    <button id="btn-sky" class="icon-btn hit hud-hidden">MAP</button>
+  </div>
+
+  <!-- big center readouts -->
+  <div id="count-big" aria-live="assertive"></div>
+  <div id="objective" aria-live="polite">
+    <span id="obj-tag"></span>
+    <span id="obj-text"></span>
+  </div>
+  <div id="bootseq" aria-hidden="true"></div>
+  <aside id="info-card" class="glass" hidden>
+    <div id="info-title"></div>
+    <div id="info-body"></div>
+    <button id="info-close" class="hit">×</button>
+  </aside>
+  <div id="banner" aria-live="polite"></div>
+  <div id="quick" aria-hidden="true"></div>
+  <div id="scan-brackets" hidden aria-hidden="true"><span class="sb-cls"></span><span class="sb-dist"></span></div>
+
+  <!-- bottom -->
+  <div id="bottom">
+    <div id="loader-line" class="mono"></div>
+    <div id="hint"></div>
+    <div id="cta-wrap">
+      <div id="cta-top"></div>
+      <button id="cta" class="big-cta hit"></button>
+    </div>
+  </div>
+
+  <div id="skip-wrap">
+    <button id="btn-skip-intro" class="icon-btn hit">SALTAR INTRO</button>
+    <button id="btn-skip-flight" class="icon-btn hit" hidden>SALTAR VIAJE</button>
+  </div>
+
+  <!-- scanner overlay -->
+  <div id="scanner" aria-hidden="true">
+    <div class="frame"></div>
+    <div class="corner c1"></div><div class="corner c2"></div>
+    <div class="corner c3"></div><div class="corner c4"></div>
+    <div id="reticle">
+      <div class="ring"></div><div class="ring r2"></div><div class="cross"></div>
+      <svg id="scan-ring" viewBox="0 0 140 140" aria-hidden="true"><circle cx="70" cy="70" r="68"></circle></svg>
+    </div>
+    <div id="scan-label"></div>
+  </div>
+
+  <!-- galaxy accessible anchors (real links) -->
+  <nav id="galaxy-anchors" aria-label="Galaxias / Galaxies"></nav>
+
+  <!-- galaxy info panel -->
+  <aside id="galaxy-panel" class="glass" data-k="intro" aria-live="polite">
+    <div class="gp-eyebrow eyebrow" id="gp-eyebrow">SG NAVIGATION</div>
+    <div id="gp-title"></div>
+    <div id="gp-sub"></div>
+    <div id="gp-nav"></div>
+    <a id="gp-cta" class="hit" href="#" rel="noopener"></a>
+  </aside>
+
+  <!-- panels -->
+  <section id="panel-settings" class="panel" role="dialog" aria-modal="false" aria-labelledby="ps-h">
+    <button class="icon-btn panel-close" data-close>✕</button>
+    <h2 id="ps-h">SETTINGS</h2>
+    <div class="row"><span data-lbl="language">IDIOMA</span>
+      <div class="seg" id="seg-lang">
+        <button data-v="es" aria-pressed="true">ES</button>
+        <button data-v="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+    <div class="row"><span data-lbl="sound">SONIDO</span>
+      <div class="seg" id="seg-sound">
+        <button data-v="on" aria-pressed="true">ON</button>
+        <button data-v="off" aria-pressed="false">OFF</button>
+      </div>
+    </div>
+    <div class="row"><span data-lbl="motion">MOVIMIENTO</span>
+      <div class="seg" id="seg-motion">
+        <button data-v="on" aria-pressed="true">ON</button>
+        <button data-v="off" aria-pressed="false">OFF</button>
+      </div>
+    </div>
+    <div class="row"><span data-lbl="quality">CALIDAD</span>
+      <div class="seg" id="seg-quality">
+        <button data-v="auto" aria-pressed="true">AUTO</button>
+        <button data-v="ultra" aria-pressed="false">ULTRA</button>
+        <button data-v="high" aria-pressed="false">HIGH</button>
+        <button data-v="performance" aria-pressed="false">PERF</button>
+      </div>
+    </div>
+    <div class="row"><span data-lbl="skip_on_return">SALTAR INTRO AL VOLVER</span>
+      <div class="seg" id="seg-skipreturn">
+        <button data-v="on" aria-pressed="false">ON</button>
+        <button data-v="off" aria-pressed="true">OFF</button>
+      </div>
+    </div>
+    <button id="btn-syncloc" class="wide-btn hit">SINCRONIZAR CON TU UBICACIÓN</button>
+    <button id="btn-lite" class="wide-btn hit">MODO LITE</button>
+    <button id="btn-reset" class="wide-btn danger hit">REINICIAR DATOS DE MISIÓN</button>
+  </section>
+
+  <section id="panel-log" class="panel" role="dialog" aria-modal="false" aria-labelledby="pl-h">
+    <button class="icon-btn panel-close" data-close>✕</button>
+    <h2 id="pl-h">MISSION LOG</h2>
+    <dl id="log-body"></dl>
+    <button id="btn-archive" class="wide-btn gold hit" hidden></button>
+    <div id="archive-body"><span class="eyebrow" id="archive-title"></span><span id="archive-text"></span></div>
+  </section>
+
+  <section id="panel-sky" class="panel" role="dialog" aria-modal="false" aria-labelledby="pk-h">
+    <button class="icon-btn panel-close" data-close>✕</button>
+    <h2 id="pk-h">MEDELLÍN // CENTRO DE CONTROL</h2>
+    <div class="cap">VALLEY MAP</div>
+    <canvas id="cv-map" width="320" height="200"></canvas>
+    <div class="cap">LOCAL SKY</div>
+    <div class="row">
+      <span class="lbl">OBSERVADOR / OBSERVER</span>
+      <div class="seg" id="seg-observer">
+        <button data-v="base" class="hit" aria-pressed="true">MEDELLÍN</button>
+        <button data-v="user" class="hit" aria-pressed="false" disabled>TU CIELO</button>
+      </div>
+    </div>
+    <canvas id="cv-sky" width="320" height="170"></canvas>
+  </section>
+
+  <!-- photo mode -->
+  <div id="photo-ui">
+    <div id="photo-presets">
+        <button class="hit ps" data-ps="natural"></button>
+        <button class="hit ps" data-ps="film"></button>
+        <button class="hit ps" data-ps="deep"></button>
+      </div>
+      <button id="btn-capture" class="icon-btn hit">CAPTURAR</button>
+    <button id="btn-photo-exit" class="icon-btn hit">SALIR</button>
+  </div>
+
+  <!-- returning explorer -->
+  <div id="welcome" class="glass">  <div id="welcome-actions">
+      <button id="w-continue" class="hit"></button>
+      <button id="w-replay" class="hit"></button>
+      <button id="w-hub" class="hit"></button>
+    </div>
+  </div>
+</div>
+
+<!-- LITE MODE / no-WebGL fallback: the three real destinations, always reachable -->
+<section id="lite" aria-label="Lite mode">
+  <div class="lite-inner">
+    <span class="eyebrow">SG NAVIGATION // LITE</span>
+    <h1 id="lite-q">¿QUÉ GALAXIA QUIERES EXPLORAR?</h1>
+    <a class="lite-card" href="https://sebasgrandamanager.starmarkagencia.com/inicio">
+      <div class="lc-t">CONÓCEME EN 60 SEGUNDOS</div>
+      <div class="lc-s">DESTINATION 01 // QUICK PROFILE</div>
+    </a>
+    <a class="lite-card v2" href="https://sebasgrandamanager.starmarkagencia.com/sebas">
+      <div class="lc-t">SEBAS GRANDA</div>
+      <div class="lc-s">DESTINATION 02 // PERSONAL UNIVERSE</div>
+    </a>
+    <a class="lite-card v3" href="https://starmarkagencia.com">
+      <div class="lc-t">STAR MARK AGENCY</div>
+      <div class="lc-s">DESTINATION 03 // BUSINESS UNIVERSE</div>
+    </a>
+    <p class="lite-note"><span id="lite-note-txt">Versión ligera sin 3D. La experiencia completa requiere WebGL.</span>
+      <button id="btn-full" class="hit">INTENTAR EXPERIENCIA COMPLETA</button></p>
+  </div>
+</section>
+
+<div id="debug" aria-hidden="true"></div>
+
+<noscript>
+  <section style="position:fixed;inset:0;z-index:99;background:#04070d;color:#eaf4ff;font-family:monospace;padding:40px;text-align:center;overflow:auto">
+    <p style="letter-spacing:.3em;color:#35d6ff;margin-bottom:20px">SG NAVIGATION</p>
+    <p style="margin-bottom:24px">UNIVERSO SEBAS GRANDA</p>
+    <p><a style="color:#35d6ff" href="https://sebasgrandamanager.starmarkagencia.com/inicio">CONÓCEME EN 60 SEGUNDOS</a></p>
+    <p><a style="color:#a97dff" href="https://sebasgrandamanager.starmarkagencia.com/sebas">SEBAS GRANDA — MI MUNDO COMPLETO</a></p>
+    <p><a style="color:#e8cf9e" href="https://starmarkagencia.com">STAR MARK AGENCY</a></p>
+  </section>
+</noscript>
+
+<script type="module">import "./js/main.js";</script>
+</body>
+</html>

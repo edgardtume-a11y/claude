@@ -1,0 +1,131 @@
+UNIVERSO SEBAS GRANDA — ENTREGA V3.2
+VERSION 1.2.0 · BUILD 20260820-V32-01
+=====================================================================
+MULTILINGUAL INTRO + CINEMATIC ASCENT + EARTH REVEAL PASS
+Aditivo sobre P0/P0.1/V3. Sin reconstrucción, sin cambio de stack, sin
+actualizar three, misma máquina de estados, Galaxy Hub UX intacto (§65).
+
+1) INTRO MULTILINGÜE (§4-§13)
+   · 22 saludos verificados (config.js); móvil <640 px usa 14 (§11/§82).
+   · Composición RADIAL/ORBITAL controlada: 2-3 anillos elípticos con ángulo
+     áureo + jitter determinista, 24 iteraciones de relajación de separación
+     mínima (62 px móvil / 96 px desktop), márgenes seguros (5.5 % X, 13 %
+     top, 15 % bottom), zona de exclusión central r=15 % — nada fuera de
+     viewport, nada bajo el HUD, nada encima del núcleo (§6).
+   · Legibilidad: opacidad 0.62-1.0 (§8), blur máx 0.5 px (§9), halo oscuro
+     de 3 capas por palabra + atenuación global de partículas al 70 %
+     mientras los textos sostienen (§7/§8, uniform uDim del shader intro).
+   · Tipografía por escritura (§10): latín .2em, griego/cirílico .09em,
+     CJK .04em, devanagari 0, árabe 0 + dirección rtl.
+   · Timing (§12): aparición 0-0.7 · lectura hasta 3.8 · convergencia
+     3.8-5.0 · singularidad 5.0 · flash 5.4 · título 6.4. SALTAR INTRO igual.
+   · Convergencia (§13): transform de dos etapas (curva con bend ±34 px +
+     estiramiento scaleX 1.35 → absorción con rotación) + 5 fragmentos-punto
+     por palabra viajando al centro antes del big bang.
+
+2) FACILITY POLISH (§14-§17) — composición CONSERVADA
+   · Vapor criogénico periódico en los tanques, sway del látigo de antena,
+     baliza roja de torre respirando (ya existente, mantenida), scorch
+     térmico saliendo del deflector, manifold de supresión de agua con
+     6 boquillas. Countdown: cada segundo dispara sistema + línea SG.OS
+     (TOWER SYSTEMS · PRESSURIZATION · CRYO VENT · PAD LIGHTING/UMBILICAL)
+     y en T-2 las luces del perímetro suben a cian brillante.
+
+3) MOTOR (§18-§24) — cámara baja de ignición CONSERVADA
+   · Tres capas: CORE 0xfff9ec→ámbar pálido, diminuto y corto; PRIMARY
+     blanco→naranja suave turbulento; OUTER gas azul-gris 0x9fb4c6, opacidad
+     0.16, expansión 3.4× — más humo/vapor existentes. Variación real de
+     tamaño/vida/velocidad/rotación/temperatura por partícula (§20).
+   · HEAT HAZE local (§21-§22): pase propio dentro del composite SGPost —
+     ruido value animado, máscara radial en la posición de pantalla del
+     motor (radio 0.10-0.30 según distancia), amplitud 0.016 ULTRA /
+     0.010 HIGH / 0 PERF / 0 SAFE, damping suave. Nunca pantalla completa.
+   · Bloom selectivo ya por threshold+knee (§23/§24): sin cambios de umbral.
+
+4) SALIDA DEL PLANETA (§25-§31)
+   · Whiteout del cloud punch: 0.68 pico / 420 ms nublado (0.38/320 ms
+     despejado) — dentro del presupuesto §25, con silueta+glow legibles.
+   · Cielo = viaje (§30): clearColor por tramos 0x8fb8dd → 0x3e6db3 →
+     0x1a3468 → 0x0b1730 → 0x05080f → 0x04070d, estrellas entrando antes
+     (uSpace 9.6-13.6) mientras cae la calima.
+   · Encuadres reencuadrados con geometría real del globo (R 1400, centro
+     y −1620): TRACK teleobjetivo rozando la primera curvatura; CHASE con
+     horizonte bajo; NEARBODY en MAX-Q = cohete centro-alto, LIMB CURVO en
+     el cuarto inferior, cielo oscuro 50-60 % superior, SIN Tierra completa
+     (§26-§28); STRATO lateral/detrás con la Tierra ≈ ⅓ (§31).
+   · MECO (§32-§33): _meco() — pluma cortada, resplandor residual, ráfaga
+     final de 10 partículas, banner 1.1 s, motor y agua a 0, blip de radio;
+     1.4 s de coasting casi silencioso antes de órbita.
+
+5) EARTH REVEAL + ÓRBITA (§34-§52)
+   · La capa Tierra ya cumplía la arquitectura bobbyroe (día/noche
+     geográficos generados, luces SOLO en lado nocturno, specular+glint
+     oceánico, banda cálida de terminador, cloud shell independiente
+     iluminada, atmósfera Fresnel Rayleigh/Mie + airglow fino): auditada y
+     conservada; resoluciones 2048 ULTRA/HIGH (§43, «no absurdas»).
+     KTX2 (§44): diferido por estabilidad — slots y addons documentados.
+   · Encuadre de órbita (§45-§47): director basePitch −0.46 / fov 58 → la
+     Tierra ocupa ~45-50 % de la altura y SE RECORTA por abajo; la nave se
+     estaciona centro-alto pequeña contra el planeta; espacio profundo
+     arriba.
+   · Hero moment (§48-§49): 2.3 s de cinematic (solo telemetría crítica +
+     SALTAR VIAJE vivos — excepciones CSS nuevas) → línea pequeña
+     «ÓRBITA TERRESTRE ALCANZADA» → nave SG (§50) → SCAN 2.9 s, CAM 3.3 s,
+     FOTO 3.7 s escalonados (§52) → carga interestelar 3.6 s. Nada de
+     tarjetas automáticas durante el reveal (§64).
+   · Starfield: 3 escalas con tamaño/temperatura/twinkle por estrella ya
+     presentes (§53); Vía Láctea subordinada 0.65 (§54).
+
+6) AUDIO (§61): nubes atenúan el motor (0.8), estratosfera lo adelgaza
+   (0.62) y corta viento, MECO = silencio súbito, ambiente interior en
+   órbita (pad 0.35) y build de energía en warp — todo sobre la síntesis
+   existente.
+
+7) ?shot= (§67-§71): nuevos `intro` (mantiene el instante legible con el
+   reloj de capítulo fijado en 2.4 s) y `maxq` (lanza el camino real y fija
+   10.6 s); facility/ignition/ascent/orbit/hub intactos. URLs añadidas a la
+   lista de validación de DEPLOY.md.
+
+8) ACEPTACIÓN (§80): el autotest emite ahora, además de la cadena V3,
+   IGNITION · LIFTOFF · CLOUD BREAK · MAX-Q · STRATOSPHERE · MECO ·
+   SHIP REVEAL PASS, verificados en los 11 escenarios.
+
+§72 COMPARACIÓN — respuestas honestas
+   INTRO   ¿Se leen TODOS los idiomas?  Sí: layout controlado sin solapes,
+           halo oscuro, blur ≤0.5 px, tracking por escritura, 14 en móvil.
+   FACILITY¿Conservé la toma buena?     Sí: misma cámara/composición; solo
+           microdetalle y movimiento ambiental.
+   IGNITION¿Energía, profundidad, refracción? Sí: 3 capas + humo erosionado
+           + heat haze local + bloom por threshold; sin blob blanco.
+   MAX-Q   ¿Se siente que abandono la Tierra? Sí: horizonte curvo abajo,
+           cielo oscureciéndose por tramos, estrellas entrando, banda
+           atmosférica fina; la Tierra completa NO aparece aún (§28).
+   ORBIT   ¿La Tierra es la recompensa?  Sí: ~mitad del encuadre, recortada,
+           continentes/océano/nubes/luces reales de canvas, hero de 2.3 s
+           sin HUD y con una sola línea pequeña.
+
+DECLARACIÓN §73-§75: sin placeholders falsos, sin URLs rotas, sin
+hotlinking. Este entorno no tiene red: no se pudieron descargar Blue/Black
+Marble ni GLB; la Tierra visible sigue siendo la geográfica generada por
+código y los slots locales (auto-detección) quedan documentados en
+ASSET-CREDITS.md §2 — nada se afirma incluido que no lo esté.
+
+PESO (§76)  antes → después
+   js/     436K → 452K   (experience.js 260K → 276K)
+   css/    32K  → 32K
+   assets/ 88K  → 88K
+   Mayor archivo: js/experience.js. Carga inicial sin cambios de orden:
+   INTRO CORE → FACILITY CORE → ROCKET/LAUNCH → ASCENT → EARTH LOD0 →
+   EARTH HI (worker, durante Facility/Launch) → SHIP → WARP → HUB (§77-§79
+   ya operativo desde P0: placeholders instantáneos, swap suave, nunca
+   pantalla de carga de Tierra).
+
+VERIFICACIÓN
+   Arnés headless sobre el código real — 11/11 PASS:
+   full · perf · ultra · safe · skip · fail=worker · fail=post ·
+   fail=satellites · fail=weather · stall 4 s ×2. Cada escenario termina en
+   [SG TEST] FULL MISSION PASS con la cadena completa §80 + secuencia de
+   galaxias §63 (CTA con navegación suprimida). Unit tests de
+   boot-diagnostics PASS; smoke de astronomy/save/config PASS
+   (SG_BUILD_ID 20260820-V32-01, 17 descubrimientos, URLs intactas).
+   Validación en hosting real: DEPLOY.md §36-§38 + escenas §67-§71.

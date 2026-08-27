@@ -1,0 +1,93 @@
+UNIVERSO SEBAS GRANDA — ENTREGA V3.4
+VERSION 1.4.0 · BUILD 20260827-V34-01
+=====================================================================
+TRUE EARTH REAL + FREE SPACE REAL + COUNTDOWN CON VOZ + GALAXY HUB
+REDISEÑADO. Aditivo sobre V3.3. Mismo stack (three r161, ahora LOCAL en
+vendor/), misma máquina de estados, URLs canónicas intactas, cero
+dependencias nuevas.
+
+---------------------------------------------------------------------
+LO ESENCIAL EN 12 PUNTOS (detalle completo: REPORT-V34.md · AUDIT-V34.md
+· QA-V34.md · PERFORMANCE-V34.md · ASSET-CREDITS.md)
+---------------------------------------------------------------------
+
+1) TRUE EARTH DE ARCHIVO: assets/earth/ y assets/moon.jpg ya contienen
+   imaginería real derivada de NASA (day/night 4K + 2K, clouds 2K,
+   fuentes y licencias en ASSET-CREDITS.md §1). HIGH/ULTRA cargan 4K,
+   PERF/MOBILE 2K, con ?v= de build. El procedural queda solo como
+   fallback (SAFE/offline). El debug imprime DAY=FILE NIGHT=FILE
+   CLOUDS=FILE. La máscara oceánica se deriva del day.jpg real para que
+   el glint caiga en los océanos correctos.
+
+2) CAUSA RAÍZ "TIERRA = FRANJA": _yawPitchGoal recibía this._tmpV como
+   pos y escribía el look-target en ese MISMO objeto antes de lookAt →
+   eye==target → rotación identidad → el pitch Earth-aware de V3.3 se
+   perdía en runtime. Corregido (copia estable primero). Coverage medido
+   del Earth Hero: 55 % (objetivo 45-65 %).
+
+3) BLOQUES OSCUROS EN VISTA LEJANA: near=0.1/far=30000 dejaba la
+   cuantización del z-buffer (~15 u a 6000 u) por encima de los 11 u que
+   separan las nubes de la superficie → las nubes perdían el depth-test
+   por parches. Near dinámico (0.1 superficie · 2.0 espacio) + pow()
+   blindados contra base negativa.
+
+4) MACH 1: el uniform uHeat del post quedaba CONGELADO al salir de la
+   superficie y doblaba el cohete — reset + decay global. Whiteout
+   reducido, el domo del cielo oscurece con la altitud, CHASE más
+   cercano: cohete grande, recto y legible.
+
+5) COUNTDOWN: dígitos 5-4-3-2-1 gigantes centrados + VOZ local
+   (SpeechSynthesis es-CO→es-ES / en-US; sin red ni API keys) + líneas
+   de Mission Control con squelch de radio (autorización, Mach uno,
+   Max-Q, separación, inserción orbital). SOUND OFF corta también la
+   voz. Sin voz disponible: beeps + visual — el lanzamiento nunca rompe.
+
+6) FREE SPACE REAL: eliminada la caja x±70/y−90..30/z±40. Vuelo 6DOF
+   (WASD+QE, vuela-hacia-donde-miras, SHIFT boost), esfera segura
+   earthR+60, envolvente earthR·6 (disco completo). X = FOCUS EARTH ·
+   R = RESET VIEW · H = HOME // MEDELLÍN (marcador discreto real por
+   lat/lon). El modo ORBIT en órbita ahora orbita EL PLANETA (drag +
+   rueda, sin atravesarlo).
+
+7) DEPARTURE por distancia real hasta disco completo con espacio
+   alrededor (60→45→32→disco); la Tierra jamás se escala. ORBITAL
+   SUNRISE sobre el sol único compartido (superficie+nubes+atmósfera+
+   nave+key light) — natural tras 21 s en PRE-WARP o QA.
+
+8) GALAXY HUB REDISEÑADO: tres morfologías reales — Conóceme =
+   doble-corriente elongada energética (pulso + streaks + anillos),
+   Sebas = GRAN espiral hero (R 250, 4 brazos, bulge, regiones magenta,
+   dust lanes, halo), Star Mark = barrada dorada (barra + nodos en red +
+   anillo). Posiciones X/Y/Z reales con inclinaciones distintas — la
+   fila de menú desapareció. El rectángulo de Star Mark era el sprite de
+   nebulosa sin fade radial: corregido en nebulaTex().
+
+9) LLEGADA AL HUB: 9 s de arrival cinemático la primera vez (exposición
+   se recupera, nombres ocultos, control bloqueado; tap >2 s lo salta;
+   3.2 s en repetición) y luego CONTROL TOTAL. Telemetría corregida:
+   SG-L1 // DEEP SPACE · NAV // GALAXY HUB. Nave siempre presente: RCS +
+   morro orientándose + línea de ruta al seleccionar. Profundidad de 5
+   capas con parallax (foreground, nave, héroes, nebulosas mixtas,
+   galaxias de fondo edge-on, starfield). BLACK HOLE secreto lejano
+   (SCAN → ANOMALY DETECTED — sin enlace, sin cuarta opción).
+
+10) FACILITY: crestas-silueta del valle (profundidad near/mid/far),
+    conos de luz volumétricos nocturnos, mástil pararrayos 62 m, casco
+    1024 px, chispas de hold-down + anillo de polvo en T-0, losas
+    re-tonalizadas. QA hero shot recompuesto (cohete dominante).
+
+11) QA REAL: ?qa=v34 (no enlazado en producción) recorre la RUTA REAL
+    con saltos del reloj: 41 destinos (facility→countdown→ignition→
+    mach→…→hub→galaxias→black hole). 35 screenshots WebGL reales en
+    qa-evidence/ + report.json + regression.json (autotest completo,
+    fallos inyectados, SAFE, LITE, 5 viewports) + perf.json medido.
+
+12) FIXES EXTRA ENCONTRADOS EN QA: el loader del vendor local resolvía
+    fetch e import en rutas distintas (nunca podía cargar); SALTAR VIAJE
+    dejaba pegado el panel SYSTEMS; variables CSS inexistentes (--mono/
+    --cy); GO TO GALAXY HUB del welcome ahora funciona desde facility.
+
+DEPLOY: subir el contenido del ZIP HOSTING a /pruebas/ reemplazando lo
+anterior y purgar caché (DEPLOY.md). Validar: ?diag=1 → todo OK ·
+?debug=1 → v1.4.0 + EARTH DAY=FILE · ?autotest=1 → FULL MISSION PASS ·
+countdown audible con SOUND ON.

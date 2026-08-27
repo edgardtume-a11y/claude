@@ -1,0 +1,171 @@
+UNIVERSO SEBAS GRANDA — ENTREGA V3.3
+VERSION 1.3.0 · BUILD 20260820-V33-01
+=====================================================================
+REAL STAGING + EARTH DEPARTURE + GALAXY UX FIX
+Aditivo sobre V3.2. Sin reconstrucción, mismo stack (three r161), misma
+máquina de estados, URLs canónicas intactas.
+
+---------------------------------------------------------------------
+EXPLICACIÓN EXACTA (los 8 puntos pedidos por la directiva)
+---------------------------------------------------------------------
+
+1) POR QUÉ LA TIERRA QUEDABA FUERA DEL ENCUADRE
+   Los rigs de ascentSpace usaban PITCH FIJO. Con centro terrestre en
+   (0, −1620, −180) y R = 1400, el limbo real visto desde la cámara está a
+   dip = asin(dy/d) + asin(R/d) BAJO la horizontal, y ese ángulo CAMBIA con
+   la altitud (≈ −18° al salir de nubes, ≈ −34° en MAX-Q, ≈ −44° en
+   estratosfera). Un pitch constante que encuadraba bien a una altitud
+   dejaba el limbo fuera del borde inferior a otra: por eso las capturas
+   mostraban solo una franja naranja delgada (el rim atmosférico asomando
+   por el borde) en vez de superficie/océano/nubes.
+
+2) QUÉ CAMBIÓ EN EL SISTEMA DE CÁMARA
+   Encuadre Earth-aware autoritativo en experience.js:
+     _limbAngle(pos)              → elevación real del limbo desde pos
+     _earthAngRadius(pos)         → radio angular del disco
+     _pitchForLimb(pos, fov, f)   → pitch que coloca el limbo en la
+                                    fracción f del alto del encuadre
+   Cada rig declara SU fracción (TRACK .10 · CHASE .16 · MAX-Q .22 ·
+   STRATO .34) y el pitch se recalcula POR FRAME desde la posición real de
+   cámara: sin números mágicos, estable en 16:9/ultrawide (la solución
+   depende del FOV vertical). La cámara de EARTH DEPARTURE usa la misma
+   utilidad: mantiene el limbo en fracción decreciente (0.55 → 0.46) y,
+   cuando el disco entero cabe (diámetro angular < 82 % del FOV), pasa a
+   encuadre de disco completo centrado por elevación real del centro.
+   MECO NO corta a negro: la Tierra sigue en cuadro (STRATO .34) durante
+   el coasting y la separación.
+
+3) QUÉ ARCHIVOS NASA FUERON INCORPORADOS
+   NINGUNO — y se dice sin rodeos. La directiva condicionaba la descarga a
+   que existiera acceso a Internet; se intentó (curl a visibleearth.nasa.gov
+   y eoimages.gsfc.nasa.gov) y el proxy del entorno la bloqueó con
+   HTTP 403 `x-deny-reason: host_not_allowed`. Por eso:
+   · assets/earth/day.jpg · night.jpg · clouds.png NO existen en el ZIP;
+   · el overlay ?debug=1 ahora imprime EARTH DAY= NIGHT= CLOUDS= con el
+     origen REAL de cada mapa (STUB → LOD0/HI canvas geográfico → FILE);
+   · como nunca dirá FILE sin los archivos, NO se declara Earth Asset Pass;
+   · el contrato de upgrade queda listo: copiar los 3 archivos con esos
+     nombres exactos (assets/README.txt) y celestial.loadOptionalTextures
+     los aplica solo, con fallback silencioso si fallan. Resolución
+     objetivo 4096×2048 (HIGH/ULTRA), 2048×1024 (PERF).
+   Lo que SÍ se ve hoy es el canvas geográfico propio (costas y ciudades
+   reales, océano especular, terminador, nubes, atmósfera): azul/verde,
+   nunca el globo marrón — más el realce V3.3 de albedo mínimo +
+   earthshine para que el lado nocturno no sea un vacío.
+
+4) QUÉ GRUPOS CONSTITUYEN STAGE 1 / STAGE 2
+   El SG-L1 se reconstruyó como vehículo de dos etapas REAL desde la
+   plataforma (no piezas inventadas en la cinemática):
+     mStage1  → booster (17 u de fuselaje) + interestage + 5 toberas +
+                2 luces de marcador naranjas (las que conserva al caer)
+     mUpper   → segunda etapa (8 u) + tobera de vacío + glow azul propio
+     mFairL / mFairR → mitades de carenado (media caña 8 u + medio cono)
+     payload  → la nave SG viaja dentro; se revela en órbita
+   Todos son Groups independientes hijos de miniRocket desde el frame 0.
+
+5) A QUÉ TIEMPO OCURRE CADA SEPARACIÓN (reloj de misión, capítulo ascenso)
+     15.2  MECO                — motor a cero, quiet súbito
+     15.8  STAGE 1 SEPARATION  — +0.6 s tras MECO: impulso relativo,
+                                 el booster cae atrás (−y, +z), rota
+                                 lentamente, conserva luces, NO explota,
+                                 sale de cámara y se culla; HUD
+                                 `STAGE 1 // SEPARATION` + mechClack
+     16.6  STAGE 2 IGNITION    — motor más pequeño y definido, HUD
+     17.4  FAIRING SEPARATION  — atmósfera ya delgada: mitades con
+                                 impulso lateral OPUESTO, rotación lenta,
+                                 cull al alejarse
+     18.8  ORBIT INSERTION     — upper stage termina; en órbita deriva
+                                 hacia atrás y desaparece: la nave queda
+                                 limpiamente sola
+
+6) QUÉ ERAN LAS PIEZAS BLANCAS ALREDEDOR DE LA NAVE
+   Eran los carenados de la ANIMACIÓN ANTIGUA del capítulo órbita: V3.2
+   disparaba `fairingOpen` a los 1.2 s de entrar en órbita y las mitades
+   se quedaban flotando junto a la nave (exactamente lo que muestra la
+   captura). En V3.3 ese evento se eliminó por completo: el carenado se
+   separa DONDE corresponde (17.4, en ascenso) y se culla lejos; en el
+   hero orbital quedan nave + Tierra + espacio (satélites lejanos ya
+   limitados). Nada residual.
+
+7) CÓMO FUNCIONA AHORA CLIC / DOBLE CLIC / TOUCH EN LAS GALAXIAS
+   Autoridad ÚNICA en el raycast del canvas (no depende del DOM):
+     · 1 clic sobre una galaxia → galaxyActivate(i): panel + dolly 8-12 %.
+     · Si el MISMO índice ya está seleccionado y el clic anterior sobre él
+       fue hace < 420 ms (lastGalaxyTapIndex/lastGalaxyTapTime) →
+       galaxyConfirm(i): entra directo. Inmune a que el anchor proyectado
+       se desplace tras el dolly.
+     · Respaldo: dblclick DOM sobre el anchor y dblclick sobre el canvas.
+     · Táctil: primer toque selecciona; SEGUNDO toque sobre la MISMA
+       galaxia confirma (sin depender de dblclick).
+     · Clic en vacío deselecciona; ESC deselecciona por la misma vía;
+       con una seleccionada las otras dos siguen clicables y cambian la
+       selección al instante; los colliders (esferas invisibles amplias
+       por galaxia) no se solapan y siguen al núcleo.
+     · Confirm cinemático rápido: core +escala, push corto de cámara,
+       riser, navegación a ~820 ms (dbl) / ~980 ms (CTA).
+     · Hint una sola vez al entrar al Hub:
+       `1 CLIC — SELECCIONAR · DOBLE CLIC — ENTRAR`
+       (`TOCA — SELECCIONAR · TOCA DE NUEVO — ENTRAR` en táctil).
+
+8) QUÉ FAILSAFE IMPIDE QUE EL HUB QUEDE BLOQUEADO
+   Al confirmar se arma un temporizador de ~2.1 s: si la página NO se
+   descargó (document.hidden sigue false y confirming sigue true), se
+   revierte todo — confirming=false, push de cámara a 0, CTA re-habilitado
+   (ui.enableCTA), interacción restaurada y aviso discreto
+   `NAVEGACIÓN PENDIENTE — USA EL PANEL`. El enlace estándar del panel
+   sigue siempre utilizable; ninguna ruta deja el Hub atrapado.
+
+---------------------------------------------------------------------
+HUB POLISH (sin rediseño)
+---------------------------------------------------------------------
+La dorada quemaba: opacidades de núcleo/halo ×0.68-0.7 SOLO en esa galaxia
+para recuperar partículas visibles; seleccionada +7 % de escala; anillo de
+selección cian pulsante orientado a cámara; el resto (capas de partículas,
+parallax, fondo) se conserva tal cual — la captura del Hub que gusta sigue
+siendo la base.
+
+---------------------------------------------------------------------
+AUDIO DE LA SECUENCIA
+---------------------------------------------------------------------
+LIFTOFF grave → MAX-Q motor+vibración → MECO corte abrupto → STAGE SEP
+mechClack (transitorio seco + golpe grave 0.14 s, nuevo en audio.js) →
+COAST casi silencio → STAGE 2 motor más fino (0.34) → ORBIT ambiente
+interior tenue → EARTH REVEAL sin ruido → EARTH DEPARTURE pad sutil
+(0.42) → WARP recién ahí gran energía.
+
+---------------------------------------------------------------------
+QA NUEVO
+---------------------------------------------------------------------
+Shots directos (mantienen el reloj clavado en el instante):
+  ?shot=maxq · stageSep (15.95, separación a medio vuelo) · stage2 (16.9) ·
+  fairing (17.6, mitades abriéndose) · orbit · earthDeparture25 · 50 · 100
+  (disco casi completo, CTA aún oculto) · hub · galaxySelected.
+Botones ?debug=1: STAGE SEP · FAIRING SEP · EARTH HERO · EARTH DEPARTURE ·
+SELECT GALAXY 1 · DOUBLE CLICK GALAXY 1 (los tres primeros actúan durante
+ascenso/órbita; los de galaxia, en el Hub).
+Overlay debug: línea nueva `EARTH DAY= NIGHT= CLOUDS=` con el origen real.
+
+---------------------------------------------------------------------
+SOBRE LAS CAPTURAS OBLIGATORIAS (declaración honesta)
+---------------------------------------------------------------------
+Este entorno de build NO tiene GPU/navegador: el arnés valida la máquina
+de estados real (11 escenarios, cadena completa STAGE 1 SEPARATION →
+STAGE 2 IGNITION → FAIRING SEPARATION → EARTH DEPARTURE → GALAXY DBLCLICK
+PASS), pero NO puede producir capturas WebGL — y la directiva prohíbe
+aceptar capturas headless sin render real. Por eso NO se adjuntan
+screenshots y NO se declaran los pass visuales: las 10 capturas del
+criterio final deben tomarse en el hosting con las URLs de DEPLOY.md
+§4.8-§4.11 (protocolo completo, incluida la matriz manual de doble clic
+por galaxia). El paquete deja cada momento congelable y accesible a un
+clic exactamente para eso.
+
+---------------------------------------------------------------------
+VERIFICACIÓN EJECUTADA AQUÍ
+---------------------------------------------------------------------
+Arnés headless sobre el código real — 11/11 PASS (full · perf · ultra ·
+safe · skip · fail=worker · fail=post · fail=satellites · fail=weather ·
+stall 4 s ×2), 0 errores, 0 long tasks; cadena §80 + V3.3 completa.
+Unit tests de boot-diagnostics PASS; smoke config/save PASS
+(SG_BUILD_ID 20260820-V33-01, 17 descubrimientos, GALAXIES[0]=/inicio,
+[1]=/sebas, [2]=starmarkagencia.com, hint 'dbl' one-shot).
+node --check en los 13 módulos; sweep estático de invariantes PASS.
