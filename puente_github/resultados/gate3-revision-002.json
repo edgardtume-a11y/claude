@@ -1,0 +1,9 @@
+{
+  "id": "gate3-revision-002",
+  "ok": true,
+  "procesado_utc": "2026-08-27T14:55:51Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "..........                                                               [100%]\n10 passed in 0.26s\n"
+  }
+}
