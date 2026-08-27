@@ -1,0 +1,5 @@
+{
+  "id": "detener-gate3-001",
+  "accion": "ejecutar_script_repo",
+  "script": "detener_gate3.sh"
+}
