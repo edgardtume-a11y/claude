@@ -1,0 +1,9 @@
+{
+  "id": "gate3-ventanas-002",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:29:59Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "lineas con p99 (primeras encontradas): 3\nmuestra: {\"timestamp\":\"2026-08-27T14:56:59.785753+00:00\",\"level\":\"INFO\",\"logger\":\"binance_collector\",\"message\":\"metrics market=spot {\\\"counters\\\":{\\\"dashboard_publish_ok\\\":142,\\\"dashboard_publish_status_ok\\\":3,\\\"event_loop_probe_missed_ticks\\\":2,\\\"websocket_messages\\\":189,\\\"websocket_bytes\\\":164001,\\\"depth_diff_messages\\\":49,\\\"cooperative_yields_receiver\\\":94,\\\"cooperative_yields_dispatcher\\\":93,\\\"partial_depth_messages\\\":49,\\\"cooperative_yields_partial\\\":49,\\\"rest_snapshots\\\":1,\\\"cooperative_yields_synchronize\\\":1,\\\"depth_stale_events\\\":1,\\\"depth_applied_events\\\":48,\\\"dashboard_publish_book_ok\\\":48,\\\"book_syncs\\\":1,\\\"agg_trade_messages\\\":91,\\\"dashboard_publish_trade_ok\\\":91,\\\"cooperative_yields_trade\\\":47,\\\"cooperative_yields_book\\\":47,\\\"csv_batches_written\\\":189,\\\"csv_rows_written\\\":14262,\\\"csv_flushes\\\":19,\\\"writer_gil_yields\\\":168},\\\"gauges\\\":{\\\"raw_queue_capacity\\\":8192,\\\"raw_bytes_capacity\\\":67108864,\\\"route_queue_capacity\\\":4096,\\\"writer_queue_capacity\\\":4096,\\\"writer_rows_capacity\\\":250000,\\\"writer_yield_requested_ms\\\":0.5,\\\"rest_used_weight_1m\\\":21,\\\"symbol_admissibility_margin_x100\\\":9223372,\\\"clock_offset_theta_hat_ns\\\":881987,\\\"clock_offset_delta_ns\\\":7977744,\\\"writer_queued_row\n\nvalores de p99 extraidos: 0\nVENTANAS_V2_SIN_DATOS\n"
+  }
+}
