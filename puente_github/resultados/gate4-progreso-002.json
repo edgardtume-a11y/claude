@@ -1,0 +1,9 @@
+{
+  "id": "gate4-progreso-002",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:35:27Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "hora UTC: 20:35:27\ncaptura VIVA pid=29069 transcurrido=05:25\n190M\t/home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m/capture\n--- ultimo p99 de usdm en el gate 4 (con uvloop) ---\n  book_apply: p50=0.224 p99=1.52 max=3.484 n=3145\n  book_pipeline_total: p50=0.558 p99=1.829 max=5.734 n=3145\n  writer_cooperative_yield: p50=0.573 p99=1.98 max=4.532 n=1418\n  event_loop_lag: p50=0.0 p99=1.0 max=12.0 n=16075\nPROGRESO_OK\n"
+  }
+}
