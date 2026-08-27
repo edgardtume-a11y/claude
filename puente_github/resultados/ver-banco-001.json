@@ -1,0 +1,9 @@
+{
+  "id": "ver-banco-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T21:56:27Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== ¿existe? ===\n-rwx------ 1 root root 19288 Aug 27 21:52 /home/trading/jean-flow-exec/herramientas/banco_gil.py\nlineas: \n\n=== ¿compila? ===\nNO COMPILA\n\n=== interfaz: que parametros acepta ===\n\n=== ¿toca algo que no deba? ===\n(vacio arriba = no se acerca a las capturas)\nVER_BANCO_OK\n/home/trading/puente_github_repo/puente_github/scripts/ver_banco_gil.sh: line 13: /home/trading/jean-flow-exec/herramientas/banco_gil.py: Permission denied\n[Errno 13] Permission denied: '/home/trading/jean-flow-exec/herramientas/banco_gil.py'grep: /home/trading/jean-flow-exec/herramientas/banco_gil.py: Permission denied\ngrep: /home/trading/jean-flow-exec/herramientas/banco_gil.py: Permission denied\n"
+  }
+}
