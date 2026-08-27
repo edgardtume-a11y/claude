@@ -1,0 +1,5 @@
+{
+  "id": "gate3-ventanas-002",
+  "accion": "ejecutar_script_repo",
+  "script": "gate3_ventanas_v2.py"
+}
