@@ -1,0 +1,9 @@
+{
+  "id": "conversion-estado-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T21:46:40Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "estado: EN MARCHA\nhora UTC: 21:46:40\nCSV que quedan : 51\nparquet creados: 24\n/dev/root       193G   67G  126G  35% /\n\n--- ultimas 30 lineas del registro ---\ncapture/usdm_futures/events-20260826T000410.135616Z-000002.csv | filas: 984925 | antes: 380.15 MiB | despues: 5.52 MiB | factor: 68.91x | VERIFICADO | BORRADO\n------------------------------------------------------------\nRESUMEN DE CONVERSION:\n  Ficheros procesados : 3\n  Fallos              : 0\n  GiB antes           : 1.2574 GiB\n  GiB despues         : 0.0194 GiB\n  GiB liberados       : 1.2574 GiB\n  Factor medio        : 64.76x\n------------------------------------------------------------\nCONVERSION_OK\n/dev/root       193G   70G  124G  36% /\n\n######## 20260827T123816Z_tokyo12_capture_gate2_30m  [3 CSV]  21:46:01\ncapture/spot/events-20260827T124724.399028Z-000001.csv | filas: 1266884 | antes: 427.92 MiB | despues: 8.25 MiB | factor: 51.85x | VERIFICADO | BORRADO\ncapture/usdm_futures/events-20260827T124724.400684Z-000001.csv | filas: 1335477 | antes: 512.00 MiB | despues: 6.89 MiB | factor: 74.33x | VERIFICADO | BORRADO\ncapture/usdm_futures/events-20260827T130439.008422Z-000002.csv | filas: 1237072 | antes: 475.15 MiB | despues: 6.34 MiB | factor: 74.99x | VERIFICADO | BORRADO\n------------------------------------------------------------\nRESUMEN DE CONVERSION:\n  Ficheros procesados : 3\n  Fallos              : 0\n  GiB antes           : 1.3819 GiB\n  GiB despues         : 0.0210 GiB\n  GiB liberados       : 1.3819 GiB\n  Factor medio        : 65.89x\n------------------------------------------------------------\nCONVERSION_OK\n/dev/root       193G   68G  125G  36% /\n\n######## 20260827T075205Z_tokyo_capture_gate1_30m  [7 CSV]  21:46:20\nESTADO_OK\n"
+  }
+}
