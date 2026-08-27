@@ -1,0 +1,9 @@
+{
+  "id": "probar-rot-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T23:34:05Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== 0) preparar un laboratorio con un CSV real y uno ABIERTO ===\ntotal 33976\ndrwxr-xr-x 2 trading trading     4096 Aug 27 23:34 .\ndrwxr-xr-x 3 trading trading     4096 Aug 27 23:33 ..\n-rw-r--r-- 1 trading trading 17388735 Aug 27 23:34 abierto.csv.partial\n-rw-r--r-- 1 trading trading 17388735 Aug 27 23:33 cerrado.csv\nhuella del fichero ABIERTO: fa837bb0f11332f8\n\n=== 1) PRIMERA PASADA: sin --borrar. Debe convertir y CONSERVAR ===\n[2026-08-27T23:34:03Z] spot/cerrado.csv: filas=50596, antes=16.58 MiB, despues=313.43 KiB, factor=54.18x, VERIFICADO, CONSERVADO [regresiones_orden_fisico=1]\n--- estado despues ---\n  csv cerrados : 1  (debe ser 1)\n  csv abiertos : 1  (debe ser 1)\n  parquet      : 1\n\n=== 2) SEGUNDA PASADA: con --borrar. Debe reverificar y BORRAR el cerrado ===\n[2026-08-27T23:34:05Z] spot/cerrado.csv: filas=50596, antes=16.58 MiB, despues=313.43 KiB, factor=54.18x, VERIFICADO, BORRADO [regresiones_orden_fisico=1]\n--- estado despues ---\n  csv cerrados : 0  (debe ser 0)\n  parquet      : 1\n\n=== 3) LA PRUEBA CRITICA: ¿toco el fichero abierto? ===\n  el .partial SIGUE EXISTIENDO\n  huella antes:   fa837bb0f11332f8\n  huella despues: fa837bb0f11332f8\n  ==> INTACTO. El rotador respeta el fichero en uso.\n  parquet creados a partir del .partial: 0  (debe ser 0)\n\n=== 4) ¿aborta si hay una captura activa? (regla S1/R-captura) ===\n\n=== 5) limpieza ===\nPROBAR_ROTADOR_OK\n"
+  }
+}
