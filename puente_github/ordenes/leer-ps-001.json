@@ -1,0 +1,5 @@
+{
+  "id": "leer-ps-001",
+  "accion": "leer_archivo",
+  "ruta": "/home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m/parquet_store_lectura.txt"
+}
