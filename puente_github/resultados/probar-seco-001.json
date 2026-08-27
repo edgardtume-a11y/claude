@@ -1,0 +1,9 @@
+{
+  "id": "probar-seco-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T21:29:21Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== antes ===\n46M\t/home/trading/jean-flow-exec/staging_runs/20260826T052518Z_csv_persistence_hot_rebase_fix_10m/capture\n2\n\n=== ejecucion EN SECO (sin --borrar), limitada a 2 ficheros ===\ncapture/spot/events-20260826T060416.262541Z-000001.csv | filas: 50596 | antes: 16.58 MiB | despues: 323.82 KiB | factor: 52.44x | VERIFICADO | CONSERVADO\ncapture/usdm_futures/events-20260826T060416.264147Z-000001.csv | filas: 74372 | antes: 28.42 MiB | despues: 413.32 KiB | factor: 70.40x | VERIFICADO | CONSERVADO\n------------------------------------------------------------\nRESUMEN DE CONVERSION:\n  Ficheros procesados : 2\n  Fallos              : 0\n  GiB antes           : 0.0439 GiB\n  GiB despues         : 0.0007 GiB\n  GiB liberados       : 0.0000 GiB\n  Factor medio        : 62.51x\n------------------------------------------------------------\nCONVERSION_OK\n\n=== despues: los CSV DEBEN seguir ahi ===\n2\n423235 events-20260826T060416.264147Z-000001.parquet\n331593 events-20260826T060416.262541Z-000001.parquet\n\n=== manifiesto ===\n  50596 filas | 17388735 -> 331593 | verificado: True | borrado: False\n  74372 filas | 29797278 -> 423235 | verificado: True | borrado: False\nSECO_OK\n"
+  }
+}
