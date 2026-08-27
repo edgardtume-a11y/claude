@@ -1,0 +1,24 @@
+{
+  "id": "mejoras-res3",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:08:35Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-27T19:58:12Z",
+    "duplicate": true,
+    "execution_models": [
+      "gemini-3.7-flash"
+    ],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-414b68e3c1eeba08b3d994a56a562649ed98c6fb",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "execution",
+    "requested_model": "gemini-3.7-flash",
+    "status": "running",
+    "updated_at": "2026-08-27T20:05:23Z"
+  }
+}
