@@ -1,0 +1,9 @@
+{
+  "id": "gate3-revision-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T14:54:13Z",
+  "resultado": {
+    "returncode": 1,
+    "salida": "F....F.............                                                      [100%]\n=================================== FAILURES ===================================\n________________________________ test_launcher _________________________________\n\n    def test_launcher():\n        content = LAUNCHER.read_text(encoding=\"utf-8\")\n        assert str(ROOT) in content\n>       assert \"6c22f5e34d674266a1660a8d3aeeb64f\" in content\nE       assert '6c22f5e34d674266a1660a8d3aeeb64f' in '#!/usr/bin/env bash\\nset -u\\nrun_path=\"/home/trading/jean-flow-exec/staging_runs/20260827T143004Z_tokyo_n2_capture_ga...\\nwait \"$heartbeat_pid\"\\nprintf \\'LIVE_FINISHED engine_rc=%s run=%s\\\\n\\' \"$engine_rc\" \"$run_path\"\\nexit \"$engine_rc\"\\n'\n\noverlay/tests/test_2h_gate.py:16: AssertionError\n________________________________ test_launcher _________________________________\n\n    def test_launcher():\n        content = LAUNCHER.read_text(encoding=\"utf-8\")\n        assert str(ROOT) in content\n>       assert \"b71f5c2e84d64a0e9b0639d14e0a30c7\" in content\nE       assert 'b71f5c2e84d64a0e9b0639d14e0a30c7' in '#!/usr/bin/env bash\\nset -u\\nrun_path=\"/home/trading/jean-flow-exec/staging_runs/20260827T143004Z_tokyo_n2_capture_ga...\\nwait \"$heartbeat_pid\"\\nprintf \\'LIVE_FINISHED engine_rc=%s run=%s\\\\n\\' \"$engine_rc\" \"$run_path\"\\nexit \"$engine_rc\"\\n'\n\noverlay/tests/test_30m_gate.py:15: AssertionError\n=========================== short test summary info ============================\nFAILED overlay/tests/test_2h_gate.py::test_launcher - assert '6c22f5e34d67426...\nFAILED overlay/tests/test_30m_gate.py::test_launcher - assert 'b71f5c2e84d64a...\n2 failed, 17 passed in 0.87s\n"
+  }
+}
