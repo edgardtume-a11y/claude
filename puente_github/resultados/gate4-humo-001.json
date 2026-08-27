@@ -1,0 +1,9 @@
+{
+  "id": "gate4-humo-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:28:55Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "python: 3.12.3\nuvloop: 0.22.1\nbucle en uso: uvloop.Loop\nbucle de respaldo: asyncio.unix_events._UnixSelectorEventLoop\ngc congelados: antes=375 despues=16265\ndual_main importado, version del paquete: 2.4.1+linux.1\ntiene _validate_stop_request: True\nHUMO_UVLOOP_OK\n"
+  }
+}
