@@ -1,0 +1,9 @@
+{
+  "id": "convertir-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T21:33:32Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "objetivo: /home/trading/jean-flow-exec/staging_runs/20260826T052518Z_csv_persistence_hot_rebase_fix_10m\ndisco antes:\n/dev/root       193G   75G  119G  39% /\nCSV antes: 2\n\n------------------------------------------------------------\nRESUMEN DE CONVERSION:\n  Ficheros procesados : 0\n  Fallos              : 0\n  GiB antes           : 0.0000 GiB\n  GiB despues         : 0.0000 GiB\n  GiB liberados       : 0.0000 GiB\n  Factor medio        : 0.00x\n------------------------------------------------------------\nCONVERSION_OK\n\nCSV despues: 2\nparquet: 2\ndisco despues:\n/dev/root       193G   75G  119G  39% /\n47M\t/home/trading/jean-flow-exec/staging_runs/20260826T052518Z_csv_persistence_hot_rebase_fix_10m/capture\nCONVERTIR_UNO_OK\n"
+  }
+}
