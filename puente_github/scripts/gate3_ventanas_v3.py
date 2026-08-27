@@ -45,7 +45,8 @@ def desanidar(linea):
 
 def buscar_p99(cuerpo, metrica):
     """Encuentra el p99 en ms de una metrica, mire donde mire su seccion."""
-    for seccion in ("histograms", "timers", "latencies", "summaries", "gauges"):
+    for seccion in ("latency_ms", "histograms", "timers", "latencies",
+                    "summaries", "gauges"):
         bloque = cuerpo.get(seccion)
         if not isinstance(bloque, dict):
             continue
