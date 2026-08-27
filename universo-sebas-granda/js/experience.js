@@ -5319,6 +5319,13 @@ class Experience {
      blend between mode switches: 0.45–0.85 s pos+quaternion+FOV (spec §12). */
   _cameraUpdate(dt) {
     const c = this.cam;
+    /* V3.4: near plane adaptativo — en el espacio la cámara ve la Tierra a
+       190–5400 unidades y con near=0.1 la precisión de profundidad a esa
+       distancia (~15 unidades) supera la separación nubes↔superficie (11):
+       z-fighting en bloques sobre el disco. near=2 la deja en <1 unidad.
+       En superficie (close-ups de pad/crew) se mantiene 0.1. */
+    const wantNear = this.gSurface.visible ? 0.1 : 2.0;
+    if (c.near !== wantNear) c.near = wantNear;
     this._camGoal(dt);
     const b = this.camBlend;
     if (b.t < 1) {
@@ -5451,6 +5458,7 @@ class Experience {
       else if (this.camRig === 'CHASE') { fov = 46; px = 10; pz = 18; frac = 0.17; }
       else if (this.camRig === 'NEARBODY') { fov = 72; px = 4; pz = 8; frac = 0.26; }
       else { fov = 82; px = -14; pz = 6; frac = 0.34; }
+      if (this._qaFrac != null) frac = this._qaFrac;   /* override QA v34 */
       pitch = this._pitchForLimb(this._tmpV2.set(px, camY, pz), fov, frac);
       const pos = this._tmpV.set(px, camY, pz);
       this._yawPitchGoal(pos, this.aim.yaw, pitch + this.aim.pitch, fov);

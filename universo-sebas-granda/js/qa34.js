@@ -18,9 +18,9 @@ const JUMPS = {
   cloudbreak:   { phase: 'ascentSpace', at: 6.9,   pin: 7.35 },
   mach1:        { phase: 'ascentSpace', at: 8.15,  pin: 8.7 },
   maxq:         { phase: 'ascentSpace', at: 10.35, pin: 11.1 },
-  stagesep:     { phase: 'ascentSpace', at: 15.75, pin: 16.6, capSep: 0.85, rig: 'TRACK' },
-  stage2:       { phase: 'ascentSpace', at: 16.55, pin: 17.15, rig: 'TRACK' },
-  fairing:      { phase: 'ascentSpace', at: 17.35, pin: 18.1, capFair: 0.75, rig: 'TRACK' },
+  stagesep:     { phase: 'ascentSpace', at: 15.75, pin: 16.6, capSep: 0.85, rig: 'STRATO', frac: 0.12 },
+  stage2:       { phase: 'ascentSpace', at: 16.55, pin: 17.15, rig: 'STRATO', frac: 0.12 },
+  fairing:      { phase: 'ascentSpace', at: 17.35, pin: 18.1, capFair: 0.75, rig: 'STRATO', frac: 0.12 },
   stratosphere: { phase: 'ascentSpace', at: 13.3,  pin: 14.4 },
   earthhero:    { phase: 'orbit',       at: 1.2,   pin: 2.2 },
   freecam:      { phase: 'orbit',       free: true },
@@ -94,7 +94,7 @@ export function initQA34(exp, ui, opts) {
   addBtn('TOGGLE ATMOSPHERE', () => exp.toggleEarthLayer('atmo'));
   addBtn('TOGGLE HOME MARKER', () => exp.toggleHomeMarker());
   addBtn('SHOW EARTH COVERAGE', () => { read.style.display = read.style.display === 'none' ? '' : 'none'; });
-  addBtn('RELEASE HOLD', () => { target = null; exp._holdCharge = false; exp._qaPin = null; exp._qaPinCh = null; });
+  addBtn('RELEASE HOLD', () => { target = null; exp._holdCharge = false; exp._qaPin = null; exp._qaPinCh = null; exp._qaFrac = null; });
   document.body.appendChild(panel);
 
   function startJump(key) {
@@ -108,6 +108,7 @@ export function initQA34(exp, ui, opts) {
        gigante puede disparar eventos posteriores al beat congelado */
     exp._qaPin = def.pin != null ? def.pin : null;
     exp._qaPinCh = def.pin != null ? def.phase : null;
+    exp._qaFrac = def.frac != null ? def.frac : null;
     setState();
     try { console.log('[QA34] JUMP →', key); } catch (e) {}
   }

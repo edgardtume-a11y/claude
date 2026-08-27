@@ -107,5 +107,5 @@ export const DIAG_ASSETS = [
   { url: 'assets/earth/runtime/day-4096.jpg', js: false },
   { url: 'assets/earth/runtime/night-4096.jpg', js: false },
   { url: 'assets/earth/runtime/clouds-alpha-2048.png', js: false },
-  { url: 'assets/earth/runtime/spec-1024.jpg', js: false },
+  { url: 'assets/earth/runtime/spec-1024.png', js: false },
 ];
