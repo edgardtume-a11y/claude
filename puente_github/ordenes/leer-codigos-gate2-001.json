@@ -1,0 +1,5 @@
+{
+  "id": "leer-codigos-gate2-001",
+  "accion": "leer_archivo",
+  "ruta": "/home/trading/jean-flow-exec/staging_runs/20260827T123816Z_tokyo12_capture_gate2_30m/audit/return_codes.json"
+}
