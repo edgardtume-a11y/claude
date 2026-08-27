@@ -1,0 +1,13 @@
+{
+  "id": "gate3-latencia-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T19:55:33Z",
+  "resultado": {
+    "archivo": "events-20260827T191714.682122Z-000024.csv",
+    "min_ms": 1.5,
+    "n": 20577,
+    "p50_ms": 2.34,
+    "p90_ms": 3.39,
+    "p99_ms": 9.05
+  }
+}
