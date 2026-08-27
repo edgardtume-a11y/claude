@@ -1,0 +1,5 @@
+{
+  "id": "banco-estado-003",
+  "accion": "ejecutar_script_repo",
+  "script": "banco_gil_estado.sh"
+}
