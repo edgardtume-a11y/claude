@@ -1,0 +1,5 @@
+{
+  "id": "nombres-writer-001",
+  "accion": "ejecutar_script_repo",
+  "script": "ver_nombres_writer.sh"
+}
