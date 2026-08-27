@@ -1,0 +1,9 @@
+{
+  "id": "gate4-esperar-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:45:32Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "SIGUE VIVA tras 540s (hora UTC 20:45:32) transcurrido=15:30\nGATE4_AUN_CORRIENDO\n"
+  }
+}
