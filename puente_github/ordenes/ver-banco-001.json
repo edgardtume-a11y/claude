@@ -1,0 +1,5 @@
+{
+  "id": "ver-banco-001",
+  "accion": "ejecutar_script_repo",
+  "script": "ver_banco_gil.sh"
+}
