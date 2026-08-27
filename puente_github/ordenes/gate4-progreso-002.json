@@ -1,0 +1,5 @@
+{
+  "id": "gate4-progreso-002",
+  "accion": "ejecutar_script_repo",
+  "script": "gate4_progreso.sh"
+}
