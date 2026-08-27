@@ -1,0 +1,9 @@
+{
+  "id": "banco-comp-ver-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T23:21:44Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "estado: EN MARCHA\nhora UTC: 23:21:44\n\n=== muestras ===\n  csv    : 52428800 bytes (de events-20260823T112713.367130Z-000002.csv)\n  codigo : 52428800 bytes\n\n########## muestra: csv ##########\n  gzip -9                 50.0 MB ->    1.44 MB   34.71x     0.5 s    94.0 MB/s\nVER_BANCO_COMP_OK\n"
+  }
+}
