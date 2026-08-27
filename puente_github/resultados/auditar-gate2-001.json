@@ -1,0 +1,9 @@
+{
+  "id": "auditar-gate2-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T13:57:47Z",
+  "resultado": {
+    "lanzado": true,
+    "log": "/home/trading/jean-flow-exec/staging_runs/20260827T123816Z_tokyo12_capture_gate2_30m/audit/puente_audit.log"
+  }
+}
