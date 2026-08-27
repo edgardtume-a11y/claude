@@ -1,0 +1,6 @@
+{
+  "id": "gemini-prueba-001",
+  "accion": "gemini_enqueue",
+  "prompt": "Prueba de conectividad del puente GitHub de JEAN FLOW. No toques ningun archivo. Responde unicamente con el texto exacto: JEAN_FLOW_PUENTE_GITHUB_OK",
+  "idempotency_key": "puente-github-prueba-1"
+}
