@@ -1,0 +1,9 @@
+{
+  "id": "instalar-uvloop-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T19:57:09Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "uvloop 0.22.1\nUVLOOP_OK\n"
+  }
+}
