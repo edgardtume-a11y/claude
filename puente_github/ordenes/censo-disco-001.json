@@ -1,0 +1,5 @@
+{
+  "id": "censo-disco-001",
+  "accion": "ejecutar_script_repo",
+  "script": "censo_disco.sh"
+}
