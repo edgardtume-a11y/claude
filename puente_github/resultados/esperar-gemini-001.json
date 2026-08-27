@@ -1,0 +1,9 @@
+{
+  "id": "esperar-gemini-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:18:18Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "t=   0s status=failed updated_at=2026-08-27T20:18:18Z\n=== RESULTADO FINAL ===\n{\n  \"attempted_models\": [\n    \"gemini-3.7-flash\"\n  ],\n  \"created_at\": \"2026-08-27T19:58:12Z\",\n  \"duplicate\": true,\n  \"error\": {\n    \"class\": \"timeout\",\n    \"code\": \"gemini_failed\",\n    \"message\": \"Gemini no completo el trabajo\"\n  },\n  \"execution_models\": [\n    \"gemini-3.7-flash\"\n  ],\n  \"fallback_model\": \"gemini-3.6-flash\",\n  \"fallback_used\": false,\n  \"finished_at\": \"2026-08-27T20:17:29Z\",\n  \"id\": \"jfr-414b68e3c1eeba08b3d994a56a562649ed98c6fb\",\n  \"model\": \"gemini-3.7-flash\",\n  \"ok\": true,\n  \"phase\": \"execution\",\n  \"requested_model\": \"gemini-3.7-flash\",\n  \"returncode\": 0,\n  \"status\": \"failed\",\n  \"updated_at\": \"2026-08-27T20:18:18Z\"\n}\n"
+  }
+}
