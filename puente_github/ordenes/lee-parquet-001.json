@@ -1,0 +1,5 @@
+{
+  "id": "lee-parquet-001",
+  "accion": "ejecutar_script_repo",
+  "script": "auditoria_lee_parquet.sh"
+}
