@@ -64,3 +64,34 @@ Lee primero: memoria/MEMORIA_JORNADA_27AGO2026.md y _PARTE2.md, y el contexto en
   (quitar el de Edgard) — hacerlo con cuidado: primero agregar el nuevo administrador,
   verificar, recién quitar el viejo. NO tocar durante certificaciones.
 - Lista de permisos allowlist para sesiones Claude ya registrada en settings (RDC lectura+proceso, Notion lectura).
+
+## ⭐ SUPER PENDIENTE — Mejoras de latencia y tecnologías (auditoría cruzada 27/08)
+Documentos fuente: planes/AUDITORIA_TECNICA_CRUZADA.md y planes/CONTRATO_MEJORA_LATENCIA_V1.md.
+Requisito: NO aplicar mientras haya captura activa. El gate 3 es la línea base del A/B.
+
+### Prioridad 1 — Aplicar tras el veredicto del gate 3 (vía flujo Gemini + A/B obligatorio)
+1. **M1 domar el GC**: `gc.set_threshold(50_000, 50, 50)` + `gc.freeze()` tras init.
+   NUNCA `gc.disable()` (crecimiento de RAM en corridas de 7 días). Verificar RSS < 4 GB.
+2. **M2 yield troceado en el writer**: bloques de ~50 items o cuota de 1 ms +
+   `await asyncio.sleep(0)` obligatorio entre tandas. Ataca directamente writer_yield_p99.
+3. **M3 uvloop + afinidad de CPU**: `uvloop.install()` antes de `asyncio.run()` +
+   `os.sched_setaffinity`. Validar con el método de Gemini (dos workers en paralelo, 48 h).
+
+### Prioridad 2 — Tecnologías a incorporar (por fase)
+- Fase 1 (colector): **uvloop**, **msgspec** (reemplazo de orjson con structs preasignados).
+- Fase 2 (entrenamiento): **Polars** (lectura Parquet columnar multi-hilo), luego **Optuna**.
+- Si M1-M3 no bastan: **Cython / PyO3** para las mutaciones del libro L2 (submilisegundos)
+  y **jemalloc/mimalloc** contra la fragmentación de heap.
+- Multi-símbolo (memecoins): **ArcticDB** con versionado de datasets.
+- Fase 4 (bot): **Nautilus Trader** — descartado para el colector, candidato para el ejecutor.
+- Opcional/discrepancia registrada: **DuckDB** (Gemini lo ve redundante con Polars+Parquet;
+  Claude lo mantiene útil para consultas exploratorias del operador sin programar).
+
+### Prioridad 3 — Respaldo completo v2
+Ver planes/PLAN_RESPALDO_COMPLETO.md: estructura de 4 carpetas (proyecto/servicios/
+instaladores/RESTAURAR.md) + estrategia de 3 capas (GitHub / .tar.gz / imagen de máquina).
+
+### Prioridad 4 — Costos
+planes/PLAN_OPTIMIZACION_COSTOS.md: apagar la VM entre gates ahorra ~70%
+(US$ 260/mes → ~US$ 22-87/mes). Postular a Google for Startups. El operador descartó
+explícitamente la vía de múltiples cuentas (riesgo de suspensión total).
