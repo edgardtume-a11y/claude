@@ -1,0 +1,11 @@
+{
+  "id": "gate3-estado-1908",
+  "ok": true,
+  "procesado_utc": "2026-08-27T19:08:24Z",
+  "resultado": {
+    "capturas_activas": "1",
+    "disco": "/dev/root       193G   72G  122G  37% /",
+    "load1": "0.18",
+    "nproc": 8
+  }
+}
