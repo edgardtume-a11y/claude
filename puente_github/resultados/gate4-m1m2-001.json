@@ -1,0 +1,9 @@
+{
+  "id": "gate4-m1m2-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:20:30Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== M2: naturaleza del writer (hilo o tarea asyncio) ===\n18:class WriterFailed(RuntimeError):\n22:class CsvJournalWriter:\n62:        self._thread = threading.Thread(\n--- valor por defecto del troceado ---\n36:        write_chunk_rows: int = 64,\n40:        if write_chunk_rows <= 0:\n41:            raise ValueError(\"write_chunk_rows debe ser positivo\")\n59:        self._write_chunk_rows = write_chunk_rows\n277:                if len(chunk) < self._write_chunk_rows:\n\n=== M1: low_latency_runtime completo ===\n    cada rafaga, conservando limpieza automatica en capturas prolongadas.\n    \"\"\"\n\n    switch_interval = _env_float(\"PYTHON_THREAD_SWITCH_INTERVAL_S\", 0.001)\n    thresholds = (\n        _env_int(\"GC_THRESHOLD_0\", 50_000),\n        _env_int(\"GC_THRESHOLD_1\", 100),\n        _env_int(\"GC_THRESHOLD_2\", 100),\n    )\n    if not 0.0005 <= switch_interval <= 0.01:\n        raise ValueError(\n            \"PYTHON_THREAD_SWITCH_INTERVAL_S debe estar entre 0.0005 y 0.01\"\n        )\n    if any(value <= 0 for value in thresholds):\n        raise ValueError(\"Los umbrales GC deben ser positivos\")\n\n    previous_switch = sys.getswitchinterval()\n    previous_thresholds = gc.get_threshold()\n    sys.setswitchinterval(switch_interval)\n    gc.set_threshold(*thresholds)\n    try:\n        yield RuntimeTuning(switch_interval, thresholds)\n    finally:\n        gc.set_threshold(*previous_thresholds)\n        sys.setswitchinterval(previous_switch)\n--- ¿existe gc.freeze en todo el paquete? ---\nNO EXISTE gc.freeze EN NINGUN MODULO\nVERIFICAR_OK\ngrep: /home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m/overlay/src/binance_collector/__pycache__: Permission denied\n"
+  }
+}
