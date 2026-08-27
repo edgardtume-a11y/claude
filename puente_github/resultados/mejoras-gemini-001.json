@@ -1,0 +1,22 @@
+{
+  "id": "mejoras-gemini-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T19:58:12Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-27T19:58:12Z",
+    "duplicate": false,
+    "execution_models": [],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-414b68e3c1eeba08b3d994a56a562649ed98c6fb",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "preflight_primary",
+    "requested_model": "gemini-3.7-flash",
+    "status": "pending",
+    "updated_at": "2026-08-27T19:58:12Z"
+  }
+}
