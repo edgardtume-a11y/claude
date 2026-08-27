@@ -1,0 +1,9 @@
+{
+  "id": "gate3-limpiar-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T14:55:16Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "test_2h_gate.py\ntest_30m_gate.py\ntest_dual_orchestration_qa.py\ntest_gate3_2h.py\n--- despues ---\ntest_dual_orchestration_qa.py\ntest_gate3_2h.py\nLIMPIEZA_OK\n"
+  }
+}
