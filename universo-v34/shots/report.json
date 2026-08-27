@@ -1,0 +1,703 @@
+[
+ {
+  "name": "01_facility_hero",
+  "ok": true,
+  "st": {
+   "chapter": "facility",
+   "mt": 0,
+   "cam": "orbit",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 29,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "02_countdown_5",
+  "ok": true,
+  "st": {
+   "chapter": "countdown",
+   "mt": 1.55,
+   "cam": "director",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 25,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "03_countdown_1",
+  "ok": true,
+  "st": {
+   "chapter": "countdown",
+   "mt": 5.55,
+   "cam": "director",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 24,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "04_ignition",
+  "ok": true,
+  "st": {
+   "chapter": "countdown",
+   "mt": 6.6,
+   "cam": "director",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 23,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "05_liftoff",
+  "ok": true,
+  "st": {
+   "chapter": "ascent",
+   "mt": 1.6,
+   "cam": "director",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 22,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "06_mach1",
+  "ok": true,
+  "st": {
+   "chapter": "ascentSpace",
+   "mt": 8.95,
+   "cam": "director",
+   "cov": 16,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 22,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "07_maxq",
+  "ok": true,
+  "st": {
+   "chapter": "ascentSpace",
+   "mt": 11.6,
+   "cam": "director",
+   "cov": 22,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 22,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "08_cloud_break",
+  "ok": true,
+  "st": {
+   "chapter": "ascentSpace",
+   "mt": 7.3,
+   "cam": "director",
+   "cov": 9,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 22,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "09_stratosphere",
+  "ok": true,
+  "st": {
+   "chapter": "ascentSpace",
+   "mt": 14.6,
+   "cam": "director",
+   "cov": 34,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 21,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "10_meco",
+  "ok": true,
+  "st": {
+   "chapter": "ascentSpace",
+   "mt": 15.65,
+   "cam": "director",
+   "cov": 34,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 22,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "11_stage_separation",
+  "ok": true,
+  "st": {
+   "chapter": "ascentSpace",
+   "mt": 16.5,
+   "cam": "director",
+   "cov": 34,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 22,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "12_stage2",
+  "ok": true,
+  "st": {
+   "chapter": "ascentSpace",
+   "mt": 17.25,
+   "cam": "director",
+   "cov": 34,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 22,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "13_fairing_separation",
+  "ok": true,
+  "st": {
+   "chapter": "ascentSpace",
+   "mt": 18.3,
+   "cam": "director",
+   "cov": 34,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 22,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "14_earth_orbit_hero",
+  "ok": true,
+  "st": {
+   "chapter": "orbit",
+   "mt": 2.6,
+   "cam": "director",
+   "cov": 55,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 21,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "15_earth_night",
+  "ok": true,
+  "st": {
+   "chapter": "orbit",
+   "mt": 2.6,
+   "cam": "director",
+   "cov": 55,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 19,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9,
+  "note": "re-shot with corrected night-side sun; state identical"
+ },
+ {
+  "name": "16_orbital_sunrise",
+  "ok": true,
+  "st": {
+   "chapter": "orbit",
+   "mt": 2.6,
+   "cam": "director",
+   "cov": 55,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 16,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "17_earth_orbit_camera",
+  "ok": true,
+  "st": {
+   "chapter": "orbit",
+   "mt": 2.6,
+   "cam": "orbit",
+   "cov": 100,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 19,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "18_free_space_earth",
+  "ok": true,
+  "st": {
+   "chapter": "orbit",
+   "mt": 2.6,
+   "cam": "free",
+   "cov": 100,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 21,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "19_free_space_full_disc",
+  "ok": true,
+  "st": {
+   "chapter": "orbit",
+   "mt": 2.6,
+   "cam": "free",
+   "cov": 57,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 21,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "20_departure_25",
+  "ok": true,
+  "st": {
+   "chapter": "orbit",
+   "mt": 14.63,
+   "cam": "director",
+   "cov": 53,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 17,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "21_departure_50",
+  "ok": true,
+  "st": {
+   "chapter": "orbit",
+   "mt": 26.28,
+   "cam": "director",
+   "cov": 50,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 15,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "22_departure_full",
+  "ok": true,
+  "st": {
+   "chapter": "orbit",
+   "mt": 12.82,
+   "cam": "director",
+   "cov": 66,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 13,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "23_pre_warp",
+  "ok": true,
+  "st": {
+   "chapter": "charge",
+   "mt": 3.4,
+   "cam": "director",
+   "cov": 66,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 13,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "24_warp",
+  "ok": true,
+  "st": {
+   "chapter": "warp",
+   "mt": 1.8,
+   "cam": "director",
+   "cov": 19,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 14,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "25_galaxy_hub",
+  "ok": true,
+  "st": {
+   "chapter": "hub",
+   "mt": 43,
+   "cam": "free",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 13,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "26_mobile_earth",
+  "ok": true,
+  "st": {
+   "chapter": "orbit",
+   "mt": 2.6,
+   "cam": "director",
+   "cov": 55,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 18,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 9
+ },
+ {
+  "name": "27_galaxy_hub_arrival",
+  "ok": true,
+  "st": {
+   "chapter": "hub",
+   "mt": 17.93,
+   "cam": "free",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 15,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "28_galaxy_hub_free",
+  "ok": true,
+  "st": {
+   "chapter": "hub",
+   "mt": 44.04,
+   "cam": "free",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 13,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "29_galaxy_01_60sec",
+  "ok": true,
+  "st": {
+   "chapter": "hub",
+   "mt": 0.11,
+   "cam": "free",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 23,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "30_galaxy_02_sebas",
+  "ok": true,
+  "st": {
+   "chapter": "hub",
+   "mt": 0.09,
+   "cam": "free",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 23,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "31_galaxy_03_starmark",
+  "ok": true,
+  "st": {
+   "chapter": "hub",
+   "mt": 0.09,
+   "cam": "free",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 22,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "32_galaxy_scan",
+  "ok": true,
+  "st": {
+   "chapter": "hub",
+   "mt": 0.1,
+   "cam": "free",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 25,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "33_ship_align",
+  "ok": true,
+  "st": {
+   "chapter": "hub",
+   "mt": 0.07,
+   "cam": "free",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 22,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "34_black_hole_secret",
+  "ok": true,
+  "st": {
+   "chapter": "hub",
+   "mt": 0.08,
+   "cam": "free",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 25,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 7
+ },
+ {
+  "name": "35_galaxy_hub_mobile",
+  "ok": true,
+  "st": {
+   "chapter": "hub",
+   "mt": 10,
+   "cam": "free",
+   "cov": 0,
+   "earth": {
+    "day": "file",
+    "night": "file",
+    "clouds": "file",
+    "spec": "file"
+   },
+   "fps": 14,
+   "draw": 1,
+   "tris": 2
+  },
+  "consoleNoise": 8
+ }
+]
