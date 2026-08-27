@@ -1,0 +1,9 @@
+{
+  "id": "banco-lanzar-002",
+  "ok": true,
+  "procesado_utc": "2026-08-27T22:29:51Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== ¿que parametros acepta? ===\nusage: banco_gil.py [-h] [--duracion DURACION] [--filas-minuto FILAS_MINUTO]\n                    [--intervalo-sonda INTERVALO_SONDA] [--dir-tmp DIR_TMP]\n\nBanco de diagnóstico para hipótesis H1 de contención de GIL en JEAN FLOW.\n\noptions:\n  -h, --help            show this help message and exit\n  --duracion DURACION   Duración en segundos de cada corrida (def: 60.0)\n  --filas-minuto FILAS_MINUTO\n                        Ritmo de escritura en filas/minuto (def: 112800,\n                        mercado de futuros)\n  --intervalo-sonda INTERVALO_SONDA\n                        Intervalo de la sonda de event loop en segundos (def:\n                        0.02 = 20 ms)\n  --dir-tmp DIR_TMP     Directorio temporal para los archivos CSV (se borra al\n                        terminar)\n\n=== cabecera del fichero (para saber que mide) ===\n#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n\"\"\"\nbanco_gil.py — Diagnóstico experimental de contención del GIL y event_loop_lag.\n\nHipótesis H1 investigada:\n  csv.writer.writerows() es una función en C que no libera el GIL durante\n  su ejecución, impidiendo que el bucle de eventos asyncio (uvloop) despierte a\n  tiempo su sonda de latencia (event_loop_lag), a pesar de sys.setswitchinterval(0.001).\n\nEscenarios evaluados:\n  E0: Sonda sola (sin hilo escritor) -> Suelo de ruido de referencia.\n  E1: Sonda + hilo escritor con csv.writer.writerows(lote de 64).\n  E2: Sonda + hilo escritor con csv.writer.writerows(lote de 8).\n  E3: Sonda + hilo escritor con construcción de línea en Python + f.write().\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport asyncio\nimport csv\nimport math\nimport os\nimport shutil\n\nbanco lanzado, pid=39830\nregistro: /home/trading/banco_gil.log\nLANZAR_BANCO_OK\n"
+  }
+}
