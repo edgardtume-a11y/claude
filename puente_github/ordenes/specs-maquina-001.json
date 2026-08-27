@@ -1,0 +1,5 @@
+{
+  "id": "specs-maquina-001",
+  "accion": "ejecutar_script_repo",
+  "script": "specs_maquina.sh"
+}
