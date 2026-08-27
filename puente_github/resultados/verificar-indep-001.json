@@ -1,0 +1,9 @@
+{
+  "id": "verificar-indep-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T21:30:25Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "pares a verificar: 2\n\n--- events-20260826T060416.264147Z-000001.csv\n  columnas csv=36  parquet=36  IGUALES\n  filas    csv=74372  parquet=74372  IGUALES\n  celdas comparadas: ~144000  discrepancias: 0\n  veredicto: IDENTICO\n\n--- events-20260826T060416.262541Z-000001.csv\n  columnas csv=36  parquet=36  IGUALES\n  filas    csv=50596  parquet=50596  IGUALES\n  celdas comparadas: ~144000  discrepancias: 0\n  veredicto: IDENTICO\n\nVERIFICACION_INDEPENDIENTE_OK\n"
+  }
+}
