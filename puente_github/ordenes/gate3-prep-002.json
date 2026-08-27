@@ -1,0 +1,5 @@
+{
+  "id": "gate3-prep-002",
+  "accion": "ejecutar_script_repo",
+  "script": "gate3_2h_prep.sh"
+}
