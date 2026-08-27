@@ -1,0 +1,13 @@
+{
+  "id": "check-v2-002",
+  "ok": true,
+  "procesado_utc": "2026-08-27T13:57:50Z",
+  "resultado": {
+    "archivo": "events-20260827T124724.400684Z-000001.csv",
+    "min_ms": 1.44,
+    "n": 20842,
+    "p50_ms": 2.05,
+    "p90_ms": 7.43,
+    "p99_ms": 23.93
+  }
+}
