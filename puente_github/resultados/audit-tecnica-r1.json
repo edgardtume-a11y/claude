@@ -1,0 +1,22 @@
+{
+  "id": "audit-tecnica-r1",
+  "ok": true,
+  "procesado_utc": "2026-08-27T17:56:03Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-27T17:56:03Z",
+    "duplicate": false,
+    "execution_models": [],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-70491330d250acd4e3fc5e2edf4ed905a2645d4d",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "preflight_primary",
+    "requested_model": "gemini-3.7-flash",
+    "status": "pending",
+    "updated_at": "2026-08-27T17:56:03Z"
+  }
+}
