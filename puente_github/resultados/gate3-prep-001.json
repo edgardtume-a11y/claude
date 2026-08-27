@@ -1,0 +1,9 @@
+{
+  "id": "gate3-prep-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T14:29:01Z",
+  "resultado": {
+    "returncode": 1,
+    "salida": "cp: cannot access '/home/trading/jean-flow-exec/staging_runs/20260827T123816Z_tokyo12_capture_gate2_30m/overlay/tests/__pycache__': Permission denied\n"
+  }
+}
