@@ -1,0 +1,5 @@
+{
+  "id": "buscar-stop-001",
+  "accion": "ejecutar_script_repo",
+  "script": "buscar_stop_previo.sh"
+}
