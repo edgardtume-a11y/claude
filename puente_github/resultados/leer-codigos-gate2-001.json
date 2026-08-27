@@ -1,0 +1,10 @@
+{
+  "id": "leer-codigos-gate2-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T14:08:10Z",
+  "resultado": {
+    "bytes": 61,
+    "contenido": "{\"journal_spot\":0,\"journal_usdm\":0,\"identity\":0,\"metrics\":2}\n",
+    "existe": true
+  }
+}
