@@ -39,6 +39,8 @@ POLL_SECONDS = 30
 MAX_ORDER_BYTES = 64 * 1024
 MAX_READ_BYTES = 100 * 1024
 STAGING_PREFIX = "/home/trading/jean-flow-exec/staging_runs/"
+VENV_PY = "/home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/.venv/bin/python"
+SCRIPTS_DIR = os.path.join(REPO_DIR, "puente_github", "scripts")
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{3,63}$")
 
 
@@ -140,8 +142,57 @@ def do_latencia(order):
             "p99_ms": round(lat[int(n * 0.99)], 2)}
 
 
+def do_revisar(order):
+    root = valid_staging(order.get("staging", ""))
+    env = dict(os.environ, PYTHONPATH="overlay/src")
+    r = subprocess.run([VENV_PY, "-m", "pytest", "overlay/tests", "-q"],
+                       cwd=root, env=env, capture_output=True, text=True,
+                       timeout=300)
+    salida = (r.stdout + r.stderr)[-4000:]
+    return {"returncode": r.returncode, "salida": salida}
+
+
+def do_lanzar(order):
+    root = valid_staging(order.get("staging", ""))
+    guard = subprocess.run(["pgrep", "-f", "binance_collector[.]dual_main"],
+                           capture_output=True)
+    if guard.returncode == 0:
+        raise ValueError("YA HAY UNA CAPTURA ACTIVA - lanzamiento abortado")
+    script = os.path.join(root, "control", "launch_live.sh")
+    if not os.path.isfile(script):
+        raise ValueError("falta control/launch_live.sh")
+    log = os.path.join(root, "launcher_console.log")
+    subprocess.Popen(["nohup", "bash", script], cwd=root,
+                     stdout=open(log, "w"), stderr=subprocess.STDOUT,
+                     start_new_session=True)
+    time.sleep(8)
+    tail = open(log).read()[-1500:] if os.path.exists(log) else ""
+    return {"lanzado": True, "log": log, "inicio": tail}
+
+
+def do_script_repo(order):
+    nombre = str(order.get("script", ""))
+    if not re.fullmatch(r"[a-z0-9_-]+\.(sh|py)", nombre):
+        raise ValueError("nombre de script invalido")
+    path = os.path.realpath(os.path.join(SCRIPTS_DIR, nombre))
+    if not path.startswith(os.path.realpath(SCRIPTS_DIR) + os.sep) \
+            or not os.path.isfile(path):
+        raise ValueError("script inexistente en puente_github/scripts/")
+    runner = ["bash", path] if nombre.endswith(".sh") else [VENV_PY, path]
+    r = subprocess.run(runner, cwd="/home/trading", capture_output=True,
+                       text=True, timeout=600)
+    return {"returncode": r.returncode,
+            "salida": (r.stdout + r.stderr)[-4000:]}
+
+
 def process(order):
     accion = order.get("accion")
+    if accion == "revisar_staging":
+        return do_revisar(order)
+    if accion == "lanzar_captura":
+        return do_lanzar(order)
+    if accion == "ejecutar_script_repo":
+        return do_script_repo(order)
     if accion == "auditar_staging":
         return do_auditar(order)
     if accion == "leer_archivo":
