@@ -1,0 +1,5 @@
+{
+  "id": "gate3-base-001",
+  "accion": "ejecutar_script_repo",
+  "script": "gate3_metricas_base.py"
+}
