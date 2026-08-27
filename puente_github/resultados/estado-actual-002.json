@@ -1,0 +1,11 @@
+{
+  "id": "estado-actual-002",
+  "ok": true,
+  "procesado_utc": "2026-08-27T14:11:58Z",
+  "resultado": {
+    "capturas_activas": "0",
+    "disco": "/dev/root       193G   56G  138G  29% /",
+    "load1": "0.02",
+    "nproc": 12
+  }
+}
