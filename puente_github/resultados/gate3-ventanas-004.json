@@ -1,0 +1,9 @@
+{
+  "id": "gate3-ventanas-004",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:32:19Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "fichero: 31046919 bytes\nsecciones del registro: ['counters', 'gauges', 'latency_ms']\n  latency_ms: p99->[] interes->['book_apply', 'book_pipeline_total']\n    ejemplo book_apply = {\"count\": 49, \"count_total\": 49, \"evicted\": 0, \"p50\": 0.204, \"p95\": 0.842, \"p99\": 1.015, \"max\": 1.015}\n    ejemplo book_pipeline_total = {\"count\": 49, \"count_total\": 49, \"evicted\": 0, \"p50\": 0.543, \"p95\": 1.08, \"p99\": 1.256, \"max\": 1.256}\n\nvalores de p99 encontrados: 13912\n\n=== peor p99 por tramo de 30 min (gate 3, SIN uvloop) ===\n\nspot.book_apply   (10 tramos de 30 min, limite 5.0 ms)\n  3.44 3.56 2.50 2.31 2.96 2.67 2.77 2.77 1.40 1.40\n  mejor=1.400  mediana=2.768  peor=3.561\n  tramos por encima de 5.0: 0/10\n\nspot.book_pipeline_total   (10 tramos de 30 min, limite 5.0 ms)\n  4.19 4.23 3.19 2.68 3.70 3.20 3.20 3.20 1.96 1.80\n  mejor=1.804  mediana=3.200  peor=4.226\n  tramos por encima de 5.0: 0/10\n\nusdm_futures.book_apply   (10 tramos de 30 min, limite 5.0 ms)\n  6.18 6.28 4.66 3.94 5.54 4.53 4.64 4.64 3.21 3.19\n  mejor=3.185  mediana=4.642  peor=6.282\n  tramos por encima de 5.0: 3/10\n\nusdm_futures.book_pipeline_total   (10 tramos de 30 min, limite 5.0 ms)\n  7.13 7.40 5.48 4.66 6.26 5.03 5.19 5.15 3.75 3.60\n  mejor=3.602  mediana=5.192  peor=7.399\n  tramos por encima de 5.0: 7/10\n\nVENTANAS_V3_OK\n"
+  }
+}
