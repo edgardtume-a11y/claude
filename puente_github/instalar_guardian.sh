@@ -39,6 +39,7 @@ WantedBy=multi-user.target
 UNIT
 
 systemctl daemon-reload
-systemctl enable --now puente-github
+systemctl enable puente-github
+systemctl restart puente-github
 sleep 3
 systemctl is-active puente-github
