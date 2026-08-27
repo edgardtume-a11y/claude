@@ -1,0 +1,10 @@
+{
+  "id": "gate3-audit-log-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T20:06:26Z",
+  "resultado": {
+    "bytes": 15,
+    "contenido": "journal_spot=0\n",
+    "existe": true
+  }
+}
