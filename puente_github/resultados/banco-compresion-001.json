@@ -1,0 +1,6 @@
+{
+  "error": "Command '['bash', '/home/trading/puente_github_repo/puente_github/scripts/banco_compresores.sh']' timed out after 600 seconds",
+  "id": "banco-compresion-001",
+  "ok": false,
+  "procesado_utc": "2026-08-27T23:19:35Z"
+}
