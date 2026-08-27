@@ -1,0 +1,5 @@
+{
+  "id": "formato-stop-001",
+  "accion": "ejecutar_script_repo",
+  "script": "formato_stop.sh"
+}
