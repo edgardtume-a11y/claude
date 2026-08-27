@@ -94,11 +94,21 @@ Lee primero: memoria/MEMORIA_JORNADA_27AGO2026.md y _PARTE2.md, y el contexto en
     que escribirlo**: ya existe (641 líneas) con `discover_closed_csv`,
     `SegmentBusy` y bloqueo exclusivo. Hay que **probarlo e integrarlo**.
     Regla: jamás borrar un CSV que el colector pueda tener abierto.
-12. **Diagnóstico de los 19 ms de `event_loop_lag`** (T2). Banco de pruebas
-    `herramientas/banco_gil.py` escrito por Gemini (19 288 bytes, 21:52) pero
-    **su ejecución no llegó a completarse**. Hipótesis a confirmar o refutar:
-    `csv.writer.writerows()` es una función en C que no libera el GIL.
-    Ver `planes/INVESTIGACION_LATENCIA_V2.md`.
+12. **Diagnóstico de los 19 ms** — **H1 REFUTADA, medida hecha.**
+    El banco corrió los cuatro escenarios al ritmo real (112 800 filas/min):
+    sonda sola, `writerows(64)`, `writerows(8)` y texto en Python + `write()`.
+    **Los cuatro dan p99 = 1.000 ms.** El escritor NO es la causa: ni la llamada
+    en C, ni el lote, ni el GIL. Ver `planes/H1_REFUTADA_GIL.md`.
+    **Nueva hipótesis H5 (por comprobar): el bucle no está bloqueado, está
+    saturado.** El retraso se pega justo por debajo de un intervalo de sonda
+    (19 de 20 ms), que es la firma de una cola de trabajo permanente, no de un
+    bloqueo. Explica que uvloop ayudara un 4 % aquí y un 23-29 % en el resto:
+    acelera cada operación pero no reduce cuántas hay.
+    **Cómo comprobarla, sin tocar el motor:** correlacionar ventana a ventana
+    `event_loop_lag` p99 contra `websocket_messages` y `depth_diff_messages`.
+    **Si se confirma, el arreglo es un proceso por mercado** — el mismo camino
+    ya previsto para las memecoins, que pasaría de idea de futuro a solución
+    del problema presente.
 13. **Afinidad de CPU + `SO_RCVBUF`** (T3). Ninguna de las dos aparece en el
     código. Con A/B obligatorio: tocar el planificador puede empeorar.
 14. **Auditorías spot y usdm en paralelo** (T4). Hoy corren en fila:
