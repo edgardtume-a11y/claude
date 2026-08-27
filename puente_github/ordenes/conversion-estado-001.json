@@ -1,0 +1,5 @@
+{
+  "id": "conversion-estado-001",
+  "accion": "ejecutar_script_repo",
+  "script": "conversion_estado.sh"
+}
