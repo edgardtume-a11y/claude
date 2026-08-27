@@ -1,0 +1,5 @@
+{
+  "id": "banco-comp-ver-003",
+  "accion": "ejecutar_script_repo",
+  "script": "banco_compresion_ver.sh"
+}
