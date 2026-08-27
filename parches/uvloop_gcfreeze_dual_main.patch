@@ -1,0 +1,56 @@
+# Mejoras de latencia certificadas en el gate 4 (27/08/2026).
+#
+# Aplicar sobre: binance_collector/dual_main.py
+# Autor del codigo: Gemini (job jfr-5226a7e9…), bajo contrato acotado.
+# Revisado y certificado por: Claude (18/18 pruebas, humo, 4/4 auditorias).
+#
+# Huella antes: 0befbd199abb8f44caad9383806cef0d7bb111ded08fe46edbb66079d184a3ca
+# Huella despues: 67ac0d90ce547ff389046c31c4215374eef6ead4b80e5cc4543dbbb5340ead13
+#
+# Resultado medido: usdm.book_pipeline_total peor p99 de 7.399 ms a 2.770 ms;
+# metrics paso de FALLAR (rc=2) a CERTIFICAR (rc=0). Detalle y salvedades en
+# operaciones/VEREDICTO_AB_GATE4.md.
+#
+# NO esta aplicado en la instalacion base. Promoverlo a produccion requiere
+# orden expresa del operador.
+--- a/binance_collector/dual_main.py
++++ b/binance_collector/dual_main.py
+@@ -2,6 +2,7 @@
+ 
+ import argparse
+ import asyncio
++import gc
+ import hashlib
+ import logging
+ import os
+@@ -12,6 +13,11 @@
+ from pathlib import Path
+ from typing import Any, Callable
+ 
++try:
++    import uvloop
++except ImportError:
++    uvloop = None
++
+ from . import __version__
+ from .collector import BinanceCollector, WALL_TIMEOUT_MARGIN_S
+ from .config import Settings
+@@ -910,7 +916,17 @@
+                     fine_timer["foreground_qos"],
+                     fine_timer.get("foreground_qos_error"),
+                 )
+-                asyncio.run(_run(args))
++                # Congela los objetos vivos cargados en el arranque para eximirlos de
++                # las pasadas del recolector durante la captura de baja latencia.
++                gc.freeze()
++                LOGGER.info("gc_frozen=%d", gc.get_freeze_count())
++                # Delegar en uvloop para reducir la latencia del bucle de eventos si está disponible.
++                if uvloop is not None:
++                    LOGGER.info("event_loop=uvloop version=%s", getattr(uvloop, "__version__", "unknown"))
++                    asyncio.run(_run(args), loop_factory=uvloop.new_event_loop)
++                else:
++                    LOGGER.info("event_loop=asyncio")
++                    asyncio.run(_run(args))
+     except RuntimeContractError as exc:
+         LOGGER.error("%s: %s", exc.code, exc)
+         exit_code = 20
