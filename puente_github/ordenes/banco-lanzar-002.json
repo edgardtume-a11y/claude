@@ -1,0 +1,5 @@
+{
+  "id": "banco-lanzar-002",
+  "accion": "ejecutar_script_repo",
+  "script": "banco_gil_lanzar.sh"
+}
