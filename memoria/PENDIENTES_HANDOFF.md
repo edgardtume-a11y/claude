@@ -1,19 +1,54 @@
-# PENDIENTES — Handoff para cualquier IA (actualizado 27/08/2026 ~15:25 UTC)
+# PENDIENTES — Handoff para cualquier IA (actualizado 27/08/2026 ~21:20 UTC)
 
 Lee primero: memoria/MEMORIA_JORNADA_27AGO2026.md y _PARTE2.md, y el contexto en Notion
 (página 19 + Memoria operativa). Vía de trabajo: PUENTE GITHUB (tutoriales/TUTORIAL_PUENTE_GITHUB.md).
 
 ## En curso ahora mismo
-1. **Gate 3 (2 horas) GRABANDO** en n2-standard-8 dedicada desde 15:05 UTC.
-   Staging: /home/trading/jean-flow-exec/staging_runs/20260827T143004Z_tokyo_n2_capture_gate3_2h
-   (sesión c37b7c55…). Veredicto programado ~17:13 UTC (trigger Veredicto Gate 3):
-   estado → auditorías → return_codes → latencia_e2e → veredicto A/B.
-   Pregunta clave: ¿metrics=0 en máquina dedicada? (historial marginal: e2 siempre 5-7 ms vs límite 5,0).
-   Si PASA → gate 2h certificado → pedir orden del operador para 6h.
-   Si NO PASA → hipótesis hardware refutada → opciones: umbral documentado 6,5 ms vs optimización código vía Gemini (decide operador).
-2. **Diálogo del amor** (filosofia/QUE_ES_EL_AMOR.md): ronda 2 enviada a Gemini
-   (clave filo-amor-ronda-2). Recoger respuesta (gemini_result), anexarla, contrarreplicar.
+1. **Gate 3 y gate 4 CERRADOS.** Nada grabando. La máquina está libre.
+   - Gate 3 (4 h 45, sin uvloop): 3/4 auditorías PASS, **metrics FALLA** por
+     `usdm.book_apply` 6.282 ms y `usdm.book_pipeline_total` 7.399 ms (límite 5.0).
+     Identidad perfecta: 1 432 500/1 432 500, ratio 1.0, 0 conflictos.
+     Staging: `.../20260827T143004Z_tokyo_n2_capture_gate3_2h` (sesión c37b7c55…), 18 GB.
+   - Gate 4 (30 min, CON uvloop + `gc.freeze`): **4/4 auditorías PASS**, primera vez
+     que `metrics` certifica. Identidad 89 767/89 767, ratio 1.0, cierre rc=0, 0 parciales.
+     Staging: `.../20260827T195636Z_tokyo_n2_gate4_mejoras_30m` (sesión f4349129…), 1.1 GB.
+   - Veredicto completo: `operaciones/VEREDICTO_AB_GATE4.md`. **El cambio se conserva.**
+
+2. **Diálogo del amor** (`filosofia/QUE_ES_EL_AMOR.md`): la ronda 2 de Claude está
+   escrita y publicada; **falta recoger la respuesta de Gemini** (job en
+   `puente_github/resultados/filo-amor-r2.json`), anexarla y contrarreplicar.
    Continúa hasta que el operador diga basta.
+
+## ⛔ BLOQUEADOR NUEVO — decidir antes del gate de 24 h
+3. **El disco no aguanta los 7 días.** Medido: 3.74 GiB/h.
+   7 días = **628 GiB**; libres = **120 GiB**. La captura moriría a las ~32 h.
+   El gate de 24 h (89.8 GiB) dejaría el disco al 97 %.
+   Con Parquet: 628 GiB → **8.74 GiB**. Tres salidas evaluadas con coste en
+   `planes/BLOQUEADOR_DISCO_7DIAS.md`. **Requiere decisión del operador.**
+
+## Hallazgos que cambian el plan
+4. **Dos de las tres mejoras de la auditoría cruzada YA existían** en el código
+   (`planes/AUDITORIA_MEJORAS_CORREGIDA.md`):
+   - M1 (umbrales del GC): ya estaba en `latency.py`, con `(50000, 100, 100)` y
+     `sys.setswitchinterval(0.001)`. Solo faltaba `gc.freeze()` — ya añadido.
+   - M2 (troceo del writer): ya estaba, con 64 filas. Y su otra mitad es
+     **inaplicable**: el writer es `threading.Thread`, no una tarea asyncio.
+     **M2 ANULADA.**
+   - M3 (uvloop): era la única real. Aplicada y verificada.
+   Lección: una auditoría hecha sin leer el código produce recomendaciones
+   plausibles y falsas. El revisor debe leer el archivo ANTES de encargar.
+
+5. **`event_loop_lag` es la próxima grieta.** Peor p99: 19.8 ms (gate 3) → 19.0 ms
+   (gate 4), contra un límite de auditoría de 20 ms. uvloop apenas lo movió (−4 %,
+   frente a −23/−29 % de las demás). **Pasa con un 5 % de margen.** En un gate de
+   24 h es lo primero que va a romper. Falta entender de dónde salen esos 19 ms.
+
+6. **El A/B secuencial no puede demostrar causalidad.** El gate 4 corrió con el
+   mercado un 32-44 % más flojo (aunque `depth_diff_messages` —el caudal que
+   gobierna las métricas que mejoraron— fue idéntico al 0.1 %). Indicio fuerte,
+   no prueba. La prueba concluyente es la de Gemini: **dos procesos en paralelo
+   sobre el mismo flujo, misma hora, 48 h**. Requiere orden del operador y
+   resolver antes el bloqueador de disco (dos capturas de 48 h ≈ 360 GiB).
 
 ## Después del veredicto del gate 3
 3. **Respaldo total** (orden del operador): ejecutar puente_github/scripts/respaldo_total.sh
