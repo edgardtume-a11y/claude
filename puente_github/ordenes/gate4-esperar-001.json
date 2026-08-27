@@ -1,0 +1,5 @@
+{
+  "id": "gate4-esperar-001",
+  "accion": "ejecutar_script_repo",
+  "script": "gate4_esperar_fin.sh"
+}
