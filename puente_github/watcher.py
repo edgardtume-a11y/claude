@@ -11,6 +11,12 @@ Acciones permitidas (lista cerrada; nada de shell arbitrario):
       -> consulta el estado/resultado de un job del router
   - estado:         {"id", "accion"}
       -> salud basica de la maquina (cpu, disco, captura activa)
+  - auditar_staging: {"id", "accion", "staging"}
+      -> lanza control/run_live_audits.sh en segundo plano (solo bajo staging_runs/)
+  - leer_archivo:   {"id", "accion", "ruta"}
+      -> lee un archivo (max 100 KB) SOLO bajo staging_runs/ (.json/.log/.txt)
+  - latencia_e2e:   {"id", "accion", "staging"}
+      -> calcula n/min/p50/p90/p99 del CSV mas grande de capture/ (ultimos 8 MB)
 
 Una orden se procesa una sola vez: si existe resultados/<id>.json se ignora.
 El id debe cumplir ^[a-z0-9][a-z0-9-]{3,63}$.
@@ -31,6 +37,8 @@ PAT_FILE = "/home/trading/.config/puente-github/pat"
 REPO_SLUG = "edgardtume-a11y/claude"
 POLL_SECONDS = 30
 MAX_ORDER_BYTES = 64 * 1024
+MAX_READ_BYTES = 100 * 1024
+STAGING_PREFIX = "/home/trading/jean-flow-exec/staging_runs/"
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{3,63}$")
 
 
@@ -65,8 +73,81 @@ def do_estado(_order):
             "disco": disk, "capturas_activas": cap}
 
 
+def valid_staging(path):
+    real = os.path.realpath(path)
+    if not real.startswith(STAGING_PREFIX) or not os.path.isdir(real):
+        raise ValueError("staging invalido o inexistente")
+    return real
+
+
+def do_auditar(order):
+    root = valid_staging(order.get("staging", ""))
+    script = os.path.join(root, "control", "run_live_audits.sh")
+    if not os.path.isfile(script):
+        raise ValueError("falta control/run_live_audits.sh")
+    log = os.path.join(root, "audit", "puente_audit.log")
+    os.makedirs(os.path.dirname(log), exist_ok=True)
+    subprocess.Popen(
+        ["nohup", "bash", script],
+        cwd=root, stdout=open(log, "w"), stderr=subprocess.STDOUT,
+        start_new_session=True)
+    return {"lanzado": True, "log": log}
+
+
+def do_leer(order):
+    ruta = os.path.realpath(str(order.get("ruta", "")))
+    if not ruta.startswith(STAGING_PREFIX):
+        raise ValueError("ruta fuera de staging_runs")
+    if not ruta.endswith((".json", ".log", ".txt")):
+        raise ValueError("solo .json/.log/.txt")
+    if not os.path.isfile(ruta):
+        return {"existe": False}
+    with open(ruta, "rb") as fh:
+        data = fh.read(MAX_READ_BYTES)
+    return {"existe": True, "bytes": os.path.getsize(ruta),
+            "contenido": data.decode("utf-8", "ignore")}
+
+
+def do_latencia(order):
+    import glob
+    root = valid_staging(order.get("staging", ""))
+    fs = glob.glob(os.path.join(root, "capture", "**", "*.csv"), recursive=True)
+    if not fs:
+        raise ValueError("sin CSV en capture/")
+    f = max(fs, key=os.path.getsize)
+    size = os.path.getsize(f)
+    with open(f, "rb") as fh:
+        head = fh.readline().decode().strip().split(",")
+        fh.seek(max(0, size - 8 * 1024 * 1024))
+        lines = fh.read().decode("utf-8", "ignore").splitlines()
+    i_ev = head.index("exchange_event_time_ms")
+    i_rx = head.index("receive_time_utc_ns")
+    lat = []
+    for ln in lines[1:]:
+        p = ln.split(",")
+        if len(p) > max(i_ev, i_rx) and p[i_ev] and p[i_rx]:
+            try:
+                lat.append(int(p[i_rx]) / 1e6 - int(p[i_ev]))
+            except ValueError:
+                pass
+    lat.sort()
+    n = len(lat)
+    if not n:
+        raise ValueError("sin muestras validas")
+    return {"archivo": os.path.basename(f), "n": n,
+            "min_ms": round(lat[0], 2), "p50_ms": round(lat[n // 2], 2),
+            "p90_ms": round(lat[int(n * 0.9)], 2),
+            "p99_ms": round(lat[int(n * 0.99)], 2)}
+
+
 def process(order):
     accion = order.get("accion")
+    if accion == "auditar_staging":
+        return do_auditar(order)
+    if accion == "leer_archivo":
+        return do_leer(order)
+    if accion == "latencia_e2e":
+        return do_latencia(order)
     if accion == "gemini_enqueue":
         prompt = order.get("prompt")
         key = order.get("idempotency_key")
