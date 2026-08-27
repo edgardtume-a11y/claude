@@ -1,0 +1,11 @@
+{
+  "id": "estado-general-1820",
+  "ok": true,
+  "procesado_utc": "2026-08-27T18:19:35Z",
+  "resultado": {
+    "capturas_activas": "1",
+    "disco": "/dev/root       193G   69G  125G  36% /",
+    "load1": "0.19",
+    "nproc": 8
+  }
+}
