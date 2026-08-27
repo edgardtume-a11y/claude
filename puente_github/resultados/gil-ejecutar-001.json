@@ -1,0 +1,22 @@
+{
+  "id": "gil-ejecutar-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T21:59:36Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-27T21:59:36Z",
+    "duplicate": false,
+    "execution_models": [],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-a32d24c361931a5d056ac8cc9c209331a10cb4e0",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "preflight_primary",
+    "requested_model": "gemini-3.7-flash",
+    "status": "pending",
+    "updated_at": "2026-08-27T21:59:36Z"
+  }
+}
