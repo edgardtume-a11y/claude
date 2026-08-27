@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>TRAZA — laboratorio del viaje de una petición web</title>
+<meta name="description" content="Laboratorio visual y educativo, totalmente local, sobre el viaje de una petición web. Todo lo mostrado es una simulación con datos sintéticos.">
+<style>
+{{ESTILOS}}
+</style>
+</head>
+<body data-modo="aprender">
+
+<a class="salto" href="#principal">Saltar al contenido principal</a>
+
+<header class="cabecera">
+  <div class="marca">
+    <h1>TRAZA</h1>
+    <span class="version">v1.0.0</span>
+    <span class="lema">laboratorio del viaje de una petición web, de tu equipo al servidor y de vuelta</span>
+  </div>
+  <p class="sello-simulacion" role="note">Simulación · datos sintéticos · sin conexiones reales</p>
+  <div class="modos" role="group" aria-label="Modo de la interfaz">
+    <button type="button" id="modo-aprender" aria-pressed="true">Aprender</button>
+    <button type="button" id="modo-inspeccionar" aria-pressed="false">Inspeccionar</button>
+  </div>
+</header>
+
+<main id="principal" class="contenido">
+
+  <div class="columna-escena">
+
+    <!-- ============ escenarios ============ -->
+    <section class="panel" aria-labelledby="titulo-escenarios">
+      <div class="panel-cabecera">
+        <h2 id="titulo-escenarios" class="etiqueta-acento">Escenario</h2>
+      </div>
+      <div class="escenarios" role="group" aria-label="Elegir escenario">
+        <button type="button" data-escenario="normal" aria-pressed="true">Navegación normal</button>
+        <button type="button" data-escenario="fallo-dns" aria-pressed="false">Fallo de DNS</button>
+        <button type="button" data-escenario="intentos-fallidos" aria-pressed="false">Intentos fallidos de acceso</button>
+      </div>
+      <p class="descripcion-escenario" id="descripcion-escenario"></p>
+    </section>
+
+    <!-- ============ recorrido ============ -->
+    <section class="panel" aria-labelledby="titulo-recorrido">
+      <div class="panel-cabecera">
+        <h2 id="titulo-recorrido" class="etiqueta-acento">Recorrido</h2>
+        <span class="etiqueta">equipo → router → dns → proveedor → servidor</span>
+      </div>
+
+      <div class="lienzo-envoltura">
+        <!-- Lienzo del viaje: cinco nodos y un paquete que se desplaza. -->
+        <svg class="lienzo" viewBox="0 0 1000 200" role="img"
+             aria-label="Diagrama del recorrido: equipo, router, resolvedor DNS, proveedor de internet y servidor web unidos por una línea; un punto representa el paquete en tránsito.">
+          <line class="via" x1="80" y1="78" x2="920" y2="78"></line>
+
+          <!-- equipo (portátil) -->
+          <g class="nodo" data-nodo="equipo" transform="translate(80,78)">
+            <circle class="halo" r="34"></circle>
+            <g class="nodo-figura">
+              <rect x="-14" y="-14" width="28" height="18" rx="2"></rect>
+              <path d="M -18 8 H 18 L 14 4 H -14 Z"></path>
+            </g>
+            <text class="nodo-nombre" y="46" text-anchor="middle">Equipo</text>
+            <text class="nodo-ip" y="60" text-anchor="middle">192.168.1.23</text>
+          </g>
+
+          <!-- router -->
+          <g class="nodo" data-nodo="router" transform="translate(290,78)">
+            <circle class="halo" r="34"></circle>
+            <g class="nodo-figura">
+              <rect x="-16" y="-4" width="32" height="12" rx="3"></rect>
+              <line x1="-8" y1="-4" x2="-8" y2="-16"></line>
+              <line x1="8" y1="-4" x2="8" y2="-16"></line>
+              <circle cx="-9" cy="2" r="1.4"></circle>
+              <circle cx="-3" cy="2" r="1.4"></circle>
+            </g>
+            <text class="nodo-nombre" y="46" text-anchor="middle">Router</text>
+            <text class="nodo-ip" y="60" text-anchor="middle">203.0.113.42</text>
+          </g>
+
+          <!-- resolvedor DNS (fichero de direcciones) -->
+          <g class="nodo" data-nodo="dns" transform="translate(500,78)">
+            <circle class="halo" r="34"></circle>
+            <g class="nodo-figura">
+              <ellipse cx="0" cy="-10" rx="14" ry="5"></ellipse>
+              <path d="M -14 -10 V 8 A 14 5 0 0 0 14 8 V -10"></path>
+              <path d="M -14 -1 A 14 5 0 0 0 14 -1"></path>
+            </g>
+            <text class="nodo-nombre" y="46" text-anchor="middle">DNS</text>
+            <text class="nodo-ip" y="60" text-anchor="middle">198.51.100.53</text>
+          </g>
+
+          <!-- proveedor (nube) -->
+          <g class="nodo" data-nodo="proveedor" transform="translate(710,78)">
+            <circle class="halo" r="34"></circle>
+            <g class="nodo-figura">
+              <path d="M -14 6 a 6 6 0 0 1 -1 -12 a 9 9 0 0 1 17 -3 a 7 7 0 0 1 12 5 a 5 5 0 0 1 -2 10 Z"></path>
+            </g>
+            <text class="nodo-nombre" y="46" text-anchor="middle">Proveedor</text>
+            <text class="nodo-ip" y="60" text-anchor="middle">red de tránsito</text>
+          </g>
+
+          <!-- servidor web (bastidor) -->
+          <g class="nodo" data-nodo="servidor" transform="translate(920,78)">
+            <circle class="halo" r="34"></circle>
+            <g class="nodo-figura">
+              <rect x="-13" y="-16" width="26" height="32" rx="2"></rect>
+              <line x1="-13" y1="-6" x2="13" y2="-6"></line>
+              <line x1="-13" y1="4" x2="13" y2="4"></line>
+              <circle cx="-7" cy="-11" r="1.4"></circle>
+              <circle cx="-7" cy="-1" r="1.4"></circle>
+              <circle cx="-7" cy="10" r="1.4"></circle>
+            </g>
+            <text class="nodo-nombre" y="46" text-anchor="middle">Servidor</text>
+            <text class="nodo-ip" y="60" text-anchor="middle">192.0.2.80</text>
+          </g>
+
+          <!-- paquete en tránsito -->
+          <g id="paquete" class="paquete" aria-hidden="true">
+            <circle r="6"></circle>
+          </g>
+        </svg>
+      </div>
+
+      <!-- ============ etapas ============ -->
+      <ol class="etapas" aria-label="Etapas del viaje">
+        <li><button type="button" data-etapa="dns"><span class="numero">01</span><span class="nombre">Resolución DNS</span></button></li>
+        <li><button type="button" data-etapa="nat"><span class="numero">02</span><span class="nombre">Traducción NAT</span></button></li>
+        <li><button type="button" data-etapa="tcp"><span class="numero">03</span><span class="nombre">Conexión TCP</span></button></li>
+        <li><button type="button" data-etapa="tls"><span class="numero">04</span><span class="nombre">Negociación TLS</span></button></li>
+        <li><button type="button" data-etapa="http_solicitud"><span class="numero">05</span><span class="nombre">Petición HTTP</span></button></li>
+        <li><button type="button" data-etapa="http_respuesta"><span class="numero">06</span><span class="nombre">Respuesta HTTP</span></button></li>
+      </ol>
+
+      <!-- ============ transporte ============ -->
+      <div class="transporte" role="group" aria-label="Controles de reproducción">
+        <button type="button" id="boton-reiniciar">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h2v12H2zM14 2v12L5 8z"/></svg>
+          <span class="texto">Reiniciar</span>
+        </button>
+        <button type="button" id="boton-retroceder">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11 2v12L3 8z"/></svg>
+          <span class="texto">Atrás</span>
+        </button>
+        <button type="button" id="boton-reproducir" class="principal">
+          <svg id="icono-reproducir" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2l9 6-9 6z"/></svg>
+          <svg id="icono-pausa" viewBox="0 0 16 16" aria-hidden="true" style="display:none"><path d="M3 2h3.5v12H3zM9.5 2H13v12H9.5z"/></svg>
+          <span class="texto">Reproducir</span>
+        </button>
+        <button type="button" id="boton-avanzar">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 2l8 6-8 6z"/></svg>
+          <span class="texto">Adelante</span>
+        </button>
+        <div class="progreso">
+          <span class="etiqueta">evento</span>
+          <span class="contador" id="contador-eventos">0 / 0</span>
+          <div class="barra-progreso" aria-hidden="true"><div id="barra-progreso-relleno"></div></div>
+        </div>
+      </div>
+      <p class="etiqueta" style="margin-top:10px">
+        atajos · espacio: reproducir/pausa · flechas: paso · inicio o r: reiniciar
+      </p>
+    </section>
+
+    <!-- ============ registro de eventos ============ -->
+    <section class="panel" aria-labelledby="titulo-registro">
+      <div class="panel-cabecera">
+        <h2 id="titulo-registro" class="etiqueta-acento">Registro de eventos</h2>
+        <span class="sello-dato">datos sintéticos</span>
+      </div>
+      <ol class="lista-eventos" id="lista-eventos"></ol>
+      <div class="exportar">
+        <button type="button" id="exportar-json">Exportar JSON</button>
+        <button type="button" id="exportar-log">Exportar registro .log</button>
+        <p class="aclaracion">Se exportan todos los eventos del escenario actual, exactamente los del registro
+          de arriba, con el esquema estable «traza.eventos.v1» documentado en LEEME.md.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ============ inspector lateral ============ -->
+  <aside class="panel inspector" aria-labelledby="titulo-inspector">
+    <div class="panel-cabecera">
+      <h2 id="titulo-inspector" class="etiqueta-acento">Inspector</h2>
+      <span class="sello-dato">dato sintético · no es una medición real</span>
+    </div>
+
+    <p class="sin-evento" id="sin-evento">
+      Ningún evento seleccionado todavía. Pulsa «Reproducir» o avanza paso a paso
+      para ver aquí cada dato del viaje.
+    </p>
+
+    <div id="con-evento" hidden>
+      <h3 class="dato" id="resumen-evento" style="margin-bottom:12px"></h3>
+
+      <dl class="campos">
+        <div class="campo"><dt>Instante</dt><dd id="campo-instante"></dd></div>
+        <div class="campo"><dt>Evento · tipo</dt><dd id="campo-evento"></dd></div>
+        <div class="campo"><dt>Etapa</dt><dd id="campo-etapa"></dd></div>
+        <div class="campo"><dt>Protocolo</dt><dd id="campo-protocolo"></dd></div>
+        <div class="campo"><dt>IP origen : puerto</dt><dd id="campo-origen"></dd></div>
+        <div class="campo"><dt>IP destino : puerto</dt><dd id="campo-destino"></dd></div>
+        <div class="campo"><dt>Tamaño</dt><dd id="campo-tamano"></dd></div>
+        <div class="campo"><dt>Estado</dt><dd id="campo-estado"></dd></div>
+      </dl>
+
+      <div class="evidencia">
+        <p class="etiqueta" style="margin-bottom:6px">Evidencia sintética</p>
+        <pre id="evidencia-texto"></pre>
+      </div>
+
+      <!-- modo APRENDER: explicación gradual -->
+      <div id="bloque-aprender">
+        <p class="nota-aprender" id="nota-aprender"></p>
+        <div class="explicacion-etapa">
+          <p class="etiqueta" style="margin:14px 0 6px">La etapa, en contexto</p>
+          <h3 id="etapa-titulo"></h3>
+          <span class="termino" id="etapa-termino"></span>
+          <p id="etapa-explicacion"></p>
+          <p class="fuente-etapa" id="etapa-fuente"></p>
+        </div>
+      </div>
+
+      <!-- modo INSPECCIONAR: todos los datos técnicos -->
+      <div id="bloque-inspeccionar" hidden>
+        <div class="json-crudo">
+          <p class="etiqueta" style="margin-bottom:6px">Evento completo (JSON)</p>
+          <pre id="json-crudo-texto"></pre>
+        </div>
+        <div id="fuentes-direcciones">
+          <p class="etiqueta" style="margin:14px 0 6px">Procedencia de las direcciones</p>
+        </div>
+      </div>
+
+      <p class="procedencia">
+        <span class="clave">Procedencia:</span> todos los valores de este panel son
+        sintéticos, generados por la simulación. Los conceptos citan su fuente (RFC)
+        en cada etapa y en el glosario.
+      </p>
+    </div>
+  </aside>
+
+  <!-- ============ retos ============ -->
+  <section class="panel ancho-completo" aria-labelledby="titulo-retos">
+    <div class="panel-cabecera">
+      <h2 id="titulo-retos" class="etiqueta-acento">Retos guiados</h2>
+      <span class="etiqueta">escribe tu explicación antes de revelar la experta</span>
+    </div>
+    <div id="lista-retos"></div>
+  </section>
+
+  <!-- ============ glosario ============ -->
+  <section class="panel ancho-completo glosario" aria-labelledby="titulo-glosario">
+    <div class="panel-cabecera">
+      <h2 id="titulo-glosario" class="etiqueta-acento">Glosario</h2>
+      <span class="etiqueta">cada término inglés, traducido y explicado</span>
+    </div>
+    <div id="lista-glosario"></div>
+  </section>
+
+</main>
+
+<footer class="pie">
+  <p><span class="fuerte">Todo lo que muestra TRAZA es una simulación con datos sintéticos.</span>
+  No se contacta con ninguna red, dominio ni equipo real; no hay telemetría ni llamadas externas.
+  Uso educativo y defensivo. Fuentes técnicas en FUENTES.md.</p>
+</footer>
+
+<!-- zona de avisos flotantes y anuncio para lectores de pantalla -->
+<div id="avisos" class="avisos"></div>
+<p id="anuncio" class="solo-lectores" role="status" aria-live="polite"></p>
+
+<script>
+{{NUCLEO}}
+</script>
+<script>
+{{APP}}
+</script>
+</body>
+</html>

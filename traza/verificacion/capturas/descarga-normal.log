@@ -1,0 +1,19 @@
+# TRAZA v1.0.0 — registro de eventos sintéticos
+# esquema: traza.eventos.v1 (formato de línea documentado en LEEME.md)
+# escenario: normal
+# generado_en: 2026-08-27T03:45:23.582Z
+# aviso: Datos sintéticos generados por TRAZA con fines educativos. Ninguna medición procede de una red real; no se realizó conexión alguna.
+#
+# [t_ms] id etapa tipo protocolo origen -> destino tam estado :: resumen
+[+      0 ms] E01 dns             paquete UDP  192.168.1.23:51324   -> 198.51.100.53:53        74 B  ok          :: Consulta DNS: ¿qué IP tiene laboratorio.example? (SINTETICO)
+[+     18 ms] E02 dns             paquete UDP  198.51.100.53:53     -> 192.168.1.23:51324      90 B  ok          :: Respuesta DNS: laboratorio.example = 192.0.2.80 (SINTETICO)
+[+     24 ms] E03 nat             estado  —    192.168.1.23:51402   -> 203.0.113.42:40817         —  info        :: El router crea una entrada NAT para la nueva conexión (SINTETICO)
+[+     26 ms] E04 tcp             paquete TCP  203.0.113.42:40817   -> 192.0.2.80:443          60 B  ok          :: TCP SYN: el equipo pide abrir conexión (SINTETICO)
+[+     58 ms] E05 tcp             paquete TCP  192.0.2.80:443       -> 203.0.113.42:40817      60 B  ok          :: TCP SYN-ACK: el servidor acepta (SINTETICO)
+[+     60 ms] E06 tcp             paquete TCP  203.0.113.42:40817   -> 192.0.2.80:443          52 B  ok          :: TCP ACK: conexión establecida (SINTETICO)
+[+     62 ms] E07 tls             paquete TLS  203.0.113.42:40817   -> 192.0.2.80:443         517 B  ok          :: TLS ClientHello: el navegador propone cifrados (SINTETICO)
+[+     96 ms] E08 tls             paquete TLS  192.0.2.80:443       -> 203.0.113.42:40817    2890 B  ok          :: TLS ServerHello + certificado (SINTETICO)
+[+    100 ms] E09 tls             paquete TLS  203.0.113.42:40817   -> 192.0.2.80:443          74 B  ok          :: TLS Finished: canal cifrado listo (SINTETICO)
+[+    104 ms] E10 http_solicitud  paquete HTTP 203.0.113.42:40817   -> 192.0.2.80:443         412 B  ok          :: GET / — el navegador pide la página (SINTETICO)
+[+    168 ms] E11 http_respuesta  paquete HTTP 192.0.2.80:443       -> 203.0.113.42:40817    1284 B  ok          :: 200 OK — llega la página (SINTETICO)
+[+    176 ms] E12 http_respuesta  estado  —    —                    -> —                          —  ok          :: El navegador dibuja la página (SINTETICO)

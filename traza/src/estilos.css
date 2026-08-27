@@ -1,0 +1,610 @@
+/*
+ * TRAZA v1.0.0 — estilos.css
+ * Sistema de diseño del laboratorio.
+ *   fondo #05070a · superficie #0b0f15 · acento #7fdcff
+ *   #ffb454 solo advertencias · #ff9c86 solo errores
+ *   texto blanco por opacidades: .92 / .62 / .45 / .32
+ */
+
+:root {
+  --fondo: #05070a;
+  --superficie: #0b0f15;
+  --acento: #7fdcff;
+  --advertencia: #ffb454;
+  --error: #ff9c86;
+  --tinta-1: rgba(255, 255, 255, 0.92);
+  --tinta-2: rgba(255, 255, 255, 0.62);
+  --tinta-3: rgba(255, 255, 255, 0.45);
+  --tinta-4: rgba(255, 255, 255, 0.32);
+  --borde: rgba(127, 220, 255, 0.10);
+  --borde-fuerte: rgba(127, 220, 255, 0.28);
+  --cristal: rgba(11, 15, 21, 0.72);
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --suave: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background:
+    radial-gradient(1100px 500px at 18% -10%, rgba(127, 220, 255, 0.05), transparent 60%),
+    var(--fondo);
+  color: var(--tinta-1);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- utilidades tipográficas ---------- */
+
+.etiqueta {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+}
+
+.etiqueta-acento {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--acento);
+}
+
+.dato {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  color: var(--tinta-1);
+}
+
+/* ---------- accesibilidad ---------- */
+
+.salto {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--superficie);
+  color: var(--acento);
+  padding: 10px 18px;
+  z-index: 50;
+  font-family: var(--mono);
+  font-size: 12px;
+  border: 1px solid var(--borde-fuerte);
+}
+.salto:focus { left: 12px; top: 12px; }
+
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.solo-lectores {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- cabecera ---------- */
+
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 12px 22px;
+  background: var(--cristal);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--borde);
+}
+
+.marca { display: flex; align-items: baseline; gap: 10px; }
+.marca h1 {
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  color: var(--tinta-1);
+}
+.marca .version {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--tinta-4);
+  letter-spacing: 0.22em;
+}
+.marca .lema {
+  font-size: 12px;
+  color: var(--tinta-3);
+  max-width: 300px;
+  line-height: 1.3;
+}
+
+.sello-simulacion {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--advertencia);
+  border: 1px solid rgba(255, 180, 84, 0.35);
+  padding: 6px 12px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.modos { display: flex; gap: 0; margin-left: auto; border: 1px solid var(--borde-fuerte); border-radius: 4px; overflow: hidden; }
+.modos button {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+  background: transparent;
+  border: 0;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: color 0.25s var(--suave), background-color 0.25s var(--suave);
+}
+.modos button[aria-pressed="true"] {
+  color: #05070a;
+  background: var(--acento);
+  font-weight: 700;
+}
+.modos button:not([aria-pressed="true"]):hover { color: var(--tinta-1); }
+
+/* ---------- disposición general ---------- */
+
+.contenido {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 16px;
+  padding: 16px 22px 60px;
+  max-width: 1460px;
+  margin: 0 auto;
+}
+
+.columna-escena { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.contenido > * { min-width: 0; }
+
+.panel {
+  background: var(--cristal);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+
+.panel-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.ancho-completo { grid-column: 1 / -1; }
+
+/* ---------- selector de escenarios ---------- */
+
+.escenarios { display: flex; gap: 8px; flex-wrap: wrap; }
+.escenarios button {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--tinta-2);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: border-color 0.25s var(--suave), color 0.25s var(--suave);
+}
+.escenarios button:hover { color: var(--tinta-1); border-color: var(--borde-fuerte); }
+.escenarios button[aria-pressed="true"] {
+  color: var(--acento);
+  border-color: var(--acento);
+  background: rgba(127, 220, 255, 0.07);
+}
+.descripcion-escenario { margin-top: 10px; font-size: 13px; color: var(--tinta-2); }
+
+/* ---------- lienzo del recorrido ---------- */
+
+.lienzo-envoltura { overflow-x: auto; }
+.lienzo { width: 100%; min-width: 560px; height: auto; display: block; }
+
+.lienzo .via {
+  stroke: rgba(127, 220, 255, 0.14);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 6;
+}
+.lienzo .nodo-figura {
+  stroke: var(--tinta-3);
+  stroke-width: 1.4;
+  fill: none;
+  transition: stroke 0.4s var(--suave);
+}
+.lienzo .nodo.activo .nodo-figura { stroke: var(--acento); }
+.lienzo .nodo.activo .halo { opacity: 1; }
+.lienzo .halo {
+  fill: rgba(127, 220, 255, 0.06);
+  stroke: rgba(127, 220, 255, 0.25);
+  stroke-width: 1;
+  opacity: 0;
+  transition: opacity 0.4s var(--suave);
+}
+.lienzo .nodo-nombre {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  fill: rgba(255, 255, 255, 0.62);
+}
+.lienzo .nodo-ip {
+  font-family: var(--mono);
+  font-size: 10px;
+  fill: rgba(255, 255, 255, 0.32);
+}
+.lienzo .nodo.activo .nodo-nombre { fill: #7fdcff; }
+
+.paquete {
+  transition: transform 0.9s var(--suave), opacity 0.3s var(--suave);
+  opacity: 0;
+}
+.paquete.visible { opacity: 1; }
+.paquete circle { fill: var(--acento); }
+.paquete.estado-advertencia circle { fill: var(--advertencia); }
+.paquete.estado-error circle { fill: var(--error); }
+
+/* ---------- etapas ---------- */
+
+.etapas {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 14px;
+}
+.etapas button {
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: border-color 0.3s var(--suave), background-color 0.3s var(--suave);
+}
+.etapas .numero { font-family: var(--mono); font-size: 9px; letter-spacing: 0.3em; color: var(--tinta-4); }
+.etapas .nombre { font-size: 11.5px; color: var(--tinta-2); line-height: 1.25; }
+.etapas button:hover { border-color: var(--borde-fuerte); }
+.etapas button[aria-current="step"] {
+  border-color: var(--acento);
+  background: rgba(127, 220, 255, 0.08);
+}
+.etapas button[aria-current="step"] .nombre { color: var(--acento); }
+.etapas button.completada .nombre { color: var(--tinta-1); }
+.etapas button.completada .numero { color: var(--acento); }
+.etapas button.no-alcanzada { border-style: dashed; opacity: 0.55; cursor: not-allowed; }
+.etapas button.con-error { border-color: rgba(255, 156, 134, 0.6); }
+.etapas button.con-error .nombre { color: var(--error); }
+
+/* ---------- transporte ---------- */
+
+.transporte {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--borde);
+}
+.transporte button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tinta-2);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  padding: 8px 13px;
+  cursor: pointer;
+  transition: color 0.25s var(--suave), border-color 0.25s var(--suave);
+}
+.transporte button:hover:not(:disabled) { color: var(--acento); border-color: var(--borde-fuerte); }
+.transporte button:disabled { opacity: 0.35; cursor: not-allowed; }
+.transporte button svg { width: 11px; height: 11px; fill: currentColor; }
+.transporte .principal {
+  color: #05070a;
+  background: var(--acento);
+  border-color: var(--acento);
+  font-weight: 700;
+}
+.transporte .principal:hover:not(:disabled) { color: #05070a; opacity: 0.9; }
+
+.progreso {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.progreso .contador { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--tinta-2); }
+.barra-progreso {
+  width: 130px; height: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.barra-progreso > div {
+  height: 100%;
+  background: var(--acento);
+  width: 0%;
+  transition: width 0.5s var(--suave);
+}
+
+/* ---------- registro de eventos ---------- */
+
+.lista-eventos { list-style: none; max-height: 240px; overflow-y: auto; }
+.lista-eventos li { border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+.lista-eventos button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 86px 40px 1fr;
+  gap: 10px;
+  align-items: baseline;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 7px 8px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background-color 0.25s var(--suave);
+}
+.lista-eventos button:hover { background: rgba(255, 255, 255, 0.03); }
+.lista-eventos .instante { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 11px; color: var(--tinta-3); }
+.lista-eventos .id-evento { font-family: var(--mono); font-size: 11px; color: var(--tinta-3); }
+.lista-eventos .resumen { font-size: 12.5px; color: var(--tinta-2); }
+.lista-eventos li.actual button { border-left-color: var(--acento); background: rgba(127, 220, 255, 0.06); }
+.lista-eventos li.actual .resumen { color: var(--tinta-1); }
+.lista-eventos li.futuro { opacity: 0.45; }
+.lista-eventos li .resumen .marca-advertencia { color: var(--advertencia); }
+.lista-eventos li .resumen .marca-error { color: var(--error); }
+
+/* ---------- inspector ---------- */
+
+.inspector { position: sticky; top: 76px; align-self: start; display: flex; flex-direction: column; gap: 0; max-height: calc(100vh - 96px); overflow-y: auto; }
+
+.sello-dato {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--advertencia);
+  border: 1px solid rgba(255, 180, 84, 0.3);
+  border-radius: 3px;
+  padding: 3px 8px;
+}
+
+.campos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-bottom: 14px; }
+.campo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.campo dt { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--tinta-4); }
+.campo dd { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--tinta-1); overflow-wrap: anywhere; }
+.campo dd.vacio { color: var(--tinta-4); }
+.campo dd .estado-ok { color: var(--acento); }
+.campo dd .estado-info { color: var(--tinta-2); }
+.campo dd .estado-advertencia { color: var(--advertencia); }
+.campo dd .estado-error { color: var(--error); }
+
+.evidencia {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--borde);
+  border-radius: 5px;
+  padding: 12px 14px;
+  overflow-x: auto;
+}
+.evidencia pre {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--tinta-2);
+  white-space: pre;
+}
+
+.nota-aprender {
+  margin-top: 14px;
+  border-left: 2px solid var(--acento);
+  padding: 4px 0 4px 14px;
+  font-size: 13.5px;
+  color: var(--tinta-2);
+}
+.nota-aprender strong { color: var(--tinta-1); font-weight: 600; }
+
+.json-crudo { margin-top: 14px; }
+.json-crudo pre {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: var(--tinta-3);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.procedencia { margin-top: 12px; font-size: 11.5px; color: var(--tinta-3); }
+.procedencia .clave { color: var(--advertencia); }
+
+.sin-evento { color: var(--tinta-3); font-size: 13px; padding: 8px 0 4px; }
+
+/* ---------- exportación ---------- */
+
+.exportar { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--borde); flex-wrap: wrap; }
+.exportar button {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--acento);
+  background: rgba(127, 220, 255, 0.06);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: 4px;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background-color 0.25s var(--suave);
+}
+.exportar button:hover { background: rgba(127, 220, 255, 0.14); }
+.exportar .aclaracion { flex-basis: 100%; font-size: 11px; color: var(--tinta-4); }
+
+/* ---------- etapa actual (explicación en modo aprender) ---------- */
+
+.explicacion-etapa { margin-top: 4px; }
+.explicacion-etapa h3 { font-size: 14px; color: var(--tinta-1); font-weight: 600; margin-bottom: 6px; }
+.explicacion-etapa .termino { font-family: var(--mono); font-size: 11px; color: var(--acento); display: block; margin-bottom: 8px; }
+.explicacion-etapa p { font-size: 13px; color: var(--tinta-2); }
+.explicacion-etapa .fuente-etapa { margin-top: 8px; font-size: 11px; color: var(--tinta-4); }
+
+/* ---------- retos ---------- */
+
+.reto { border-top: 1px solid var(--borde); padding: 18px 0; }
+.reto:first-of-type { border-top: 0; padding-top: 6px; }
+.reto h3 { font-size: 14.5px; font-weight: 600; color: var(--tinta-1); margin-bottom: 6px; }
+.reto .pregunta { font-size: 13.5px; color: var(--tinta-2); margin-bottom: 8px; }
+.reto .pista { font-size: 12px; color: var(--tinta-3); margin-bottom: 12px; }
+.reto .pista .clave { color: var(--acento); }
+.reto textarea {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--borde);
+  border-radius: 5px;
+  color: var(--tinta-1);
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  padding: 10px 12px;
+}
+.reto textarea:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+.reto .pie-reto { display: flex; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.reto .contador-intento { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 11px; color: var(--tinta-4); }
+.reto .revelar {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--acento);
+  background: rgba(127, 220, 255, 0.06);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: 4px;
+  padding: 9px 14px;
+  cursor: pointer;
+}
+.reto .revelar:disabled { opacity: 0.35; cursor: not-allowed; color: var(--tinta-3); border-color: var(--borde); }
+.reto .explicacion-experta {
+  margin-top: 12px;
+  border-left: 2px solid var(--acento);
+  padding: 8px 0 8px 14px;
+  font-size: 13.5px;
+  color: var(--tinta-2);
+}
+.reto .explicacion-experta[hidden] { display: none; }
+
+/* ---------- glosario ---------- */
+
+.glosario details { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+.glosario details:first-of-type { border-top: 0; }
+.glosario summary {
+  cursor: pointer;
+  padding: 10px 4px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--tinta-2);
+  list-style: none;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+.glosario summary::-webkit-details-marker { display: none; }
+.glosario summary::before { content: "+"; color: var(--acento); font-family: var(--mono); }
+.glosario details[open] summary::before { content: "−"; }
+.glosario summary .traduccion { color: var(--tinta-4); font-size: 11.5px; }
+.glosario .cuerpo-termino { padding: 0 4px 12px 24px; font-size: 13px; color: var(--tinta-2); }
+.glosario .fuente-termino { font-size: 11px; color: var(--tinta-4); margin-top: 4px; }
+
+/* ---------- pie ---------- */
+
+.pie {
+  border-top: 1px solid var(--borde);
+  margin-top: 8px;
+  padding: 22px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--tinta-3);
+}
+.pie .fuerte { color: var(--advertencia); }
+
+/* ---------- avisos flotantes (descargas) ---------- */
+
+.avisos { position: fixed; bottom: 16px; right: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 40; }
+.aviso-flotante {
+  background: var(--cristal);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: 5px;
+  color: var(--tinta-1);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  padding: 10px 16px;
+}
+
+/* ---------- adaptación: pantallas medianas y móvil ---------- */
+
+@media (max-width: 1100px) {
+  .contenido { grid-template-columns: 1fr; }
+  .inspector { position: static; max-height: none; }
+  .etapas { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .cabecera { padding: 10px 14px; gap: 10px; }
+  .sello-simulacion { white-space: normal; }
+  .marca .lema { display: none; }
+  .modos { margin-left: 0; }
+  .contenido { padding: 12px 14px 48px; }
+  .panel { padding: 14px; }
+  .etapas { grid-template-columns: repeat(2, 1fr); }
+  .campos { grid-template-columns: 1fr; }
+  .progreso { margin-left: 0; flex-basis: 100%; }
+  .lista-eventos button { grid-template-columns: 70px 34px 1fr; }
+}
+
+/* ---------- menos movimiento: anular animaciones y transiciones ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

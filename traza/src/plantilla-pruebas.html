@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>TRAZA — ejecutor de pruebas</title>
+<style>
+/* Ejecutor de pruebas de TRAZA v1.0.0 — mismos cimientos de diseño que la aplicación. */
+:root {
+  --fondo: #05070a;
+  --superficie: #0b0f15;
+  --acento: #7fdcff;
+  --exito: #8ce8b0;      /* verde: prueba superada */
+  --error: #ff9c86;      /* rojo suave: prueba fallida */
+  --tinta-1: rgba(255,255,255,.92);
+  --tinta-2: rgba(255,255,255,.62);
+  --tinta-3: rgba(255,255,255,.45);
+  --tinta-4: rgba(255,255,255,.32);
+  --borde: rgba(127,220,255,.10);
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --suave: cubic-bezier(0.22, 1, 0.36, 1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--fondo);
+  color: var(--tinta-1);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  padding: 26px 22px 60px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+header { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+h1 { font-family: var(--mono); font-size: 17px; letter-spacing: .42em; }
+.version { font-family: var(--mono); font-size: 10px; letter-spacing: .22em; color: var(--tinta-4); }
+.lema { font-size: 12.5px; color: var(--tinta-3); }
+.sello {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .28em; text-transform: uppercase;
+  color: #ffb454; border: 1px solid rgba(255,180,84,.35); border-radius: 3px; padding: 4px 10px;
+}
+.resumen-global {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  background: rgba(11,15,21,.72);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border: 1px solid var(--borde); border-radius: 8px;
+  padding: 16px 20px; margin: 18px 0;
+}
+.marcador { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 26px; }
+.marcador.todo-verde { color: var(--exito); }
+.marcador.con-fallos { color: var(--error); }
+.detalle-marcador { font-size: 13px; color: var(--tinta-2); }
+.repetir {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--acento); background: rgba(127,220,255,.06);
+  border: 1px solid rgba(127,220,255,.28); border-radius: 4px;
+  padding: 9px 14px; cursor: pointer;
+  transition: background-color .25s var(--suave);
+}
+.repetir:hover { background: rgba(127,220,255,.14); }
+h2.grupo {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .32em; text-transform: uppercase;
+  color: var(--acento); margin: 22px 0 8px;
+}
+ul { list-style: none; }
+li.prueba {
+  display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: start;
+  border-bottom: 1px solid rgba(255,255,255,.05); padding: 9px 4px;
+}
+.insignia {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  text-align: center; border-radius: 3px; padding: 3px 0; margin-top: 2px;
+}
+.insignia.pasa { color: #05070a; background: var(--exito); font-weight: 700; }
+.insignia.falla { color: #05070a; background: var(--error); font-weight: 700; }
+.nombre-prueba { font-size: 13.5px; color: var(--tinta-1); }
+.error-prueba {
+  font-family: var(--mono); font-size: 11.5px; color: var(--error);
+  white-space: pre-wrap; overflow-wrap: anywhere; margin-top: 4px;
+}
+footer { margin-top: 28px; font-size: 12px; color: var(--tinta-3); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+@media (max-width: 640px) {
+  body { padding: 18px 14px 48px; }
+  li.prueba { grid-template-columns: 56px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TRAZA</h1>
+  <span class="version">v1.0.0 · pruebas</span>
+  <span class="lema">ejecutor de pruebas del núcleo, sin dependencias y sin red</span>
+  <span class="sello">entorno de simulación</span>
+</header>
+
+<p class="lema">Estas pruebas ejercitan exactamente el mismo núcleo incrustado en traza.html:
+escenarios, esquema de eventos, reproductor, exportadores, retos y contenido educativo.</p>
+
+<div class="resumen-global" role="status" aria-live="polite">
+  <span class="marcador" id="marcador">…</span>
+  <span class="detalle-marcador" id="detalle-marcador">ejecutando…</span>
+  <button type="button" class="repetir" id="repetir">Repetir pruebas</button>
+</div>
+
+<div id="resultados"></div>
+
+<footer>
+  Si alguna prueba aparece en rojo, el detalle indica la aserción exacta que falló.
+  Ejecutor local: abrir este archivo con doble clic basta; no necesita servidor ni conexión.
+</footer>
+
+<script>
+{{NUCLEO}}
+</script>
+<script>
+{{PRUEBAS_DEF}}
+</script>
+<script>
+/* Ejecutor visual: recorre las pruebas y las pinta en verde o rojo. */
+(function () {
+  "use strict";
+
+  function ejecutarYPintar() {
+    var resultados = window.TRAZA_PRUEBAS.ejecutarTodas(window.TRAZA_NUCLEO);
+    var contenedor = document.getElementById("resultados");
+    contenedor.innerHTML = "";
+
+    var porGrupo = {};
+    var ordenGrupos = [];
+    resultados.forEach(function (r) {
+      if (!porGrupo[r.grupo]) { porGrupo[r.grupo] = []; ordenGrupos.push(r.grupo); }
+      porGrupo[r.grupo].push(r);
+    });
+
+    var fallos = 0;
+    ordenGrupos.forEach(function (grupo) {
+      var titulo = document.createElement("h2");
+      titulo.className = "grupo";
+      titulo.textContent = grupo;
+      contenedor.appendChild(titulo);
+
+      var lista = document.createElement("ul");
+      porGrupo[grupo].forEach(function (r) {
+        if (!r.paso) fallos++;
+        var li = document.createElement("li");
+        li.className = "prueba";
+
+        var insignia = document.createElement("span");
+        insignia.className = "insignia " + (r.paso ? "pasa" : "falla");
+        insignia.textContent = r.paso ? "pasa" : "falla";
+
+        var cuerpo = document.createElement("div");
+        var nombre = document.createElement("p");
+        nombre.className = "nombre-prueba";
+        nombre.textContent = r.nombre;
+        cuerpo.appendChild(nombre);
+
+        if (!r.paso) {
+          var detalle = document.createElement("p");
+          detalle.className = "error-prueba";
+          detalle.textContent = r.error;
+          cuerpo.appendChild(detalle);
+        }
+
+        li.appendChild(insignia);
+        li.appendChild(cuerpo);
+        lista.appendChild(li);
+      });
+      contenedor.appendChild(lista);
+    });
+
+    var marcador = document.getElementById("marcador");
+    marcador.textContent = (resultados.length - fallos) + " / " + resultados.length;
+    marcador.className = "marcador " + (fallos === 0 ? "todo-verde" : "con-fallos");
+    document.getElementById("detalle-marcador").textContent = fallos === 0
+      ? "todas las pruebas superadas"
+      : fallos + (fallos === 1 ? " prueba fallida" : " pruebas fallidas") + " — detalle en rojo más abajo";
+
+    // resultado también en el título de la pestaña, útil para automatizar
+    document.title = "TRAZA pruebas — " + (resultados.length - fallos) + "/" + resultados.length;
+  }
+
+  document.getElementById("repetir").addEventListener("click", ejecutarYPintar);
+  ejecutarYPintar();
+})();
+</script>
+</body>
+</html>

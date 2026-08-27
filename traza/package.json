@@ -1,0 +1,14 @@
+{
+  "name": "traza-herramientas-desarrollo",
+  "version": "1.0.0",
+  "description": "Herramientas de construcción y verificación de TRAZA (no forman parte del producto)",
+  "scripts": {
+    "construir": "node herramientas/construir.js",
+    "probar": "node herramientas/ejecutar-pruebas.js",
+    "verificar": "node verificacion/verificar-navegador.js"
+  },
+  "dependencies": {
+    "playwright-core": "^1.62.1"
+  },
+  "private": true
+}
