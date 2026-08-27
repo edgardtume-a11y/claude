@@ -1,0 +1,9 @@
+{
+  "id": "detener-gate3-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T19:52:55Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "STOP escrito: {\"capture_session_id\": \"c37b7c55fca84a6cb08afb8bb43d1a08\", \"reason\": \"launcher_shutdown\", \"requested_by_pid\": 4442, \"requested_utc_ns\": 1787860365775270027}\n=== esperando cierre ordenado ===\nMOTOR CERRADO tras 20 s\n=== ULTIMAS LINEAS DEL LAUNCHER ===\nLIVE_STARTED supervisor_pid=4442 engine_pid=4444 hb_pid=4443 run=/home/trading/jean-flow-exec/staging_runs/20260827T143004Z_tokyo_n2_capture_gate3_2h\nLIVE_FINISHED engine_rc=20 run=/home/trading/jean-flow-exec/staging_runs/20260827T143004Z_tokyo_n2_capture_gate3_2h\n=== PARCIALES ===\n0\nDETENCION_OK\n"
+  }
+}
