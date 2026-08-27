@@ -1,0 +1,9 @@
+{
+  "id": "banco-comp-ver-003",
+  "ok": true,
+  "procesado_utc": "2026-08-27T23:24:26Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "estado: EN MARCHA\nhora UTC: 23:24:26\n\n=== muestras ===\n  csv    : 52428800 bytes (de events-20260823T112713.367130Z-000002.csv)\n  codigo : 52428800 bytes\n\n########## muestra: csv ##########\n  gzip -9                 50.0 MB ->    1.44 MB   34.71x     0.5 s    94.0 MB/s\n  bzip2 -9                50.0 MB ->    1.05 MB   47.65x    14.3 s     3.5 MB/s\n  zstd -3                 50.0 MB ->    1.37 MB   36.42x     0.1 s   961.5 MB/s\n  zstd -12                50.0 MB ->    1.15 MB   43.54x     0.3 s   147.9 MB/s\n  zstd -19                50.0 MB ->    1.05 MB   47.83x    19.5 s     2.6 MB/s\n  zstd -22 --long         50.0 MB ->    0.97 MB   51.36x    81.0 s     0.6 MB/s\n  xz -6 -T8               50.0 MB ->    1.06 MB   46.98x     2.8 s    17.8 MB/s\n  xz -9 -T8               50.0 MB ->    1.08 MB   46.20x     6.3 s     7.9 MB/s\n\n########## muestra: codigo ##########\n  gzip -9                 50.0 MB ->   49.52 MB    1.01x     1.7 s    28.9 MB/s\n  bzip2 -9                50.0 MB ->   49.81 MB    1.00x     6.7 s     7.5 MB/s\n  zstd -3                 50.0 MB ->   48.60 MB    1.03x     0.1 s   694.4 MB/s\n  zstd -12                50.0 MB ->   48.49 MB    1.03x     0.3 s   146.6 MB/s\n  zstd -19                50.0 MB ->   48.21 MB    1.04x    11.5 s     4.4 MB/s\n  zstd -22 --long         50.0 MB ->   47.94 MB    1.04x    18.6 s     2.7 MB/s\nVER_BANCO_COMP_OK\n"
+  }
+}
