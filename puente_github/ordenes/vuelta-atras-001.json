@@ -1,0 +1,5 @@
+{
+  "id": "vuelta-atras-001",
+  "accion": "ejecutar_script_repo",
+  "script": "probar_vuelta_atras.py"
+}
