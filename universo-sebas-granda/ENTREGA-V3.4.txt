@@ -284,7 +284,18 @@ Regresión ?autotest=1: FULL MISSION PASS — BOOT→INTRO→APPROACH→FACILITY
   de desarrollo ("chapter stuck: orbit") se dispara bajo SwiftShader (~3 FPS)
   por pura lentitud del rasterizador CPU y es seguido inmediatamente por
   ORBIT PASS — no ocurre a framerates reales.
-SHA-256 de los entregables:
-  production: 0ca61ab9545813180fbe9512d38ca67b4eb32e3f1316440fb4c14ec2ebc84a03
-  HOSTING:    4dd268ea3edcac7206a8e9d02b96ce0f88c64b70286e6bd5209ebb3b2d0c4c8f
+SHA-256 de los entregables: publicados junto a los ZIP en
+  entregables/SELLOS-V34.sha256 del repositorio (el hash del production.zip
+  no puede figurar dentro de sí mismo).
 ================================================================================
+
+VERIFICACIÓN ADVERSARIAL INDEPENDIENTE (12 agentes revisores)
+--------------------------------------------------------------
+Cada captura clave fue sometida a un revisor independiente instruido para
+REFUTAR el criterio del brief correspondiente (Tierra reconocible ≥45 %,
+fuselaje recto en Mach 1, disco completo sin artefactos, booster separado
+visible, hub intacto, warp sin Tierra, números gigantes, free cam con
+textura real, etc.). Resultado: 11/11 criterios NO refutados; 0 bloqueantes;
+solo observaciones cosméticas menores (p. ej. anillo de shock plano tipo
+billboard, plume del burn como glow radial). Completitud: 15/15 archivos
+presentes y de tamaño válido.

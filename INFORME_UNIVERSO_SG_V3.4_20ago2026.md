@@ -61,3 +61,17 @@ su pitch hacia la Tierra… y lo ignoraban. Con el fix, el hero orbital pasó de
   resultado al final de la sesión.
 - Cobertura medida: HERO 55 % · Mach1 18 % · Max-Q 24 % · Strato 34 % ·
   Departure final 52 % disco completo — todo dentro de los rangos del brief §8.
+
+## Cierre de verificación
+
+- Regresión `?autotest=1`: **FULL MISSION PASS** (cadena completa + suite de
+  UX de galaxias del hub). El único aviso fue el watchdog de desarrollo bajo
+  SwiftShader ~3 FPS, seguido de ORBIT PASS.
+- Verificación adversarial (workflow de 12 agentes): **11/11 criterios del
+  brief NO refutados, 0 bloqueantes**; completitud 15/15 capturas.
+- Sellos:
+  - `universo-sebas-granda-V3.4-production.zip`
+    `c31f4ad5fc76e9801335fe7b576494ed66bc1063760d683409464bcc6ba1cf56`
+  - `universo-sebas-granda-V3.4-HOSTING.zip`
+    `4dd268ea3edcac7206a8e9d02b96ce0f88c64b70286e6bd5209ebb3b2d0c4c8f`
+  (también en `entregables/SELLOS-V34.sha256`)
