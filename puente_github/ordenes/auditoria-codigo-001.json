@@ -1,0 +1,5 @@
+{
+  "id": "auditoria-codigo-001",
+  "accion": "ejecutar_script_repo",
+  "script": "auditoria_codigo.sh"
+}
