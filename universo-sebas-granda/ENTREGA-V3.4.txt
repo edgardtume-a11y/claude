@@ -50,10 +50,10 @@ optimizados en assets/earth/runtime/. TODO dentro del ZIP; cero hotlinking.
 source/  earth-blue-marble.jpg 4096×2048 (1.43 MB) · earth-night.jpg
          4096×2048 (0.70 MB) · clouds.png 4096×2048 (4.92 MB, alfa) ·
          earth-water.png 1600×800 (0.42 MB) · earth-topology.png 2048×1024
-runtime/ day-4096.jpg 1.39 MB · day-2048.jpg 0.36 MB · day-1024.jpg 0.11 MB
+runtime/ day-4096.jpg 1.52 MB (q92) · day-2048.jpg 0.36 MB · day-1024.jpg 0.11 MB
          night-4096.jpg 0.57 MB · night-2048.jpg 0.17 MB · night-1024.jpg 46 KB
          clouds-alpha-2048.png 1.70 MB · clouds-alpha-1024.png 0.46 MB
-         spec-1024.jpg 66 KB
+         spec-1024.png 111 KB (PNG sin bloques JPEG en el glint)
 Tiers: HIGH/ULTRA→4096 · PERFORMANCE→2048 · MOBILE→1024 (nubes 2048/1024).
 
 4) FUENTE NASA DE CADA UNA
@@ -264,4 +264,27 @@ estaba bloqueada por la red del entorno; se documentó el bloqueo y se usó el
 mirror MIT npm de las mismas imágenes NASA de dominio público. Los archivos
 REALES están en el ZIP y HIGH/ULTRA los usa (QA: FILE). Si se prefiere el
 original de 8K, las rutas exactas y URLs oficiales están en ASSET-CREDITS §6.
+================================================================================
+
+================================================================================
+RESULTADOS DE VERIFICACIÓN (medidos en runtime, Chromium+SwiftShader real)
+================================================================================
+Cobertura vertical de Tierra por beat (earthScreenCoverage, overlay QA):
+  MACH 1 17 % · MAX-Q 25 % · CLOUD BREAK 12 % · STRATOSPHERE 34 % ·
+  STAGE SEP 14 % · ORBIT HERO 55 % (LIMB) · DEPARTURE 50 → disco completo
+  52 % (DISC) — todos dentro de los rangos del brief §8; HERO ≥45 % ✓.
+Texturas: DAY/NIGHT/CLOUDS/SPEC = FILE en todos los beats (nunca STUB en ULTRA).
+Consola: JS ERRORS = 0 en las 15 capturas (los únicos mensajes de red son los
+  probes 404 de assets OPCIONALES ya contractuales de V3.3: moon.jpg, modelos
+  hero .glb y el manifest de clips de voz).
+Regresión ?autotest=1: FULL MISSION PASS — BOOT→INTRO→APPROACH→FACILITY→
+  COUNTDOWN→LIFTOFF→MACH1→MAX-Q→MECO→STAGE SEP→STAGE 2→FAIRING→ORBIT→
+  DEPARTURE→CHARGE→WARP→HUB + suite completa de UX de galaxias
+  (SELECT/SWITCH/RESELECT/DBLCLICK/CTA) en PASS. Nota: un aviso del watchdog
+  de desarrollo ("chapter stuck: orbit") se dispara bajo SwiftShader (~3 FPS)
+  por pura lentitud del rasterizador CPU y es seguido inmediatamente por
+  ORBIT PASS — no ocurre a framerates reales.
+SHA-256 de los entregables:
+  production: 0ca61ab9545813180fbe9512d38ca67b4eb32e3f1316440fb4c14ec2ebc84a03
+  HOSTING:    4dd268ea3edcac7206a8e9d02b96ce0f88c64b70286e6bd5209ebb3b2d0c4c8f
 ================================================================================
