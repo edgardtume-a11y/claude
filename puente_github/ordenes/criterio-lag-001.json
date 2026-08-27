@@ -1,0 +1,5 @@
+{
+  "id": "criterio-lag-001",
+  "accion": "ejecutar_script_repo",
+  "script": "leer_criterio_lag.sh"
+}
