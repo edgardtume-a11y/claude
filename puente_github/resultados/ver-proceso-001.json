@@ -1,0 +1,9 @@
+{
+  "id": "ver-proceso-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T22:02:45Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== hora UTC: 22:02:45 ===\n\n=== ¿corre el banco de pruebas? ===\n(vacio = no se esta ejecutando)\n\n=== procesos del agente Gemini ===\n649 /usr/bin/python3 /opt/jean-flow-gemini/lib/gemini_job_runner.py\n37554 bash /home/trading/puente_github_repo/puente_github/scripts/ver_proceso_gemini.sh\n(vacio = ninguno)\n\n=== carga de la maquina ===\n 22:02:45 up  7:39,  0 user,  load average: 0.08, 0.22, 0.41\n\n=== los 5 procesos que mas CPU consumen ===\n 0.7    07:38:46 root     otelopscol\n 0.7    07:38:42 root     fluent-bit\n 0.4       07:42 trading  node\n 0.3       07:41 trading  node\n 0.2    07:38:55 root     cloudflared\n\n=== salud del router ===\n{\"active_jobs\":1,\"fallback_model\":\"gemini-3.6-flash\",\"model\":\"gemini-3.7-flash\",\"model_policy\":{\"fallback\":\"gemini-3.6-flash\",\"fallback_on\":[\"availability\",\"capacity\"],\"primary\":\"gemini-3.7-flash\",\"routing\":\"preflight_then_single_execution\"},\"ok\":true,\"probe_status\":{\"fallback\":\"available\",\"primary\":\"available\"},\"version\":\"2.0.0\"}\n\n=== permisos del banco ===\ntotal 52\ndrwx------  3 trading trading  4096 Aug 27 21:49 .\ndrwx------ 13 trading trading  4096 Aug 27 21:23 ..\ndrwx------  2 trading trading  4096 Aug 27 21:51 __pycache__\n-rwx------  1 trading trading 19288 Aug 27 21:52 banco_gil.py\n-rwx------  1 trading trading 19738 Aug 27 21:39 convertir_parquet.py\nVER_PROCESO_OK\n"
+  }
+}
