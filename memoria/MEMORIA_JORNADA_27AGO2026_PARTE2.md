@@ -49,3 +49,15 @@ Contexto vivo también en Notion: página 19 (bloques 16O→16Q) y Memoria opera
 - Secreto expuesto en chat: rotar de inmediato (bridge token rotado; PAT quedó por decisión del operador).
 - Credenciales de Cloud Shell caducan: la cura real es gcloud auth login completo (responder Y y pegar el código), no config set account.
 - Más vCPU sí arregla colas p99 internas: 53,7 → 23,9 ms al pasar de 4 a 12.
+
+## Anexo 14:25 UTC — Veredicto Gate 2 y decisión n2 (pendiente de copiar a Notion como 16R)
+
+- Auditorías Gate 2 (12 vCPU): journal_spot 0 ✅ journal_usdm 0 ✅ identity 0 ✅ metrics 2 ❌.
+- Detalle métricas (peor ventana vs límite 5,0 ms): spot writer_yield 6,091 · usdm book_pipeline 5,462 · usdm writer_yield 5,270. book_apply ahora PASA; 0 fallos de invariantes (antes 1).
+- Latencia E2E 12 vCPU: n=20.842, min 1,44 / p50 2,05 / p90 7,43 / p99 23,93 ms (p99 mejoró de 53,68).
+- Diagnóstico: el patrón marginal persiste en familia e2 (CPU compartida/steal); ya no es cantidad de vCPU.
+- DECISIÓN DEL OPERADOR: cambiar a n2-standard-8 (dedicada). Ejecutado ~14:22 UTC vía Cloud Shell; verificado por el puente: nproc=8, guardián sobrevivió al reinicio.
+- Gemini por el puente: prueba end-to-end OK ("JEAN_FLOW_PUENTE_GITHUB_OK", gemini-3.7-flash).
+- Diálogo filosófico Claude-Gemini sobre el amor iniciado en filosofia/QUE_ES_EL_AMOR.md (orden lúdica del operador; respuesta de Gemini r1 pendiente de recoger).
+- Guardián v3 publicado (revisar_staging/lanzar_captura/ejecutar_script_repo + scripts/parquet_prueba.sh); pendiente instalador del operador.
+- Siguiente cadena: instalador v3 → prueba Parquet → gate 2h flujo Gemini en n2.
