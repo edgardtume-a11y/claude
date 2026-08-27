@@ -1,0 +1,9 @@
+{
+  "id": "banco-estado-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T22:05:54Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "estado: EN MARCHA\nhora UTC: 22:05:54\n\n--- registro completo (ultimas 60 lineas) ---\n(sin registro)\nBANCO_ESTADO_OK\n"
+  }
+}
