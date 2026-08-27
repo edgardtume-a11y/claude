@@ -1,0 +1,24 @@
+{
+  "id": "sat-res-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T23:32:23Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-27T23:22:49Z",
+    "duplicate": true,
+    "execution_models": [
+      "gemini-3.7-flash"
+    ],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-61860b64d676455b663ffbcbef25ee18ee21b600",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "execution",
+    "requested_model": "gemini-3.7-flash",
+    "status": "running",
+    "updated_at": "2026-08-27T23:32:23Z"
+  }
+}
