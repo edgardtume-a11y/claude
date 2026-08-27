@@ -61,3 +61,58 @@ Contexto vivo también en Notion: página 19 (bloques 16O→16Q) y Memoria opera
 - Diálogo filosófico Claude-Gemini sobre el amor iniciado en filosofia/QUE_ES_EL_AMOR.md (orden lúdica del operador; respuesta de Gemini r1 pendiente de recoger).
 - Guardián v3 publicado (revisar_staging/lanzar_captura/ejecutar_script_repo + scripts/parquet_prueba.sh); pendiente instalador del operador.
 - Siguiente cadena: instalador v3 → prueba Parquet → gate 2h flujo Gemini en n2.
+
+## Anexo 17:35 UTC — Puente GitHub en producción, Parquet aprobado, Gate 3 en curso
+
+### Cambio de era operativa: el puente GitHub sustituyó al conector RDC
+- Guardián v3 en producción (systemd `puente-github`, sobrevive reinicios). Acciones cerradas:
+  `estado`, `gemini_enqueue`, `gemini_result`, `auditar_staging`, `leer_archivo`,
+  `latencia_e2e`, `revisar_staging` (pytest), `lanzar_captura` (con guarda anti-doble-arranque),
+  `ejecutar_script_repo` (solo scripts versionados en puente_github/scripts/).
+- Idempotencia por id de archivo: un id ya respondido nunca se reprocesa.
+- Circuito verificado de extremo a extremo: orden → GitHub → guardián → router → Gemini 3.7
+  → resultado → GitHub ("JEAN_FLOW_PUENTE_GITHUB_OK").
+- Latencia práctica del puente: 25-60 s por orden, CERO caídas (vs RDC que cayó ~6 veces en el día).
+- Documentación: tutoriales/TUTORIAL_PUENTE_GITHUB.md (paso a paso reproducible) y
+  operaciones/BITACORA_COMANDOS_27AGO2026.md (comandos crudos sanitizados).
+
+### Parquet — etapa 1 APROBADA (14:5x UTC)
+- pyarrow 25.0.1 instalado en el venv del colector.
+- Prueba con 50.001 filas reales del gate 1 (usdm_futures): CSV → Parquet → CSV,
+  tabla IDÉNTICA tras ida y vuelta (`tabla.equals(tabla2) == True`).
+- **Compresión 71,93×** (19.822.897 → 275.579 bytes) con zstd. Hash muestra ce4ad11df4efd1d7.
+- Conclusión: Parquet habilitado técnicamente; el conversor definitivo se autoriza vía
+  flujo Gemini antes de gates ≥24 h.
+
+### Gate 3 (2 horas, n2-standard-8 dedicada) — EN CURSO
+- Preparación por el puente: staging 20260827T143004Z_tokyo_n2_capture_gate3_2h,
+  sesión c37b7c55fca84a6cb08afb8bb43d1a08.
+  Tropiezo y cura: `cp -a` falló por restos de __pycache__ de root → se copia el overlay
+  con `tar --exclude` (lección para futuros preparadores).
+- Contrato a Gemini vía puente (clave tokyo-n2-gate3-2h-v1) → `JEAN_FLOW_GATE3_FILES_OK`.
+- Revisión independiente: primera pasada FALLÓ (2 tests) — el revisor detectó **pruebas
+  fantasma** de gates anteriores arrastradas en el overlay (test_30m_gate.py, test_2h_gate.py
+  con sesiones/raíces viejas). Retiradas por el revisor → segunda pasada **10/10 PASSED**.
+  El flujo autor→revisor volvió a atrapar un defecto real que el autor no vio.
+- Captura lanzada 15:05 UTC con guarda anti-doble-arranque (engine_pid 4444).
+- Seguimiento 17:34 UTC: sigue grabando (2h29), **load 0.34 en 8 vCPU dedicados**
+  (el más bajo del día — buena señal para las métricas marginales), disco 127G libres, 0 errores.
+- Veredicto automático encadenado: estado → auditorías → return_codes → latencia_e2e → A/B.
+
+### Documentos nuevos del día
+- planes/PLAN_FASE2_ENTRENAMIENTO.md — escalera de modelos (LightGBM primero, confirmado
+  por el protocolo jean-flow-555), pipeline, métricas y enemigos (leakage, overfitting, costos).
+- planes/CONTRATO_FEATURES_V1.md — 14 features (libro, flujo, contexto) + labels
+  (retorno 5s/30s y triple-barrera 60s) + 4 reglas anti-leakage como pruebas. PENDIENTE
+  DE APROBACIÓN DEL OPERADOR.
+- planes/EVALUACION_ARCTICDB.md — veredicto: Parquet+Polars ahora; ArcticDB candidata
+  oficial para la fase multi-símbolo (memecoins) por su versionado de datasets.
+- memoria/PENDIENTES_HANDOFF.md — pendientes vivos + notas del operador (marca QUANTFLOW/
+  Lorvellan, AWS Tokio futuro, memecoins, bot fase 4, facturación, proyecto de Derecho).
+- filosofia/QUE_ES_EL_AMOR.md — diálogo Claude↔Gemini por el puente (rondas 1-2), orden lúdica
+  del operador; sirve además como prueba viva de que el canal Gemini funciona para tareas libres.
+
+### Costos (verificado 27/08)
+- n2-standard-8 en Tokio: ~$260/mes con descuento por uso sostenido (la e2-custom-12 previa
+  costaba ~$420 sin descuento) → **la máquina dedicada salió MÁS BARATA**. +$10 disco, +$4 IP.
+- Disco de Singapur apagada: ~$10/mes (seguro de respaldo, se elimina solo por orden expresa).
