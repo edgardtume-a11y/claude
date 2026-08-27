@@ -1,0 +1,5 @@
+{
+  "id": "probar-seco-001",
+  "accion": "ejecutar_script_repo",
+  "script": "probar_conversor_seco.sh"
+}
