@@ -1,0 +1,5 @@
+{
+  "id": "investigar-bloqueos-001",
+  "accion": "ejecutar_script_repo",
+  "script": "investigar_bloqueos.sh"
+}
