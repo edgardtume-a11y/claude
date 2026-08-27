@@ -1,0 +1,9 @@
+{
+  "id": "reversibilidad-001",
+  "ok": true,
+  "procesado_utc": "2026-08-27T21:52:47Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "parquet de origen: events-20260827T145655.037360Z-000001.parquet  (7749014 bytes)\n\n=== 1) reconstruir el CSV ===\n\nevents-20260827T145655.037360Z-000001.parquet\n  -> /home/trading/reversibilidad_tmp/events-20260827T145655.037360Z-000001.csv\n  filas: 1340365  bytes: 536879934\n  huella: e21ab84ff6dcd284\n\nRECONSTRUCCION_OK\n\n=== 2) ¿el auditor lo certifica? ===\n{\n  \"book_statuses\": {\n    \"HOT_REBASE_SWAPPED\": 3,\n    \"PREVENTIVE_REBASE\": 3,\n    \"REBASE_IN_PROGRESS\": 3,\n    \"SYNCED\": 4,\n    \"SYNCING\": 1\n  },\n  \"causal_identity\": {\n    \"capture_session_ids\": [\n      \"c37b7c55fca84a6cb08afb8bb43d1a08\"\n    ],\n    \"ingest_seq_max\": 56673,\n    \"ingest_seq_min\": 3,\n    \"invalid_causal_ingest_headers\": 0,\n    \"schema_versions\": [\n      \"2.0.0\"\n    ],\n    \"source_socket_ids\": [\n      \"b1c51ed854824b78ade533cd59551d93:usdm_market_trades\",\n      \"b1c51ed854824b78ade533cd59551d93:usdm_public_depth\",\n      \"collector\",\n      \"rest:depth\"\n    ],\n    \"unique_ingest_seq_count\": 29182\n  },\n  \"certification\": {\n    \"causal_replay\": \"PASS\",\n    \"causal_replay_errors\": [],\n    \"journal_integrity\": \"PASS\",\ncodigo de retorno del auditor: 0\n\n=== 3) limpieza ===\nREVERSIBILIDAD_OK\n"
+  }
+}
