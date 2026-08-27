@@ -1,0 +1,24 @@
+{
+  "id": "rot-res-002",
+  "ok": true,
+  "procesado_utc": "2026-08-27T23:26:36Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-27T22:50:30Z",
+    "duplicate": true,
+    "execution_models": [
+      "gemini-3.7-flash"
+    ],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-a2fba053895f12498dc2a8e4bd93ea9d2326986e",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "execution",
+    "requested_model": "gemini-3.7-flash",
+    "status": "running",
+    "updated_at": "2026-08-27T23:22:49Z"
+  }
+}
