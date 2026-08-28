@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "mp-ver-020",
+  "ok": true,
+  "procesado_utc": "2026-08-28T12:47:59Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "staging: /home/trading/jean-flow-exec/staging_runs/20260828T122455Z_markprice\ndrwxr-xr-x 6 trading trading 4096 Aug 28 09:30 /home/trading/jean-flow-exec/staging_runs/20260828T122455Z_markprice\n--- ¿toco la base? (deben ser 0,0,0) ---\n  base/collector.py: 0\n  base/parquet_store.py: 0\n  base/normalize.py: 0\n--- listas cerradas del overlay ---\n27:_SEQUENCED_RECORD_TYPES = frozenset(\n28-    {\n29-        \"AGG_TRADE\",\n30-        \"FORCE_ORDER\",\n31-        \"L2_PARTIAL\",\n32-        \"L2_PARTIAL_LEVEL\",\n33-        \"L2_DELTA\",\n34-        \"L2_DELTA_LEVEL\",\n35-    }\n36-)\n37-_UNSEQUENCED_RECORD_TYPES = frozenset(\n38-    {\n39-        \"L2_SNAPSHOT\",\n--- MARK_PRICE en normalize/collector ---\n/home/trading/jean-flow-exec/staging_runs/20260828T122455Z_markprice/overlay/src/binance_collector/normalize.py:4\n/home/trading/jean-flow-exec/staging_runs/20260828T122455Z_markprice/overlay/src/binance_collector/collector.py:3\n/home/trading/jean-flow-exec/staging_runs/20260828T122455Z_markprice/overlay/src/binance_collector/models.py:1\n--- ficheros nuevos ---\ntotal 40\ndrwx------ 2 root    root     4096 Aug 28 12:25 __pycache__\n-rw-r--r-- 1 trading trading 11965 Aug 13 00:00 test_dual_orchestration_qa.py\n-rw------- 1 trading trading 11562 Aug 28 08:45 test_forceorder.py\n-rw-r--r-- 1 trading trading  5047 Aug 27 20:22 test_gate4_mejoras.py\n-rw-r--r-- 1 trading trading  2430 Aug 27 19:56 test_gate4_mejoras.py.original\nMP_OK\n"
+  }
+}
