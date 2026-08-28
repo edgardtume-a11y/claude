@@ -1,0 +1,1 @@
+{"id":"banco-ap-001","accion":"ejecutar_script_repo","script":"banco_auditor_parquet.sh"}
