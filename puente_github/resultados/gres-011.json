@@ -1,0 +1,31 @@
+{
+  "estado": "completed",
+  "id": "gres-011",
+  "ok": true,
+  "procesado_utc": "2026-08-28T15:07:42Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-28T14:49:30Z",
+    "duplicate": true,
+    "execution_models": [
+      "gemini-3.7-flash"
+    ],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "finished_at": "2026-08-28T14:57:43Z",
+    "id": "jfr-0d2a8efbd76086f71bf04b374304c114dbf7e8f8",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "execution",
+    "requested_model": "gemini-3.7-flash",
+    "response": "```bash\n$ ls -l /home/trading/jean-flow-exec/staging_runs/20260828T143727Z_auditparquet/overlay/tests/\ntotal 56\n-rw-r--r-- 1 trading trading  4884 Aug 28 14:47 test_audit_parquet.py\n-rw-r--r-- 1 trading trading 11965 Aug 13 00:00 test_dual_orchestration_qa.py\n-rw-r--r-- 1 trading trading 11562 Aug 28 08:45 test_forceorder.py\n-rw-r--r-- 1 trading trading  5047 Aug 27 20:22 test_gate4_mejoras.py\n-rw-r--r-- 1 trading trading  2430 Aug 27 19:56 test_gate4_mejoras.py.original\n-rw-r--r-- 1 trading trading 10105 Aug 28 13:11 test_markprice.py\n\n$ sudo -u trading /home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/.venv/bin/python -m py_compile /home/trading/jean-flow-exec/staging_runs/20260828T143727Z_auditparquet/overlay/src/binance_collector/audit.py && echo COMPILA\nCOMPILA\n```\n\nPERMISOS_OK",
+    "served_model": "gemini-3.7-flash",
+    "served_models": [
+      "gemini-3.7-flash"
+    ],
+    "status": "done",
+    "updated_at": "2026-08-28T15:07:42Z"
+  }
+}
