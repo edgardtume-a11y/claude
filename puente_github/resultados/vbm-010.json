@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "vbm-010",
+  "ok": true,
+  "procesado_utc": "2026-08-28T20:42:34Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "TERMINADO\nficheros disponibles: 10\n\n ficheros          bytes          filas  pico_RSS_MB     segundos\n        1      536896697          39134         69.1           24\n        2     1073808887          75536         78.7           48\n        4     2147916615         146594         97.8           96\n        7     3759122355         265037        131.0          169\n       10     5038992297         339229        156.2          231\n\n===== LECTURA =====\n  filas -> MB: 39,134->69MB, 75,536->79MB, 146,594->98MB, 265,037->131MB, 339,229->156MB\n  pendiente: 290.1 MB por cada millon de filas\n  base (interprete y codigo): ~58 MB\n  filas estimadas en 7 dias (a este ritmo): 56,990,472\n  PROYECCION de memoria para journal de 7 dias: 16,591 MB\n  RAM de la maquina: 32090 MB\n  VEREDICTO: CABE\nBANCO_MEMORIA_FIN\nVBM_OK\n"
+  }
+}
