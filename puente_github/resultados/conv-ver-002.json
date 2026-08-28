@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "conv-ver-002",
+  "ok": true,
+  "procesado_utc": "2026-08-28T11:37:09Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== ¿sigue viva? ===\n  VIVA (pid 139995)\n      01:35  139 2188800\n\n=== progreso ===\n  CSV que quedan: 60\n  Parquet generados: 22\n  CSV pesan: 21.34 GiB\n  Parquet pesan: 0.104 GiB\n\n=== ultimas 25 lineas del log ===\n\n=== disco ===\n/dev/root       193G   92G  102G  48% /\nVER_CONV_OK\n"
+  }
+}
