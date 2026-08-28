@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "bm-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T20:29:55Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "lanzado pid 218868\nBM_LANZADO\n"
+  }
+}
