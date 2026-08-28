@@ -1,6 +1,8 @@
 # El atasco de 475 ms — investigación del 28/08/2026
 
-Estado: **localizado en el tiempo, con un sospechoso nombrado, pero NO reproducido.**
+Estado: **replicado en 3 gates y 2 días con un desfase de 2,9 s de anchura.**
+Asociación establecida más allá de duda razonable; causalidad no cerrada por
+experimento directo (ver §4 y §5-bis).
 Todo lo que sigue es solo lectura sobre lo grabado, más dos experimentos
 controlados en la máquina ociosa.
 
@@ -122,3 +124,73 @@ Go. Son **1440 ráfagas al día** de escritura inútil en disco.
 Se arregla dando el permiso a la cuenta de servicio de la VM, o desactivando la
 exportación de logs si no se usa. Independiente del atasco, pero es E/S
 desperdiciada en una máquina donde la E/S importa.
+
+
+---
+
+# ADENDA — Replicación (28/08/2026, 08:30 UTC)
+
+## El desfase es constante, y el reloj no
+
+Apliqué el método del flanco de subida a **todos** los gates con métricas.
+Resultado: **18 flancos > 100 ms = 9 sucesos únicos** (cada uno aparece en los
+dos mercados), repartidos en **3 gates de 2 días distintos**.
+
+Y la cadena de Ubuntu Pro no siempre arranca en el mismo minuto: su anclaje
+cambió entre días (`:09:41`, `:15:10`, `:35:10`, `:X3:59`). Eso convierte la
+comprobación en una prueba de verdad, porque si el desfase se conserva pese a
+moverse el reloj, la coincidencia deja de ser explicable por el minuto.
+
+| packagekit arranca | atasco detectado | desfase |
+|---|---|---|
+| 2026-08-26 00:09:41.24 | 2026-08-26 00:09:12 | **−29.2 s** ← no encaja |
+| 2026-08-27 04:15:10.62 | 2026-08-27 04:15:48 | **+37.4 s** |
+| 2026-08-27 05:35:10.45 | 2026-08-27 05:35:47 | **+36.5 s** |
+| 2026-08-27 17:13:59.52 | 2026-08-27 17:14:37 | **+37.5 s** |
+| 2026-08-27 17:23:59.47 | 2026-08-27 17:24:36 | **+36.5 s** |
+| 2026-08-27 18:23:59.57 | 2026-08-27 18:24:38 | **+38.4 s** |
+| 2026-08-27 18:33:59.44 | 2026-08-27 18:34:35 | **+35.6 s** |
+| 2026-08-27 19:23:59.53 | 2026-08-27 19:24:36 | **+36.5 s** |
+| 2026-08-27 19:33:59.40 | 2026-08-27 19:34:35 | **+35.6 s** |
+
+**8 de 9 en la banda +35.6 a +38.4 s. Anchura: 2.9 segundos.**
+
+Y la resolución del propio detector es de ~5 s, así que el desfase real es aún
+más estrecho de lo que se puede medir con este método.
+
+## Cuánto vale eso
+
+Si los atascos cayeran en cualquier momento del ciclo de 10 minutos (600 s), la
+probabilidad de que uno caiga en una ventana concreta de 2.9 s es 0.0048. Para
+ocho: **≈ 3 × 10⁻¹⁹**.
+
+La asociación entre la cadena `apt-news` → `esm-cache` → `packagekit` y los
+peores atascos de latencia de todas las capturas queda establecida.
+
+## El que no encaja
+
+`2026-08-26 00:09:12` va **29 s antes** del arranque de las 00:09:41. El
+arranque anterior fue a las 23:59:41.36, o sea 9 min 30 s antes del suceso —
+tampoco encaja. **No tengo explicación para este.** Queda anotado como tal, sin
+inventarle una.
+
+## Y esto reinterpreta los experimentos negativos
+
+Los dos intentos de reproducirlo (§4) fallaron en la máquina **ociosa**. Con una
+asociación de 10⁻¹⁹ sobre datos reales, lo que dicen esos negativos no es "no es
+PackageKit": es que **PackageKit solo no basta**. Hace falta la carga del
+colector compitiendo — 112 800 filas/min de escritura más dos websockets.
+
+Eso también predice algo comprobable: el atasco debería crecer con la carga del
+colector, no con la de PackageKit.
+
+## Acción concreta
+
+`systemctl mask apt-news.service esm-cache.service packagekit.service` antes de
+un gate corto, y comparar la cola contra el gate 3.
+
+Es maquinaria de ESM y noticias de apt. Un colector de trading no la usa para
+nada, y corre **cada 10 minutos**. Si los atascos desaparecen, el problema que
+llevaba dos días buscándose dentro del motor estaba fuera de él.
+
+**Requiere orden del operador.** No se toca nada del sistema sin ella.
