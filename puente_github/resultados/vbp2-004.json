@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "vbp2-004",
+  "ok": true,
+  "procesado_utc": "2026-08-28T19:53:16Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "CORRIENDO\n--- log ---\nficheros: spot=4 usdm=10 | 6.5G\nRAM total: 32090 MB\n\n===== A) EN SERIE =====\n  journal_spot      98.1 s  rc=0\n  journal_usdm     230.1 s  rc=0\n--- carga y memoria ahora ---\n1.04 1.08 0.95 2/331 212122\n  usada 1461 MB de 32090 MB\nVBP_OK\n"
+  }
+}
