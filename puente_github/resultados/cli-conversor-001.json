@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "cli-conversor-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T11:34:35Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== argumentos que acepta ===\n161:    parser.add_argument(\n166:    parser.add_argument(\n172:    parser.add_argument(\n\n=== el valor por defecto de --borrar ===\n165-    )\n166-    parser.add_argument(\n167:        \"--borrar\",\n168-        action=\"store_true\",\n169-        default=False,\n170-        help=\"Borra el CSV original tras verificar exitosamente la conversión. Por defecto NO borra nada.\",\n171-    )\n\n=== ¿que espera como --run? ===\n15:- S4: Protección estricta contra borrado de archivos fuera de staging/capture/ o sin extensión .csv.\n53:    resultado = subprocess.run(cmd, capture_output=True)\n190:    # Localizar directorio capture/ o raíz de búsqueda y ruta de manifiesto\n191:    # Si {ruta}/capture existe, sigue funcionando como hoy.\n193:    if os.path.basename(staging_dir) == \"capture\":\n196:    elif os.path.exists(os.path.join(staging_dir, \"capture\")):\n197:        raiz_busqueda = os.path.join(staging_dir, \"capture\")\nCLI_OK\n"
+  }
+}
