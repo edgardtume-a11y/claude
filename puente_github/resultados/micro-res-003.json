@@ -1,0 +1,24 @@
+{
+  "id": "micro-res-003",
+  "ok": true,
+  "procesado_utc": "2026-08-28T02:19:47Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-27T23:31:47Z",
+    "duplicate": true,
+    "execution_models": [
+      "gemini-3.7-flash"
+    ],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-878f0c33885ee8162c2825ee95f91c6518d8e5b1",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "execution",
+    "requested_model": "gemini-3.7-flash",
+    "status": "running",
+    "updated_at": "2026-08-28T02:17:35Z"
+  }
+}
