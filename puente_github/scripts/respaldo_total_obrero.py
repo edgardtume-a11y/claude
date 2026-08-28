@@ -71,8 +71,10 @@ def sha256(ruta):
 class Volumenes:
     """Escribe una serie de zips independientes de ~PARTE_MB cada uno."""
 
-    def __init__(self, destino_dir, marca, limite_bytes):
+    def __init__(self, destino_dir, marca, limite_bytes,
+                 prefijo="RESPALDO_COMPLETO"):
         self.dir = destino_dir
+        self.prefijo = prefijo
         self.marca = marca
         self.limite = limite_bytes
         self.n = 0
@@ -84,7 +86,7 @@ class Volumenes:
 
     def _abrir(self):
         self.n += 1
-        nombre = f"RESPALDO_COMPLETO_{self.marca}_parte{self.n:02d}.zip"
+        nombre = f"{self.prefijo}_{self.marca}_parte{self.n:02d}.zip"
         self.ruta = os.path.join(self.dir, nombre)
         self.tmp = self.ruta + ".escribiendo"
         self.z = zipfile.ZipFile(self.tmp, "w", allowZip64=True)
@@ -128,17 +130,27 @@ def main():
                         "(AAAA-MM-DD). Usa 1970-01-01 para el disco entero.")
     p.add_argument("--hasta", default=None,
                    help="opcional, AAAA-MM-DD exclusivo")
+    p.add_argument("--desde-epoch", type=float, default=None,
+                   help="igual que --desde pero con precision de segundo "
+                        "(segundos desde 1970). Manda sobre --desde. Lo usa el "
+                        "respaldo incremental, que necesita cortar al segundo "
+                        "exacto en que termino el anterior para no repetir ni "
+                        "perder ficheros.")
     p.add_argument("--dry-run", action="store_true",
                    help="solo cuenta y mide; no escribe ningun zip")
     p.add_argument("--destino-dir", default=DESTINO_DIR)
     p.add_argument("--parte-mb", type=int, default=PARTE_MB)
+    p.add_argument("--prefijo", default="RESPALDO_COMPLETO",
+                   help="prefijo de los ficheros de salida")
     args = p.parse_args()
 
-    desde = calendar.timegm(time.strptime(args.desde, "%Y-%m-%d"))
+    desde = (args.desde_epoch if args.desde_epoch is not None
+             else calendar.timegm(time.strptime(args.desde, "%Y-%m-%d")))
     hasta = (calendar.timegm(time.strptime(args.hasta, "%Y-%m-%d"))
              if args.hasta else None)
-    print(f"ventana: desde {args.desde}"
-          + (f" hasta {args.hasta}" if args.hasta else " en adelante"))
+    print("ventana: desde %s%s"
+          % (time.strftime("%Y-%m-%d %H:%M:%SZ", time.gmtime(desde)),
+             (" hasta " + args.hasta) if args.hasta else " en adelante"))
 
     if os.system("pgrep -f 'binance_collector[.]dual_main' >/dev/null") == 0:
         print("HAY UNA CAPTURA ACTIVA - respaldo abortado")
@@ -161,7 +173,7 @@ def main():
 
     marca = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     vol = None if args.dry_run else Volumenes(
-        args.destino_dir, marca, args.parte_mb * 1024 * 1024)
+        args.destino_dir, marca, args.parte_mb * 1024 * 1024, args.prefijo)
     fuera_de_ventana = 0
 
     inventario = []
@@ -248,7 +260,7 @@ def main():
     cab = [
         "INVENTARIO DEL RESPALDO - JEAN FLOW",
         f"marca: {marca}",
-        f"ventana: desde {args.desde}" + (f" hasta {args.hasta}" if args.hasta else " en adelante"),
+        "ventana: desde %s%s" % (time.strftime("%Y-%m-%d %H:%M:%SZ", time.gmtime(desde)), (" hasta " + args.hasta) if args.hasta else " en adelante"),
         f"ficheros fuera de la ventana (no incluidos): {fuera_de_ventana}",
         f"host: {os.uname().nodename}   sistema: {os.uname().release}",
         "",
