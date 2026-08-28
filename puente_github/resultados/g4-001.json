@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "g4-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T14:30:58Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== informes certificados ===\ntotal 48\n-rw-r--r-- 1 trading trading  2081 Aug 27 21:02 identity.json\n-rw-r--r-- 1 trading trading     0 Aug 27 21:01 identity.stderr\n-rw-r--r-- 1 trading trading  2329 Aug 27 21:01 journal_spot.json\n-rw-r--r-- 1 trading trading     0 Aug 27 21:00 journal_spot.stderr\n-rw-r--r-- 1 trading trading  2564 Aug 27 21:01 journal_usdm.json\n-rw-r--r-- 1 trading trading     0 Aug 27 21:01 journal_usdm.stderr\n-rw-r--r-- 1 trading trading 26884 Aug 27 21:02 metrics.json\n-rw-r--r-- 1 trading trading     0 Aug 27 21:02 metrics.stderr\n-rw-r--r-- 1 trading trading    67 Aug 27 21:02 puente_audit.log\n-rw-r--r-- 1 trading trading    61 Aug 27 21:02 return_codes.json\n  codigos de retorno: {\"journal_spot\":0,\"journal_usdm\":0,\"identity\":0,\"metrics\":0}\n\n=== que hay en capture/ ===\n  spot: 0 csv, 1 parquet\n  usdm_futures: 0 csv, 2 parquet\n22M\t/home/trading/jean-flow-exec/staging_runs/20260827T195636Z_tokyo_n2_gate4_mejoras_30m/capture\n  jsonl de metricas: 2924107 bytes\n\n=== tamano de los csv si estan ===\n  0.00 GiB en 0 ficheros\n\n=== huellas de los informes (la verdad a reproducir) ===\n  journal_spot.json: 00ebba71859524c5\n  journal_usdm.json: 694caf8e32bf1643\n  identity.json: 53e075e347ffd85c\n  metrics.json: f744a30158ef8e17\nG4_OK\n"
+  }
+}
