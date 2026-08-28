@@ -1,4 +1,4 @@
-# PENDIENTES — Handoff para cualquier IA (actualizado 27/08/2026 ~22:15 UTC)
+# PENDIENTES — Handoff para cualquier IA (actualizado 28/08/2026 ~05:45 UTC)
 
 Lee primero: memoria/MEMORIA_JORNADA_27AGO2026.md y _PARTE2.md, y el contexto en Notion
 (página 19 + Memoria operativa). Vía de trabajo: PUENTE GITHUB (tutoriales/TUTORIAL_PUENTE_GITHUB.md).
@@ -87,6 +87,57 @@ Lee primero: memoria/MEMORIA_JORNADA_27AGO2026.md y _PARTE2.md, y el contexto en
 10. Idea de negocio del operador pendiente de responder desde temprano: "¿puedo crear mi
     empresa de alquilar un VPS con mi código para que las empresas graben sus datos?" — darle
     una respuesta seria de viabilidad cuando haya un momento tranquilo.
+
+## ⬇️ PENDIENTE DEL OPERADOR — DESCARGAR RESPALDOS
+
+**Los respaldos están hechos y verificados, pero SIGUEN SOLO EN LA MÁQUINA.**
+Mientras no estén en el PC del operador, no protegen de nada: si la máquina se
+pierde, se pierden con ella.
+
+### 1. El reducido — bájalo primero
+```
+/home/trading/RESPALDO_JEAN_FLOW_20260828T003137Z.zip
+```
+**625.83 MB** · 5 209 ficheros · integridad verificada · sha256 `b06e15dc…7590b`
+
+Contiene TODO el trabajo del operador: código del colector (3 668 ficheros),
+capturas ya en Parquet (1 044), puente (478), router, los 5 servicios de
+systemd, y la lista de paquetes y librerías para rehacer la máquina desde cero.
+
+**Es una sola descarga de minutos.** Prioridad máxima.
+
+### 2. El completo — cuando haya tiempo
+```
+/home/trading/respaldo_24_27/RESPALDO_COMPLETO_20260828T030804Z_parteNN.zip
+```
+**35 partes · 31.86 GiB · 116 831 ficheros · 0 partes rotas**
+
+Disco entero. De los 31.86 GiB, unos **14 GiB son lastre incompresible**: el
+respaldo antiguo de 7.1 GB, un `.part` de 1.5 GB, otro zip de 1.4 GB,
+`import_backup` (830 MB) y `/snap` (3.2 GB). El resto sí comprimió — los 21 GiB
+de capturas viejas quedaron en ~500 MB.
+
+Cada parte es un zip **independiente**: se abre sola, no necesita a las demás.
+Orden sugerido: **la 35 primero** (280 MB, trae el `INVENTARIO_COMPLETO.txt`
+con qué hay en cada parte) y **la 32 la última** (7.1 GB, es el respaldo antiguo
+entero).
+
+### 3. Cómo descargarlos
+WinSCP ya está operativo: `34.180.96.105`, usuario `trading`, puerto 22, con la
+llave del PC del operador ya autorizada (huella `yROLUuGO…`).
+Activar **Opciones → Preferencias → Transferencia en segundo plano** para que la
+cola siga sola y reanude si se corta.
+
+### ⚠️ Ambos contienen credenciales
+Token del puente, llave de GitHub, credenciales del agente. **No subir a GitHub
+ni compartir con terceros sin limpiarlos antes.**
+
+### 4. Respaldos incrementales
+`/home/trading/respaldo_incremental/` recoge solo lo nuevo desde el respaldo
+completo (marca: 28/08 03:08:04 UTC). El reloj automático cada 4 h quedó
+**DESACTIVADO** tras detectarse que el incremental se respaldaba a sí mismo
+(copió 24 GB de nada). Ya corregido con doble exclusión —por ruta y por
+nombre—; **volver a programarlo solo después de ver una corrida limpia.**
 
 ## Trabajo técnico pendiente (por orden de valor)
 11. **Enganchar `parquet_store.py` a la rotación en vivo.** Es la pieza que
