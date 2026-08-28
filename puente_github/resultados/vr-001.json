@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "vr-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T14:59:27Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "  _iterar_filas en reconstruct.py: 0\n  _iterar_filas en audit.py (debe ser 0 defs): 1\n  audit.py lo importa: 0\n  DictReader que quedan en reconstruct.py: 1\n  parquet en reconstruct.py: 0\n  fechas: audit 14:45:30  reconstruct 09:49:31   ahora 14:59:27\n  propietario reconstruct.py: trading:trading\n  ¿toco la BASE? (0): 0\nVR_OK\n"
+  }
+}
