@@ -1,0 +1,9 @@
+{
+  "id": "incremental-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T05:00:14Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "primera corrida: se parte del respaldo completo del 28/08 03:08:04 UTC\ndesde : 2026-08-28T03:08:04Z\nhasta : 2026-08-28T05:00:14Z\ndestino: /home/trading/respaldo_incremental/20260828T050014Z\n\nlanzado pid=70750\nvigilante de la marca lanzado\nregistro: /home/trading/respaldo_incremental/incremental.log\nINCREMENTAL_LANZADO_OK\n"
+  }
+}
