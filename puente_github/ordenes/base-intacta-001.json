@@ -1,0 +1,5 @@
+{
+  "id": "base-intacta-001",
+  "accion": "ejecutar_script_repo",
+  "script": "verificar_base_intacta.sh"
+}
