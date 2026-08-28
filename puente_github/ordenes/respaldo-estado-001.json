@@ -1,0 +1,5 @@
+{
+  "id": "respaldo-estado-001",
+  "accion": "ejecutar_script_repo",
+  "script": "respaldo_estado.sh"
+}
