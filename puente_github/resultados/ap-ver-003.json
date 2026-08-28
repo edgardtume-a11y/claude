@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "ap-ver-003",
+  "ok": true,
+  "procesado_utc": "2026-08-28T14:36:55Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "STAGING: todavia no\n"
+  }
+}
