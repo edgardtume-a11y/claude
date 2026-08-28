@@ -1,0 +1,11 @@
+{
+  "id": "monitor-0030",
+  "ok": true,
+  "procesado_utc": "2026-08-28T00:29:29Z",
+  "resultado": {
+    "capturas_activas": "0",
+    "disco": "/dev/root       193G   43G  150G  23% /",
+    "load1": "0.10",
+    "nproc": 8
+  }
+}
