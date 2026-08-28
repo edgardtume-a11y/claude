@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "bp2-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T19:44:46Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "lanzado v2 pid 211180\nBP2_LANZADO\n"
+  }
+}
