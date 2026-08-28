@@ -1,0 +1,7 @@
+{
+  "error": "Command '['bash', '/home/trading/puente_github_repo/puente_github/scripts/borrar_csv_viejos.sh']' timed out after 120 seconds",
+  "estado": "failed",
+  "id": "conv-borrar-001",
+  "ok": false,
+  "procesado_utc": "2026-08-28T11:44:08Z"
+}
