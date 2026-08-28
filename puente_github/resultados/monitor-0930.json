@@ -1,0 +1,12 @@
+{
+  "estado": "completed",
+  "id": "monitor-0930",
+  "ok": true,
+  "procesado_utc": "2026-08-28T09:29:16Z",
+  "resultado": {
+    "capturas_activas": "0",
+    "disco": "/dev/root       193G   92G  102G  48% /",
+    "load1": "0.19",
+    "nproc": 8
+  }
+}
