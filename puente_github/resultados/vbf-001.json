@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "vbf-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T15:16:29Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "CORRIENDO\n\n=== los errores ===\n--- pq_journal_spot.err (0 bytes) ---\n--- pq_journal_usdm.err (0 bytes) ---\n--- pq_identity.err (0 bytes) ---\n--- csv_journal_spot.err (0 bytes) ---\n--- csv_journal_usdm.err (0 bytes) ---\n--- csv_identity.err (0 bytes) ---\n\n=== el log completo desde el paso 2 ===\n== 2) auditor NUEVO sobre PARQUET ==\n  journal_spot rc=0\n  journal_usdm rc=0\n  identity rc=0\n\n== 3) auditor NUEVO sobre CSV RECONSTRUIDO ==\nVB2_OK\n"
+  }
+}
