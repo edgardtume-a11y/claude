@@ -1,0 +1,6 @@
+{
+  "error": "Command '['/home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/.venv/bin/python', '/home/trading/puente_github_repo/puente_github/scripts/verificar_partes.py']' timed out after 600 seconds",
+  "id": "verificar-partes-001",
+  "ok": false,
+  "procesado_utc": "2026-08-28T04:26:30Z"
+}
