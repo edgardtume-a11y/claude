@@ -1,0 +1,5 @@
+{
+  "id": "verificar-respaldo-001",
+  "accion": "ejecutar_script_repo",
+  "script": "verificar_respaldo.py"
+}
