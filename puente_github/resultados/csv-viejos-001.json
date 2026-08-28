@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "csv-viejos-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T11:33:25Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== disco ===\n/dev/root       193G   92G  102G  48% /\n\n=== donde estan los CSV grandes que quedan ===\n22G\t/home/trading/restore_stage_20260825\n--- por subdirectorio (top 12) ---\n22G\t/home/trading/restore_stage_20260825/ubuntu/\n\n=== cuantos CSV, cuanto pesan, cuantos ya tienen Parquet al lado ===\n  ficheros .csv: 60\n  suman: 21.34 GiB\n  ficheros .parquet ya presentes: 0\n  .csv.partial (EN USO, no se tocan):\n0\n\n=== ¿hay estructura de captura (capture/ y manifiesto)? ===\n\n=== ¿hay alguna captura activa ahora mismo? (si la hay, no se toca nada) ===\n  ninguna\nVER_CSV_VIEJOS_OK\n"
+  }
+}
