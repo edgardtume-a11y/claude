@@ -34,7 +34,25 @@ Desfase de cada excedencia a la publicación más cercana:
 ```
 
 **434 de 438 = 99.1 %** a menos de 0.25 s. Mediana del desfase absoluto 0.113 s.
-Bajo reparto uniforme en el ciclo de 5.2 s se esperaría **9.6 %**.
+
+**Replicado en el segundo mercado**, que no se había tocado: `usdm_futures` da
+**99.3 %** con mediana 0.116 s, sobre 436 excedencias. Cifras casi idénticas.
+
+### El confundidor, y por qué el hallazgo lo sobrevive
+
+Al replicar aparece también que la publicación va **después** del suceso en el
+98.6 % y el 99.8 % de los casos. **Eso no prueba nada:** los eventos se acumulan
+en un búfer y se vacían en el snapshot siguiente, así que ningún evento puede
+publicarse antes de ocurrir. El **signo** del desfase es tautológico y se retira
+como evidencia.
+
+Lo que sobrevive es **la magnitud**. Si los sucesos se repartieran uniformemente
+en el ciclo de 5.2 s, el desfase al snapshot siguiente tendría **mediana 2.6 s**,
+y la fracción dentro de los primeros 0.25 s sería 0.25/5.2 = **4.8 %**.
+
+Medido: mediana **0.113 s** y fracción **99.1 %**. Los sucesos no están
+repartidos por el ciclo: se apiñan en su fracción final, justo antes de
+publicar. Eso el búfer no puede fabricarlo.
 
 ## No es circular
 
