@@ -1,0 +1,5 @@
+{
+  "id": "resp24-seco-001",
+  "accion": "ejecutar_script_repo",
+  "script": "respaldo_total_obrero.py"
+}
