@@ -1,0 +1,5 @@
+{
+  "id": "verificar-rapido-001",
+  "accion": "ejecutar_script_repo",
+  "script": "verificar_partes_rapido.py"
+}
