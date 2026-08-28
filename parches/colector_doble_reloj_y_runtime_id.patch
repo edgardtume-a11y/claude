@@ -1,3 +1,21 @@
+# ##########################################################################
+# ##  AVISO 28/08/2026 — ESTE PARCHE TIENE UN FALLO. NO APLICAR.          ##
+# ##########################################################################
+#
+# Usa time.monotonic_ns() para el reloj de medida. El propio codigo avisa en
+# collector.py:856-860 que en Windows + Python 3.12 monotonic_ns() usa
+# GetTickCount64, con tic de 15.625 ms, y que las duraciones sub-ms salian
+# 0.0 o 15/16 clavados. El host de referencia del proyecto es Windows 11:
+# alli 'event_loop_lag_wall' habria salido inservible, el mismo problema de
+# cuantizacion que este parche pretendia resolver, cambiado de sitio.
+#
+# Lo correcto es time.perf_counter_ns(), que es lo que usa el resto del motor.
+#
+# Sustituido por el trabajo en /home/trading/jean-flow-worktree (commits
+# 0b5d062, c93b6de, e400cf2), que usa perf_counter_ns y ademas trae el
+# contrato temporal completo y 1180 lineas de pruebas.
+# Se conserva como registro del error, no como parche aplicable.
+#
 # Colector: doble reloj en la sonda de lag + identificador real de runtime
 #
 # Base:     e4210555c3b3cdea  (1934 lin) - el linaje que ejecutaron los 9 gates del 27/08
