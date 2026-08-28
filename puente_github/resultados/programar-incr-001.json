@@ -1,0 +1,9 @@
+{
+  "id": "programar-incr-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T05:08:45Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== 1) estado de la primera corrida ===\n>>> cerrada INCREMENTAL_20260828T050014Z_parte10.zip: 759.0 MB\n\n>>> abriendo INCREMENTAL_20260828T050014Z_parte11.zip\n>>> cerrada INCREMENTAL_20260828T050014Z_parte11.zip: 1678.1 MB\n\n>>> abriendo INCREMENTAL_20260828T050014Z_parte12.zip\n>>> cerrada INCREMENTAL_20260828T050014Z_parte12.zip: 7255.5 MB\n\n>>> abriendo INCREMENTAL_20260828T050014Z_parte13.zip\n>>> cerrada INCREMENTAL_20260828T050014Z_parte13.zip: 1568.1 MB\n\n>>> abriendo INCREMENTAL_20260828T050014Z_parte14.zip\n\n--- carpetas de incrementales ---\ntotal 20\ndrwxr-xr-x  3 trading trading 4096 Aug 28 05:00 .\ndrwxr-x--- 28 trading trading 4096 Aug 28 05:00 ..\n-rwxr-xr-x  1 trading trading  695 Aug 28 05:00 .cerrar_marca.sh\ndrwxr-xr-x  2 trading trading 4096 Aug 28 05:07 20260828T050014Z\n-rw-r--r--  1 trading trading 1712 Aug 28 05:07 incremental.log\n--- marca actual ---\n  (aun no se ha adelantado: la primera corrida no ha cerrado)\n\n=== 2) programando en el reloj de la maquina ===\n  programado: cada 4 horas\n\n=== 3) como queda el reloj ===\n# JEAN FLOW respaldo incremental automatico\n0 */4 * * * /usr/bin/flock -n /tmp/jf_incremental.lock bash /home/trading/puente_github_repo/puente_github/scripts/respaldo_incremental.sh >> /home/trading/respaldo_incremental/cron.log 2>&1\n\n=== 4) espacio ===\n/dev/root       193G  115G   79G  60% /\nPROGRAMAR_OK\n"
+  }
+}
