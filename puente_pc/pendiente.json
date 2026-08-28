@@ -1,0 +1,5 @@
+{
+  "id": "000-inicial",
+  "mensaje": "",
+  "nota": "Buzon del puente PC. Claude cambia 'id' y 'mensaje'; el bucle del PC detecta el id nuevo y lo escribe en ChatGPT. Con 'mensaje' vacio no hace nada."
+}
