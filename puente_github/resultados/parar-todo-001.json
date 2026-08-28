@@ -1,0 +1,9 @@
+{
+  "id": "parar-todo-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T06:11:11Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== procesos de respaldo vivos ===\n\n=== deteniendo ===\n  (no habia)\n  (no habia)\n  (no habia)\n\n=== quitando del reloj ===\n0\n\n=== carga y disco ahora ===\n 06:11:11 up 15:47,  2 users,  load average: 0.18, 0.13, 0.10\n/dev/root       193G   92G  102G  48% /\n\n=== lo que se conserva intacto ===\n  respaldo reducido : 1\n  respaldo completo : 35 partes\nPARAR_TODO_OK\n"
+  }
+}
