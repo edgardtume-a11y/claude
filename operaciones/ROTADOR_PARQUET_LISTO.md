@@ -109,10 +109,24 @@ sí debe abortar) con la del rotador.
 
 ## 6. Cómo se usa cuando llegue la orden
 
+> ### ⚠️ CORRECCIÓN del 28/08 — el `PYTHONPATH` importa
+>
+> El ejemplo original usaba el `PYTHONPATH` de la **instalación base**. Está
+> mal. El rotador importa `binance_collector.parquet_store`, y desde que se
+> añadió la captura de liquidaciones, la base **no** conoce el tipo
+> `FORCE_ORDER`: el rotador fallaría en el primer fichero que contuviera una.
+>
+> **Usa siempre el `PYTHONPATH` de la captura que estás comprimiendo:**
+> `PYTHONPATH=<run>/overlay/src`
+>
+> Regla general: cualquier herramienta que importe módulos del colector debe
+> usar el `PYTHONPATH` de su captura, no el de la base. La base es el punto de
+> partida de los overlays, no lo que corre.
+
 Con la captura ya lanzada:
 
 ```
-PYTHONPATH=/home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/src \
+PYTHONPATH=<run>/overlay/src \
 /home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/.venv/bin/python \
 /home/trading/jean-flow-exec/herramientas/rotador_parquet.py \
   --run <staging de la captura> --intervalo 60 --max-por-ciclo 2 --borrar
