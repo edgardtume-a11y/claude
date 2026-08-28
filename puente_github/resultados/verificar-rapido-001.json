@@ -1,0 +1,9 @@
+{
+  "id": "verificar-rapido-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T04:30:09Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "partes: 35   a medias: 0\n\n  parte01      825.0 MB    52705 ficheros  OK\n  parte02      605.3 MB      724 ficheros  OK\n  parte03     1504.1 MB     1617 ficheros  OK\n  parte04      626.1 MB       13 ficheros  OK\n  parte05     1501.8 MB       11 ficheros  OK\n  parte06      702.5 MB        3 ficheros  OK\n  parte07     1627.6 MB        4 ficheros  OK\n  parte08     1504.1 MB        1 ficheros  OK\n  parte09     1516.0 MB        3 ficheros  OK\n  parte10      677.2 MB        2 ficheros  OK\n  parte11     1711.8 MB        6 ficheros  OK\n  parte12     1569.0 MB        2 ficheros  OK\n  parte13     1700.0 MB        7 ficheros  OK\n  parte14      759.0 MB        4 ficheros  OK\n  parte15     1610.8 MB        3 ficheros  OK\n  parte16      825.0 MB        1 ficheros  OK\n  parte17     1510.5 MB        1 ficheros  OK\n  parte18      716.7 MB     7738 ficheros  OK\n  parte19       44.1 MB        3 ficheros  OK\n  parte20       44.7 MB        4 ficheros  OK\n  parte21       62.1 MB       65 ficheros  OK\n  parte22       43.9 MB        3 ficheros  OK\n  parte23       43.9 MB        3 ficheros  OK\n  parte24       50.2 MB        4 ficheros  OK\n  parte25       43.8 MB        3 ficheros  OK\n  parte26       57.6 MB        4 ficheros  OK\n  parte27       51.2 MB        3 ficheros  OK\n  parte28       63.1 MB       53 ficheros  OK\n  parte29      173.5 MB      897 ficheros  OK\n  parte30       50.4 MB      199 ficheros  OK\n  parte31      179.6 MB     5547 ficheros  OK\n  parte32     7255.5 MB        1 ficheros  OK\n  parte33     1555.7 MB    45784 ficheros  OK\n  parte34     1134.5 MB     1252 ficheros  OK\n  parte35      279.1 MB      161 ficheros  OK\n\nTOTAL: 35 partes | 116831 ficheros | 31.86 GiB\ninventario en: RESPALDO_COMPLETO_20260828T030804Z_parte35.zip\npartes con fallo: 0\nPARTES_OK\n"
+  }
+}
