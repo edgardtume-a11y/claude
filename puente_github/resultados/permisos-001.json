@@ -1,0 +1,23 @@
+{
+  "estado": "completed",
+  "id": "permisos-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T14:49:30Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-28T14:49:30Z",
+    "duplicate": false,
+    "execution_models": [],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-0d2a8efbd76086f71bf04b374304c114dbf7e8f8",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "preflight_primary",
+    "requested_model": "gemini-3.7-flash",
+    "status": "pending",
+    "updated_at": "2026-08-28T14:49:30Z"
+  }
+}
