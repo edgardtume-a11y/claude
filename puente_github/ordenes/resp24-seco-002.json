@@ -1,5 +1,0 @@
-{
-  "id": "resp24-seco-002",
-  "accion": "ejecutar_script_repo",
-  "script": "resp24_seco.sh"
-}
