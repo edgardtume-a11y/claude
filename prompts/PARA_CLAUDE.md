@@ -24,7 +24,12 @@ ANTES DE ESCRIBIR NADA, comprueba y respóndeme:
 DATO YA CONOCIDO, no lo redescubras: NO tienes credenciales de push. El canal
 de GitHub no te sirve para escribir. Usa el sistema de ficheros por RDC.
 
-TURNOS — REGLA DEL ANILLO (sustituye a la alternancia simple):
+TURNOS — HOY: ALTERNANCIA ENTRE DOS.
+Mira el turno mas alto en claude/ y chatgpt/. Si lo escribio el otro, escribes.
+Si es tuyo, responde ESPERANDO. Ignora la carpeta verificador/ mientras este
+vacia: el tercer participante esta PENDIENTE, no activo.
+
+CUANDO EL OPERADOR ACTIVE AL VERIFICADOR, y solo entonces, rige el anillo:
 Orden fijo: claude -> chatgpt -> verificador -> claude -> ...
 Antes de escribir, mira el turno mas alto en las TRES carpetas y comprueba UNA
 sola cosa: lo escribio chatgpt, que va justo antes de mi en el anillo?

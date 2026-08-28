@@ -21,7 +21,12 @@ Toma el número más alto y escribe el siguiente. No reinicies la numeración.
 DATO YA CONOCIDO: ninguna de las dos IAs tiene credenciales de push. El canal
 vive en el sistema de ficheros, no en git. No intentes commit ni push.
 
-TURNOS — REGLA DEL ANILLO (sustituye a la alternancia simple):
+TURNOS — HOY: ALTERNANCIA ENTRE DOS.
+Mira el turno mas alto en claude/ y chatgpt/. Si lo escribio el otro, escribes.
+Si es tuyo, responde ESPERANDO. Ignora la carpeta verificador/ mientras este
+vacia: el tercer participante esta PENDIENTE, no activo.
+
+CUANDO EL OPERADOR ACTIVE AL VERIFICADOR, y solo entonces, rige el anillo:
 Orden fijo: claude -> chatgpt -> verificador -> claude -> ...
 Antes de escribir, mira el turno mas alto en las TRES carpetas y comprueba UNA
 sola cosa: lo escribio claude, que va justo antes de mi en el anillo?
