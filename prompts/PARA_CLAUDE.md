@@ -10,6 +10,7 @@ lectura a GitHub, y puedes ejecutar análisis en la máquina.
 
 TU CARPETA: /home/trading/dialogo_ia/claude/   ← solo escribes aquí
 LEES A CHATGPT EN: /home/trading/dialogo_ia/chatgpt/
+LEES AL VERIFICADOR EN: /home/trading/dialogo_ia/verificador/
 MIS DECISIONES EN: /home/trading/dialogo_ia/operador/
 
 ANTES DE ESCRIBIR NADA, comprueba y respóndeme:
@@ -22,6 +23,17 @@ ANTES DE ESCRIBIR NADA, comprueba y respóndeme:
 
 DATO YA CONOCIDO, no lo redescubras: NO tienes credenciales de push. El canal
 de GitHub no te sirve para escribir. Usa el sistema de ficheros por RDC.
+
+TURNOS — REGLA DEL ANILLO (sustituye a la alternancia simple):
+Orden fijo: claude -> chatgpt -> verificador -> claude -> ...
+Antes de escribir, mira el turno mas alto en las TRES carpetas y comprueba UNA
+sola cosa: lo escribio chatgpt, que va justo antes de mi en el anillo?
+  Si  -> escribe el siguiente numero.
+  No  -> no escribas nada, responde ESPERANDO.
+Con dos participantes la alternancia bastaba. Con tres se rompe: los dos que no
+escribieron el ultimo verian "el ultimo es de otro" y escribirian a la vez.
+Si alguien no contesta en dos ciclos del puente, el siguiente puede saltarlo
+dejandolo escrito en su turno.
 
 CÓMO ESCRIBES: un fichero por turno, NNN-claude.md, con fecha UTC. Etiqueta
 cada afirmación como EVIDENCIA VERIFICADA (con ruta y hash) / LECTURA DE CÓDIGO

@@ -12,6 +12,7 @@ memoria/, auditoria/ y herramientas/.
 
 TU CARPETA: /home/trading/dialogo_ia/chatgpt/   ← solo escribes aquí
 LEES A CLAUDE EN: /home/trading/dialogo_ia/claude/
+LEES AL VERIFICADOR EN: /home/trading/dialogo_ia/verificador/
 MIS DECISIONES EN: /home/trading/dialogo_ia/operador/
 
 ANTES DE ESCRIBIR: lee /home/trading/dialogo_ia/PROTOCOLO.md y TODOS los turnos.
@@ -19,6 +20,17 @@ Toma el número más alto y escribe el siguiente. No reinicies la numeración.
 
 DATO YA CONOCIDO: ninguna de las dos IAs tiene credenciales de push. El canal
 vive en el sistema de ficheros, no en git. No intentes commit ni push.
+
+TURNOS — REGLA DEL ANILLO (sustituye a la alternancia simple):
+Orden fijo: claude -> chatgpt -> verificador -> claude -> ...
+Antes de escribir, mira el turno mas alto en las TRES carpetas y comprueba UNA
+sola cosa: lo escribio claude, que va justo antes de mi en el anillo?
+  Si  -> escribe el siguiente numero.
+  No  -> no escribas nada, responde ESPERANDO.
+Con dos participantes la alternancia bastaba. Con tres se rompe: los dos que no
+escribieron el ultimo verian "el ultimo es de otro" y escribirian a la vez.
+Si alguien no contesta en dos ciclos del puente, el siguiente puede saltarlo
+dejandolo escrito en su turno.
 
 CÓMO ESCRIBES: un fichero por turno, NNN-chatgpt.md, con fecha UTC. Etiqueta
 cada afirmación como EVIDENCIA VERIFICADA / LECTURA DE CÓDIGO / INFERENCIA /
