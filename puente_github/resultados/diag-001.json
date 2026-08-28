@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "diag-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T14:55:37Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== 1) ¿funciona _iterar_filas por si solo? ===\n  OK. columnas: 36\n  primeras claves: ['schema_version', 'capture_session_id', 'ingest_seq', 'source_socket_id', 'local_event_id', 'row_index']\n  tipos: {'schema_version': 'str', 'capture_session_id': 'str', 'ingest_seq': 'str', 'source_socket_id': 'str'}\n\n=== 2) TODOS los sitios que abren ficheros en audit.py ===\n183:        with p.open(\"r\", encoding=\"utf-8\", newline=\"\") as handle:\n818:        with Path(path).open(\"r\", encoding=\"utf-8\") as handle:\n\n=== 3) donde se imprime AUDIT FAIL ===\n1357-            failed = result[\"certification\"] != \"PASS\"\n1358-        else:\n1359-            result = audit_causal_identity(resolve_csv_patterns(args.paths))\n1360-            failed = result[\"certification\"] != \"PASS\"\n1361-    except (OSError, ValueError, csv.Error, ReplayError) as exc:\n1362-        if args.command == \"identity\":\n1363-            result = {\n1364-                \"certification\": \"FAIL\",\n1365-                \"errors\": [str(exc)],\n1366-            }\n1367-            print(json.dumps(result, indent=2, sort_keys=True, ensure_ascii=False))\n1368-            raise SystemExit(2) from exc\n1369:        parser.exit(2, f\"AUDIT FAIL: {exc}\\n\")\n1370-    print(json.dumps(result, indent=2, sort_keys=True, ensure_ascii=False))\n1371-    if failed:\n1372-        raise SystemExit(2)\n1373-\n\n=== 4) reproducir con traza completa ===\n  candidata: audit_journal (paths: 'Iterable[Path]') -> 'dict[str, object]'\n  SystemExit: 2\nDIAG_OK\nAUDIT FAIL: 'utf-8' codec can't decode byte 0xb5 in position 19: invalid start byte\n"
+  }
+}
