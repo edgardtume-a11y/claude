@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "pc-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T15:13:12Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== journal sobre el PARQUET de spot ===\n  rc=0\n  causal_replay : PASS\n  journal_integ : PASS\n  sha256 libro  : 1d749fd5d6c741b1d9cba0bdc9f2668fbe796baa7bff5af1113b2e0dc9f36c00\n  DEBE SER      : 1d749fd5d6c741b1d9cba0bdc9f2668fbe796baa7bff5af1113b2e0dc9f36c00\nPC_OK\n"
+  }
+}
