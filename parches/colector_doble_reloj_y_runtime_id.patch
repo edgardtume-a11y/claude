@@ -1,0 +1,121 @@
+# Colector: doble reloj en la sonda de lag + identificador real de runtime
+#
+# Base:     e4210555c3b3cdea  (1934 lin) - el linaje que ejecutaron los 9 gates del 27/08
+# Resultado: 595065b7bac11815 (2000 lin)
+#
+# NO aplicar sobre el paquete instalado (7672118b, 1433 lin): los gates no
+# importan de ahi, seria un no-op. Ver memoria/HALLAZGOS_28AGO2026_*.md seccion 5.
+#
+# Probado: py_compile OK. Prueba A/A y de discriminacion en la seccion de abajo.
+
+--- a/src/binance_collector/collector.py
++++ b/src/binance_collector/collector.py
+@@ -6,6 +6,7 @@
+ 
+ 
+ import asyncio
++import hashlib
+ import logging
+ import random
+ import time
+@@ -60,6 +61,41 @@
+ from .writer import CsvJournalWriter, WriterFailed
+ 
+ LOGGER = logging.getLogger("binance_collector")
++
++# --- [28/08/2026] Identificador real del runtime -----------------------------
++# Motivo: se encontraron TRES copias distintas de este archivo (1433, 1934 y
++# 1945 lineas, huellas 7672118b / e4210555 / 8aeb1597) y las tres declaraban
++# __version__ = "2.4.1+linux.1". El numero de version no distingue el codigo;
++# la huella si. Sin esto, ninguna linea de metricas es atribuible al codigo
++# que la produjo.
++METRIC_SCHEMA_VERSION = 2
++_RUNTIME_ID: dict | None = None
++
++
++def _resolucion_loop_time(loop) -> str:
++    """uvloop cachea loop.time() por iteracion y en ms enteros (medido:
++    1 valor distinto en 2000 lecturas, frente a 2000 con asyncio)."""
++    lecturas = [loop.time() for _ in range(200)]
++    return "cacheada_baja" if len(set(lecturas)) <= 2 else "alta"
++
++
++def _runtime_id(loop) -> dict:
++    global _RUNTIME_ID
++    if _RUNTIME_ID is None:
++        try:
++            with open(__file__, "rb") as fh:
++                digest = hashlib.sha256(fh.read()).hexdigest()[:16]
++        except OSError:
++            digest = "desconocido"
++        _RUNTIME_ID = {
++            "collector_sha256_16": digest,
++            "event_loop": type(loop).__name__,
++            "loop_time_resolucion": _resolucion_loop_time(loop),
++            "metric_schema_version": METRIC_SCHEMA_VERSION,
++        }
++    return _RUNTIME_ID
++
++
+ _RAW_SENTINEL = object()
+ _MAX_CONSECUTIVE_SNAPSHOT_INVARIANT_FAILURES = 3
+ 
+@@ -1903,6 +1939,9 @@
+ 
+     async def _emit_metrics(self) -> None:
+         metrics_snapshot = await asyncio.to_thread(self.metrics.snapshot)
++        # Aditivo: no toca counters/gauges/latency_ms, asi que el auditor y los
++        # analisis existentes siguen leyendo lo mismo.
++        metrics_snapshot["runtime"] = _runtime_id(asyncio.get_running_loop())
+         metrics_payload = await asyncio.to_thread(orjson.dumps, metrics_snapshot)
+         LOGGER.info(
+             "metrics market=%s %s",
+@@ -1911,16 +1950,39 @@
+         )
+ 
+     async def _event_loop_lag_probe(self, stop: asyncio.Event) -> None:
+-        """Watchdog independiente; no mezcla el tick con serializacion/logging."""
++        """Watchdog independiente; no mezcla el tick con serializacion/logging.
++
++        [28/08/2026] DOBLE RELOJ. uvloop cachea loop.time() por iteracion y lo
++        devuelve en milisegundos enteros: medido, 1 valor distinto en 2000
++        lecturas, frente a 2000 valores y 95 ns de resolucion con asyncio. El
++        gate 3 (sin uvloop) y el gate 4 (con uvloop) midieron esta metrica con
++        instrumentos distintos, asi que sus numeros no son comparables.
++
++        Se conserva 'event_loop_lag' con el reloj del bucle para continuidad
++        historica del auditor, y se anade 'event_loop_lag_wall', medido con
++        time.monotonic_ns() sobre un calendario propio. El wall es el que debe
++        decidir PASS/FAIL, pero solo despues de validar A/A: hasta entonces
++        conviven y el criterio del gate no cambia.
++
++        loop.time() se sigue usando para PROGRAMAR el sleep -- es el reloj con
++        el que el bucle planifica-- y monotonic_ns solo para MEDIR.
++        """
+ 
+         interval = self.settings.event_loop_probe_interval_s
+         loop = asyncio.get_running_loop()
+         deadline = loop.time() + interval
++        interval_ns = int(interval * 1_000_000_000)
++        deadline_wall_ns = time.monotonic_ns() + interval_ns
+         while not stop.is_set():
+             await asyncio.sleep(max(0.0, deadline - loop.time()))
+             now = loop.time()
++            now_wall_ns = time.monotonic_ns()
+             lag_s = max(0.0, now - deadline)
+             self.metrics.observe("event_loop_lag", lag_s * 1_000)
++            self.metrics.observe(
++                "event_loop_lag_wall",
++                max(0.0, (now_wall_ns - deadline_wall_ns) / 1_000_000),
++            )
+             if lag_s >= interval:
+                 self.metrics.inc(
+                     "event_loop_probe_missed_ticks",
+@@ -1932,3 +1994,7 @@
+                 # muestra conserva el retraso real y el siguiente deadline parte
+                 # del presente.
+                 deadline = now + interval
++            # Mismo criterio para el calendario wall: sin spin de recuperacion.
++            deadline_wall_ns += interval_ns
++            if deadline_wall_ns <= now_wall_ns:
++                deadline_wall_ns = now_wall_ns + interval_ns

@@ -1,0 +1,128 @@
+# Guardian del puente: ACK durable + guarda anti-autorreinicio
+#
+# Base:      11f33eb716d22b29 (283 lin)
+# Resultado: 7b73fcd2899e5785 (350 lin)
+#
+# APLICADO Y EN PRODUCCION el 28/08/2026 07:04 UTC. Servicio reiniciado,
+# NRestarts=0, estable. Respaldo en /home/trading/puente_github_watcher.py.bak_11f33eb7
+#
+# Arregla el incidente del 28/08: la orden acelerar-001 hacia
+# 'systemctl restart puente-github', matando al guardian que la ejecutaba a
+# mitad de orden. Al rearrancar veia la orden sin resultado y la repetia.
+# Cinco ciclos en dos segundos hasta start-limit-hit. 29 minutos ciego.
+#
+# Dos defensas independientes:
+#   1. ACK durable con fsync ANTES de ejecutar. Si el guardian muere durante
+#      una orden, al volver la ve marcada como 'started' con intentos>=1 y la
+#      cierra como fallida en vez de repetirla. Cubre cualquier muerte, no
+#      solo el autorreinicio.
+#   2. Guarda estatica: rechaza un script que reinicie/pare su propio servicio
+#      salvo que use el patron diferido (nohup + retardo) de
+#      reiniciar_guardian.sh.
+#
+# ESTADO_DIR vive FUERA de REPO_DIR a proposito: sync_repo() hace
+# 'git reset --hard' en cada ciclo (linea 224 del original).
+#
+# Probado contra los 88 scripts reales del repo: ninguno bloqueado (cero falsos
+# positivos). Rechaza: restart sincrono, 'stop', y variantes con flags
+# (--no-block). Permite: el patron diferido, y reiniciar OTROS servicios.
+
+--- a/puente_github_watcher.py
++++ b/puente_github_watcher.py
+@@ -43,6 +43,51 @@
+ SCRIPTS_DIR = os.path.join(REPO_DIR, "puente_github", "scripts")
+ ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{3,63}$")
+ 
++# --- [28/08/2026] ACK durable y guarda anti-autorreinicio --------------------
++# ESTADO_DIR vive FUERA de REPO_DIR a proposito: sync_repo() hace
++# 'git reset --hard' en cada ciclo y se llevaria por delante cualquier marca
++# guardada dentro del repositorio.
++ESTADO_DIR = "/home/trading/puente_estado"
++MAX_INTENTOS = 1
++
++# Una orden no puede reiniciar el servicio que la esta ejecutando: se mata a
++# mitad de orden, arranca de nuevo, ve la orden sin resultado y la repite.
++# Paso el 28/08/2026 y dejo el puente ciego 29 minutos (start-limit-hit).
++# Se permite el patron diferido (nohup + retardo) de reiniciar_guardian.sh.
++AUTO_REINICIO_RE = re.compile(
++    r"systemctl\s+(?:--?\S+\s+)*(?:restart|stop|kill)\s+(?:\S+\s+)*puente-github",
++    re.IGNORECASE)
++
++
++def _estado_path(order_id):
++    return os.path.join(ESTADO_DIR, order_id + ".json")
++
++
++def leer_estado(order_id):
++    try:
++        with open(_estado_path(order_id)) as fh:
++            return json.load(fh)
++    except (OSError, ValueError):
++        return None
++
++
++def marcar_estado(order_id, estado, **extra):
++    """ACK durable con fsync: sobrevive a que nos maten a mitad de orden."""
++    os.makedirs(ESTADO_DIR, exist_ok=True)
++    doc = leer_estado(order_id) or {"id": order_id, "intentos": 0}
++    if estado == "started":
++        doc["intentos"] = int(doc.get("intentos", 0)) + 1
++    doc["estado"] = estado
++    doc[estado + "_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
++    doc.update(extra)
++    tmp = _estado_path(order_id) + ".tmp"
++    with open(tmp, "w") as fh:
++        json.dump(doc, fh, ensure_ascii=False, sort_keys=True)
++        fh.flush()
++        os.fsync(fh.fileno())
++    os.replace(tmp, _estado_path(order_id))
++    return doc
++
+ 
+ def sh(args, cwd=None, timeout=120):
+     return subprocess.run(args, cwd=cwd, timeout=timeout,
+@@ -178,6 +223,12 @@
+     if not path.startswith(os.path.realpath(SCRIPTS_DIR) + os.sep) \
+             or not os.path.isfile(path):
+         raise ValueError("script inexistente en puente_github/scripts/")
++    texto = open(path, encoding="utf-8", errors="replace").read()
++    if AUTO_REINICIO_RE.search(texto) and "nohup" not in texto:
++        raise ValueError(
++            "RECHAZADA: el script reinicia el propio guardian que lo ejecuta y "
++            "no usa el patron diferido (nohup + retardo). Vease "
++            "puente_github/scripts/reiniciar_guardian.sh")
+     runner = ["bash", path] if nombre.endswith(".sh") else [VENV_PY, path]
+     r = subprocess.run(runner, cwd="/home/trading", capture_output=True,
+                        text=True, timeout=120)
+@@ -258,15 +309,31 @@
+         if os.path.getsize(opath) > MAX_ORDER_BYTES:
+             push_result(order_id, {"ok": False, "error": "orden demasiado grande"})
+             continue
++        previo = leer_estado(order_id)
++        if previo and previo.get("estado") == "started" \
++                and int(previo.get("intentos", 0)) >= MAX_INTENTOS:
++            out = {"ok": False, "id": order_id, "estado": "failed",
++                   "error": "ANULADA: ya se intento %d vez/veces y el guardian "
++                            "murio durante la ejecucion sin escribir resultado. "
++                            "No se reintenta para no entrar en bucle."
++                            % int(previo.get("intentos", 0)),
++                   "procesado_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ",
++                                                  time.gmtime())}
++            marcar_estado(order_id, "failed", motivo="muerte durante ejecucion")
++            push_result(order_id, out)
++            continue
+         try:
+             order = json.load(open(opath))
+             if order.get("id") != order_id:
+                 raise ValueError("id del JSON no coincide con el nombre del archivo")
++            marcar_estado(order_id, "started")
+             result = process(order)
+             out = {"ok": True, "id": order_id, "resultado": result}
+         except Exception as exc:  # noqa: BLE001 - se reporta, nunca se oculta
+             out = {"ok": False, "id": order_id, "error": str(exc)}
+         out["procesado_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
++        out["estado"] = "completed" if out.get("ok") else "failed"
++        marcar_estado(order_id, out["estado"])
+         push_result(order_id, out)
+ 
+ 
