@@ -1,0 +1,22 @@
+{
+  "id": "respaldo-total-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T02:21:53Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-28T02:21:53Z",
+    "duplicate": false,
+    "execution_models": [],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-117f88ba2d1f499fef539687a4597fc613b98fb7",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "preflight_primary",
+    "requested_model": "gemini-3.7-flash",
+    "status": "pending",
+    "updated_at": "2026-08-28T02:21:53Z"
+  }
+}
