@@ -1,0 +1,5 @@
+{
+  "id": "mapeo-001",
+  "accion": "ejecutar_script_repo",
+  "script": "ver_mapeo_liquidacion.sh"
+}
