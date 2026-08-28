@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "cont-002",
+  "ok": true,
+  "procesado_utc": "2026-08-28T21:34:21Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "segmentos disponibles: 10\n\n############ CASO 1: continuo (DEBE APROBAR) ############\n  certification: PASS\n  costura: ultimo 326103 -> primero 326104 | hueco 0 | pass True\n  errores: []\n  sesiones: ['9ac313ebe33f4ddca6827213eeb0c2e4'] | esquemas: ['2.0.0']\n  codigo de salida: 0   (DEBE SER 0)\n\n############ CASO 2: falta un segmento entero (DEBE SUSPENDER) ############\n  certification: FAIL\n  costura: hueco de 63950 eventos\n  ERROR DETECTADO: /home/trading/prueba_continuidad/c2_dia1 -> /home/trading/prueba_continuidad/c2_dia2: faltan 63950 eventos (salta de 326103 a 390054)\n  codigo de salida: 2   (DEBE SER 2)\n\n############ CASO 3: solapamiento (DEBE SUSPENDER) ############\n  certification: FAIL\n  costura: hueco -63950 (negativo = solapamiento)\n  ERROR DETECTADO: /home/trading/prueba_continuidad/c3_dia1 -> /home/trading/prueba_continuidad/c3_dia2: solapamiento de 63950 eventos (de 390053 a 326104)\n  codigo de salida: 2   (DEBE SER 2)\n\n############ VEREDICTO ############\n  LA HERRAMIENTA SIRVE: aprueba lo continuo y suspende hueco y solapamiento\nPC_CONT_OK\n"
+  }
+}
