@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "vbp-005",
+  "ok": true,
+  "procesado_utc": "2026-08-28T19:41:12Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "CORRIENDO\n--- log ---\nficheros: spot=4 usdm=10\ntamano:   6.5G\nmemoria libre antes: 30756 MB disponibles\n\n===== A) EN SERIE (como se hace hoy) =====\n  journal_spot :   journal_usdm :   identity     :   metrics      :   TOTAL EN SERIE: 574 s\n\n===== B) EN PARALELO (las cuatro a la vez) =====\n--- carga y memoria ahora ---\n2.56 1.44 0.73 4/335 210117\n  usada 1545 MB de 32090 MB\nVBP_OK\n"
+  }
+}
