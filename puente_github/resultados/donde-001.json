@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "donde-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T13:06:23Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== acciones que acepta el guardian ===\n7:Acciones permitidas (lista cerrada; nada de shell arbitrario):\n241:    if accion == \"revisar_staging\":\n243:    if accion == \"lanzar_captura\":\n245:    if accion == \"ejecutar_script_repo\":\n247:    if accion == \"auditar_staging\":\n249:    if accion == \"leer_archivo\":\n251:    if accion == \"latencia_e2e\":\n253:    if accion == \"gemini_enqueue\":\n262:    if accion == \"gemini_result\":\n264:    if accion == \"estado\":\n\n=== donde guarda el runner sus trabajos ===\n5:YOLO approval and no sandbox.  The queue still requires a separate 256-bit\n36:QUEUE_ROOT = Path(\n42:TOKEN_FILE = Path(\n52:GEMINI_ALLOWED_ROOT = Path(\n77:sandbox is disabled. You have root privileges. Preserve existing data unless\n312:        \"--sandbox=false\",\n376:    except json.JSONDecodeError:\n419:    processing = QUEUE_ROOT / \"jobs\" / \"processing\"\n420:    failed = QUEUE_ROOT / \"jobs\" / \"failed\"\n421:    for path in sorted(processing.glob(\"*.json\")):\n432:                QUEUE_ROOT / \"jobs\" / state / f\"{job_id}.json\"\n434:            for state in (\"done\", \"failed\")\n473:        os.path.lexists(QUEUE_ROOT / \"jobs\" / state / f\"{job_id}.json\")\n474:        for state in (\"processing\", \"done\", \"failed\")\n512:    pending = QUEUE_ROOT / \"jobs\" / \"pending\"\n513:    processing = QUEUE_ROOT / \"jobs\" / \"processing\"\n514:    done = QUEUE_ROOT / \"jobs\" / \"done\"\n515:    failed = QUEUE_ROOT / \"jobs\" / \"failed\"\n516:    for source in sorted(pending.glob(\"*.json\")):\n556:        \"jobs/pending\",\n557:        \"jobs/processing\",\n558:        \"jobs/done\",\n559:        \"jobs/failed\",\n566:    requested = Path(GEMINI_BIN)\n\n=== ficheros abiertos por el runner ===\nlrwxrwxrwx 1 root root 0 Aug 28 06:32 /proc/649/cwd\nDONDE_OK\n"
+  }
+}
