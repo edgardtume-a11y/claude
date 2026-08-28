@@ -31,11 +31,13 @@ sudo -n sed -i 's/timeout=600)/timeout=120)/' "$W" 2>/dev/null \
 grep -n 'timeout=' "$W" | head -5
 
 echo
-echo "=== 4) reiniciando el guardian ==="
-sudo -n systemctl restart puente-github 2>/dev/null && echo "  reiniciado" \
-  || echo "  (sin permisos para reiniciar; el cambio entra al proximo reinicio)"
-sleep 2
-systemctl is-active puente-github 2>/dev/null
+echo "=== 4) NO se reinicia el guardian desde aqui ==="
+# NUNCA reiniciar el servicio que esta ejecutando este mismo script: se mata a
+# si mismo a mitad de la orden, arranca de nuevo, ve la orden sin resultado y
+# la repite. Bucle de reinicio. Paso el 28/08 y dejo el puente ciego 18 minutos.
+# El reinicio va en una orden aparte, con nohup y retardo, para que el guardian
+# alcance a escribir su resultado antes de morir.
+echo "  (el reinicio se hace en una orden separada, ver reiniciar_guardian.sh)"
 
 echo
 echo "=== 5) RDC: la via rapida. ¿por que esta caido? ==="

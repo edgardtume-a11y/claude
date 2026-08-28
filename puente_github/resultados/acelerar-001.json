@@ -1,0 +1,6 @@
+{
+  "id": "acelerar-001",
+  "ok": false,
+  "error": "ANULADA: el script reiniciaba el propio guardian que lo ejecutaba, creando un bucle de reinicio",
+  "procesado_utc": "2026-08-28T06:00:00Z"
+}

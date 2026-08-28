@@ -1,5 +1,0 @@
-{
-  "id": "acelerar-001",
-  "accion": "ejecutar_script_repo",
-  "script": "acelerar_puente.sh"
-}
