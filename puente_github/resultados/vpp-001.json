@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "vpp-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T23:36:21Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "CORRIENDO\nsegmentos: spot=4 usdm=10\nPYTHONPATH=/home/trading/prueba_paralelo/overlay/src\njournal_spot=0\n\n=== codigos: original vs paralelo ===\n  original: {\"journal_spot\":0,\"journal_usdm\":0,\"identity\":0,\"metrics\":2}\n  paralelo: \n=== ¿mismos informes, ignorando el campo 'files' (rutas distintas)? ===\n  journal_spot: IDENTICO\n  journal_usdm: no comparable (Expecting value: line 1 column 1 (char 0))\n  identity: no comparable (Expecting value: line 1 column 1 (char 0))\nVPP_OK\n"
+  }
+}
