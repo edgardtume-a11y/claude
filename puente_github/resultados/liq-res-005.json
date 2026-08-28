@@ -1,0 +1,32 @@
+{
+  "estado": "completed",
+  "id": "liq-res-005",
+  "ok": true,
+  "procesado_utc": "2026-08-28T09:29:14Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-28T08:31:43Z",
+    "duplicate": true,
+    "error": {
+      "class": "timeout",
+      "code": "gemini_failed",
+      "message": "Gemini no completo el trabajo"
+    },
+    "execution_models": [
+      "gemini-3.7-flash"
+    ],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "finished_at": "2026-08-28T09:29:14Z",
+    "id": "jfr-7036b11ee2091736b8790d5aa209d4300185ed10",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "execution",
+    "requested_model": "gemini-3.7-flash",
+    "returncode": 0,
+    "status": "failed",
+    "updated_at": "2026-08-28T09:29:14Z"
+  }
+}
