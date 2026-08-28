@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "revisar-fo-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T09:30:09Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "staging: /home/trading/jean-flow-exec/staging_runs/20260828T083219Z_forceorder\n\n=== 1) LO IRREVERSIBLE: ¿se toco la instalacion base? ===\n  base/collector.py: 7672118bb818e6ed\n  base/parquet_store.py: a594749da7b893d0\n  base/audit.py: 542c6c2d45c7c03c\n  base/models.py: 821b53a42f5323ec\n  base/dual_main.py: a57d03d82f8ba4a9\n  (deben coincidir con los de antes del cambio; la base NO se toca)\n\n=== 2) LO IRREVERSIBLE: ¿cambio el esquema? ===\n  SCHEMA_VERSION: SCHEMA_VERSION = \"2.0.0\"\n  columnas CSV_FIELDS: 36 columnas | version 2.0.0\n  DEBE SER: 36 columnas | version 2.0.0\n\n=== 3) ¿esta FORCE_ORDER en la lista cerrada de parquet_store? ===\n27:_SEQUENCED_RECORD_TYPES = frozenset(\n28-    {\n29-        \"AGG_TRADE\",\n30-        \"FORCE_ORDER\",\n31-        \"L2_PARTIAL\",\n32-        \"L2_PARTIAL_LEVEL\",\n33-        \"L2_DELTA\",\n34-        \"L2_DELTA_LEVEL\",\n35-    }\n36-)\n37-_UNSEQUENCED_RECORD_TYPES = frozenset(\n  --> FORCE_ORDER debe aparecer ahi. Si no, la conversion a Parquet\n      fallara en todo fichero con una liquidacion, EN VIVO.\n\n=== 4) ¿se suscribe al flujo de liquidaciones? ===\n42:    force_order_batch,\n899:                self.metrics.inc(\"force_order_messages\")\n924:                    force_order_batch(\n\n=== 5) ¿se rompio algo que no se debia tocar? ===\n  contrato de parada: INTACTO\n  salida con codigo 20: INTACTO\n  uvloop: INTACTO\n  gc.freeze: INTACTO\n  nada de gc.disable: ***PERDIDO***\n  (el ultimo debe decir PERDIDO: gc.disable no debe existir)\n\n=== 6) ¿compila todo lo tocado? ===\n  collector.py: compila\n  parquet_store.py: compila\n  models.py: compila\n  dual_main.py: compila\n  audit.py: compila\n\n=== 7) las pruebas ===\n.........................                                                [100%]\n25 passed in 0.49s\nREVISAR_FORCEORDER_OK\n"
+  }
+}
