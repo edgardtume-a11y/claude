@@ -1,0 +1,9 @@
+{
+  "id": "autorizar-llave-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T04:55:38Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== 1) ¿es una llave valida? ===\n  SI: 2048 SHA256:yROLUuGONR18gAXe6QrVxwK+w6a6lueTBoWZ8/X7y48 rsa-key-20260827 (RSA)\n\n=== 2) ¿ya estaba autorizada? ===\n  no estaba: se anade\n\n=== 3) anadiendo ===\n  anadida\n\n=== 4) permisos que exige ssh ===\ndrwx------ 2 trading trading 4096 Aug 28 04:55 /home/trading/.ssh\n-rw------- 1 trading trading 1742 Aug 28 04:55 /home/trading/.ssh/authorized_keys\n\n=== 5) llaves autorizadas ahora ===\n256 SHA256:FkULaCj4xeCp3kGS5keP2RSpingEYskO+G5wB1q6jVk trading (ED25519)\n3072 SHA256:hEbtU8o6Jhl2X4zIQQLgwlgDBdRKSpWWmtU0jmCwScQ trading@jean-flow-01.asia-southeast1-a.c.jean-flow-01.internal (RSA)\n3072 SHA256:uG5dbqPHUuC2bAsvuuwi4WeFZSk5yc5WV4KuJ5wtoVU trading@cs-895995892790-default (RSA)\n2048 SHA256:yROLUuGONR18gAXe6QrVxwK+w6a6lueTBoWZ8/X7y48 rsa-key-20260827 (RSA)\n\n=== 6) el servicio ssh esta escuchando ===\nactive\nLISTEN 0      4096         0.0.0.0:22         0.0.0.0:*          \nLISTEN 0      4096            [::]:22            [::]:*          \nAUTORIZAR_OK\n"
+  }
+}
