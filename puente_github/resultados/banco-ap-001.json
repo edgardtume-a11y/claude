@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "banco-ap-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T14:54:18Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "lanzado pid 169101; staging nuevo: /home/trading/jean-flow-exec/staging_runs/20260828T143727Z_auditparquet\n--- log a los 60 s ---\n  huella: 572c235ee53f2f55\n\nRECONSTRUCCION_OK\n\nevents-20260827T203003.239083Z-000001.parquet\n  -> /home/trading/banco_auditparquet/csv_reconstruido/usdm_events-20260827T203003.239083Z-000001.csv\n  filas: 1325271  bytes: 536876254\n  huella: 08f5f2e7bad709f7\n\nRECONSTRUCCION_OK\n\nevents-20260827T205131.125228Z-000002.parquet\n  -> /home/trading/banco_auditparquet/csv_reconstruido/usdm_events-20260827T205131.125228Z-000002.csv\n  filas: 576079  bytes: 233572983\n  huella: c942c17cc88b6678\n\nRECONSTRUCCION_OK\ntotal 1124940\n-rw-r--r-- 1 trading trading 381483964 Aug 28 14:53 spot_events-20260827T203002.737505Z-000001.csv\n-rw-r--r-- 1 trading trading 536876254 Aug 28 14:53 usdm_events-20260827T203003.239083Z-000001.csv\n-rw-r--r-- 1 trading trading 233572983 Aug 28 14:54 usdm_events-20260827T205131.125228Z-000002.csv\n\n== 2) auditor NUEVO sobre PARQUET ==\n  journal_spot rc=2\n  journal_usdm rc=2\nBANCO_LANZADO\n"
+  }
+}
