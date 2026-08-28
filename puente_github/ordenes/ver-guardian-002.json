@@ -1,0 +1,5 @@
+{
+  "id": "ver-guardian-002",
+  "accion": "ejecutar_script_repo",
+  "script": "ver_guardian.sh"
+}
