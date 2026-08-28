@@ -1,0 +1,7 @@
+{
+  "error": "Command '['bash', '/home/trading/puente_github_repo/puente_github/scripts/probar_continuidad.sh']' timed out after 120 seconds",
+  "estado": "failed",
+  "id": "cont-001",
+  "ok": false,
+  "procesado_utc": "2026-08-28T21:33:24Z"
+}
