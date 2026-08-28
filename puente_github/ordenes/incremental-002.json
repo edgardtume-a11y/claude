@@ -1,0 +1,5 @@
+{
+  "id": "incremental-002",
+  "accion": "ejecutar_script_repo",
+  "script": "respaldo_incremental.sh"
+}
