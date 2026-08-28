@@ -1,0 +1,5 @@
+{
+  "id": "parar-todo-001",
+  "accion": "ejecutar_script_repo",
+  "script": "parar_todo_respaldo.sh"
+}
