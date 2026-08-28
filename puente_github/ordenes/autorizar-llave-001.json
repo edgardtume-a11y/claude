@@ -1,0 +1,5 @@
+{
+  "id": "autorizar-llave-001",
+  "accion": "ejecutar_script_repo",
+  "script": "autorizar_llave_windows.sh"
+}
