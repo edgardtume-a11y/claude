@@ -1,0 +1,5 @@
+{
+  "id": "hueco-001",
+  "accion": "ejecutar_script_repo",
+  "script": "ver_hueco_integracion.sh"
+}
