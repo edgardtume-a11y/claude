@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "vpp-011",
+  "ok": true,
+  "procesado_utc": "2026-08-28T23:38:40Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "TERMINADO\nsegmentos: spot=4 usdm=10\nPYTHONPATH=/home/trading/prueba_paralelo/overlay/src\njournal_spot=0\njournal_usdm=0\nidentity=0\nmetrics=2\nduracion=245s\nAUDITS_FINISHED\n\n=== codigos: original vs paralelo ===\n  original: {\"journal_spot\":0,\"journal_usdm\":0,\"identity\":0,\"metrics\":2}\n  paralelo: {\"journal_spot\":0,\"journal_usdm\":0,\"identity\":0,\"metrics\":2}\n\n=== ¿mismos informes, ignorando el campo 'files' (rutas distintas)? ===\n  journal_spot: IDENTICO\n  journal_usdm: IDENTICO\n  identity: IDENTICO\nVPP_OK\n"
+  }
+}
