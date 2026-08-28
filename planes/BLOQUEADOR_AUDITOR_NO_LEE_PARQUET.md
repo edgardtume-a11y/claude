@@ -2,7 +2,9 @@
 
 **Fecha:** 28/08/2026, 13:45 UTC
 **Encontrado por:** Claude, revisando la integración antes del gate de 7 días
-**Estado: BLOQUEADOR ABIERTO.** No impide lanzar el gate de 6 h. Sí impide
+**Estado: RESUELTO el 28/08 a las 15:25 UTC.** Ver `operaciones/VEREDICTO_AUDITOR_PARQUET.md`. Se tomó la opción B.
+
+~~BLOQUEADOR ABIERTO.~~ No impide lanzar el gate de 6 h. Sí impide
 cerrar los 7 días tal como está planteado hoy.
 
 ---
