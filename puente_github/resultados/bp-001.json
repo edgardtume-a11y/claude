@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "bp-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T19:30:55Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "lanzado pid 208517\nficheros: spot=4 usdm=10\ntamano:   6.5G\nmemoria libre antes: 30756 MB disponibles\n\n===== A) EN SERIE (como se hace hoy) =====\n  journal_spot : BP_LANZADO\n"
+  }
+}
