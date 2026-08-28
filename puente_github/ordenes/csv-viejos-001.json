@@ -1,0 +1,5 @@
+{
+  "id": "csv-viejos-001",
+  "accion": "ejecutar_script_repo",
+  "script": "ver_csv_viejos.sh"
+}
