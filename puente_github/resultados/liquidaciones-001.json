@@ -1,0 +1,23 @@
+{
+  "estado": "completed",
+  "id": "liquidaciones-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T08:31:43Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-28T08:31:43Z",
+    "duplicate": false,
+    "execution_models": [],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-7036b11ee2091736b8790d5aa209d4300185ed10",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "preflight_primary",
+    "requested_model": "gemini-3.7-flash",
+    "status": "pending",
+    "updated_at": "2026-08-28T08:31:43Z"
+  }
+}
