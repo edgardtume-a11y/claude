@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "vbp2-011",
+  "ok": true,
+  "procesado_utc": "2026-08-28T19:59:20Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "TERMINADO\n--- log ---\nficheros: spot=4 usdm=10 | 6.5G\nRAM total: 32090 MB\n\n===== A) EN SERIE =====\n  journal_spot      98.1 s  rc=0\n  journal_usdm     230.1 s  rc=0\n  identity         247.4 s  rc=0\n  metrics            0.3 s  rc=2\n  ---> TOTAL EN SERIE: 577 s\n\n===== B) EN PARALELO =====\n  ---> TOTAL EN PARALELO: 245 s\n  pico de memoria: 1616 MB   |   pico de carga: 2.65\n\n===== C) ¿SALEN LOS MISMOS INFORMES? =====\n  journal_spot: IDENTICO  (9dfb0fa5f19ba42d, 2824 bytes)\n  journal_usdm: IDENTICO  (bc688b6c4ff0e732, 3955 bytes)\n  identity: IDENTICO  (8ffff6be551f533a, 3739 bytes)\n  metrics: IDENTICO  (c6424c41b860fb72, 33344 bytes)\n  ==> el paralelo NO cambia el resultado\nBANCO_PARALELO_FIN\n--- carga y memoria ahora ---\n0.90 1.52 1.24 1/326 214089\n  usada 1341 MB de 32090 MB\nVBP_OK\n"
+  }
+}
