@@ -123,3 +123,52 @@ fichero de salida como argumento a la función.
 La lección: **un banco de pruebas mal instrumentado no da un error, da un
 resultado**. Y un resultado falso que confirma lo que esperabas es lo más caro
 que hay.
+
+---
+
+## 6. El guion, escrito y validado (28/08, 23:50 UTC)
+
+`puente_github/scripts/run_live_audits_paralelo.sh` — sustituto directo de
+`control/run_live_audits.sh`.
+
+Validado contra la auditoría real del gate del operador, **sin tocar sus
+informes**: se montó un staging temporal con enlaces a su `capture/` y al
+overlay bueno, de modo que el `audit/` nuevo se escribiera aparte.
+
+| | Original (en serie) | El guion nuevo |
+|---|---|---|
+| Códigos de salida | `{0,0,0,2}` | **`{0,0,0,2}`** |
+| `journal_spot` | | **IDÉNTICO** |
+| `journal_usdm` | | **IDÉNTICO** |
+| `identity` | | **IDÉNTICO** |
+| Duración | ~600 s | **245 s** |
+
+Comparación campo a campo ignorando `files`, que legítimamente guarda rutas
+distintas porque la prueba usó enlaces.
+
+### Dos detalles del guion que importan
+
+**Se espera a cada proceso por su PID**, no con un `wait` a secas:
+
+```bash
+wait $p_spot;  rc_spot=$?
+wait $p_usdm;  rc_usdm=$?
+```
+
+Un `wait` sin argumentos devuelve sólo el código del último y perderíamos los
+otros tres — una fase podría fallar en silencio y el `return_codes.json`
+diría que todo fue bien.
+
+**Acepta `.csv` y `.parquet`**, así que funciona igual antes y después de que
+el rotador comprima.
+
+### Y un error mío al probarlo
+
+La primera prueba envolvió el guion en `timeout 100`. Tarda 245 s: se mató a sí
+misma y dejó dos informes vacíos que parecían «distintos». No era el guion: era
+mi arnés.
+
+Es la tercera vez en el día que el arnés falla y no lo que se estaba probando
+—la redirección que se comía el tiempo, el veredicto que contestaba otra
+pregunta, y ahora este—. **Cuando una prueba falla, sospechar primero de la
+prueba.**
