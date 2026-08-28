@@ -1,0 +1,9 @@
+{
+  "id": "verificar-respaldo-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T01:30:15Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "fichero: /home/trading/RESPALDO_JEAN_FLOW_20260828T003137Z.zip\ntamano : 656229173 bytes (625.83 MB)\n\n=== 1) ¿se abre y esta completo el indice? ===\n  miembros: 5209\n\n=== 2) comprobacion de CRC de TODOS los miembros ===\n  TODOS LOS MIEMBROS INTEGROS\n\n=== 3) ¿esta el inventario? ===\n  INVENTARIO.txt: 1027648 caracteres\n  aviso de seguridad presente: SI\n    > AVISO DE SEGURIDAD: Este respaldo puede contener credenciales (token del puente,\n    > llave de GitHub, credenciales del agente) y por tanto NO debe subirse a GitHub ni\n    > 5273 B | LZMA   | 27abf91fb273bdbfa0f35c69ff640008ac0eecbc47400ea292bc8c53bcd7c0df | jean-flow-v2.4.1/555/binance_phase1\n\n=== 4) ¿estan los metadatos para rehacer la maquina? ===\n  dpkg_get_selections: 1 fichero(s)\n  pip_freeze: 1 fichero(s)\n  systemd: 5 fichero(s)\n\n=== 5) reparto del contenido por carpeta principal ===\n    3668  jean-flow-v2.4.1\n    1044  jean-flow-exec\n     478  puente_github_repo\n      11  jean-flow-router\n       5  sistema_systemd\n       2  metadatos_sistema\n       1  INVENTARIO.txt\n\n=== 6) metodos de compresion usados ===\n  STORED (sin recomprimir)    : 94 ficheros\n  LZMA                        : 5115 ficheros\n\n=== 7) huella del fichero, para comprobar la descarga ===\n  sha256: b06e15dce10fbaa3dea0030a1bd18c6fa40811df38043048de3efb3d8577590b\n\nVERIFICAR_RESPALDO_OK\n"
+  }
+}
