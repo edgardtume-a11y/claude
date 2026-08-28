@@ -1,6 +1,5 @@
 {
   "id": "ver-guardian-001",
-  "accion": "bash",
-  "idempotency_key": "ver-guardian-001",
-  "script": "#!/usr/bin/env bash\n# El guardian que CORRE es /home/trading/puente_github_watcher.py, no la copia\n# del repositorio. Antes de tocarlo hay que leer el que de verdad se ejecuta.\nset +e\nG=/home/trading/puente_github_watcher.py\necho \"=== 1) que fichero corre de verdad ===\"\nsystemctl cat puente-github 2>/dev/null | grep -E 'ExecStart|WorkingDirectory|Restart|User'\necho\nps -eo pid,etime,cmd | grep -i 'puente_github_watcher' | grep -v grep\n\necho\necho \"=== 2) los numeros que gobiernan la latencia del puente ===\"\ngrep -n -iE 'POLL|SLEEP|INTERVAL|TIMEOUT|time\\.sleep|_SECONDS|_SEGUNDOS' \"$G\" | head -30\n\necho\necho \"=== 3) tamano y fecha ===\"\nls -l \"$G\"; sha256sum \"$G\" | cut -c1-16\n\necho\necho \"=== 4) ¿como reinicia el servicio? (para no suicidarse otra vez) ===\"\nls -l /home/trading/reiniciar_guardian.sh 2>/dev/null || echo \"  no existe reiniciar_guardian.sh\"\necho \"VER_GUARDIAN_OK\"\n"
+  "accion": "ejecutar_script_repo",
+  "script": "ver_guardian.sh"
 }
