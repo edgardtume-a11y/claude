@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "diag-002",
+  "ok": true,
+  "procesado_utc": "2026-08-28T14:56:17Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== la traza de verdad ===\n\n=== otras lecturas: incomplete_markers y modulos importados ===\n3:import argparse\n4:import csv\n5:import glob\n6:import hashlib\n7:import json\n8:import math\n9:import random\n10:import re\n11:import sys\n18:import pyarrow.parquet as pq\n20:from .identity import validate_capture_session_id\n21:from .metrics import _percentile\n22:from .models import CAUSAL_IDENTITY_SCHEMA_VERSION\n23:from .reconstruct import ReplayError, reconstruct\n158:def _related_partial_files(paths: Iterable[Path]) -> list[Path]:\n287:    partials = _related_partial_files(resolved)\n542:    incomplete_markers: list[str] = []\n574:                incomplete_markers.append(note)\n583:    integrity_pass = not incomplete_markers and len(markets) == 1\n627:        \"incomplete_markers\": incomplete_markers,\nDIAG2_OK\nTraceback (most recent call last):\n  File \"<stdin>\", line 5, in <module>\n  File \"/home/trading/jean-flow-exec/staging_runs/20260828T143727Z_auditparquet/overlay/src/binance_collector/audit.py\", line 532, in audit_journal\n    state = reconstruct(resolved)\n            ^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/trading/jean-flow-exec/staging_runs/20260828T143727Z_auditparquet/overlay/src/binance_collector/reconstruct.py\", line 496, in reconstruct\n    for row in csv.DictReader(handle):\n  File \"/usr/lib/python3.12/csv.py\", line 115, in __next__\n    self.fieldnames\n  File \"/usr/lib/python3.12/csv.py\", line 102, in fieldnames\n    self._fieldnames = next(self.reader)\n                       ^^^^^^^^^^^^^^^^^\n  File \"<frozen codecs>\", line 322, in decode\nUnicodeDecodeError: 'utf-8' codec can't decode byte 0xb5 in position 19: invalid start byte\n"
+  }
+}
