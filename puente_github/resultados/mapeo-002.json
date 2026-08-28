@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "mapeo-002",
+  "ok": true,
+  "procesado_utc": "2026-08-28T09:34:00Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== force_order_batch en normalize.py ===\ndef force_order_batch(\n    event: ForceOrderEvent,\n    sequencer: EventSequencer,\n    *,\n    market: str = \"usdm_futures\",\n) -> CsvBatch:\n    capture_session_id, ingest_seq, source_socket_id = _event_identity(\n        event, sequencer\n    )\n    note_payload = {\n        \"o\": event.order_type,\n        \"f\": event.time_in_force,\n        \"X\": event.order_status,\n        \"q\": event.original_quantity,\n        \"p\": event.original_price,\n    }\n    compact_note = json.dumps(note_payload, ensure_ascii=False, separators=(\",\", \":\"))\n    row = _base_row(\n        capture_session_id=capture_session_id,\n        ingest_seq=ingest_seq,\n        source_socket_id=source_socket_id,\n        event_id=sequencer.next(),\n        row_index=0,\n        record_type=\"FORCE_ORDER\",\n        symbol=event.symbol,\n        channel=\"forceOrder\",\n        connection_id=event.connection_id,\n        receive_utc_ns=event.receive_utc_ns,\n        receive_monotonic_ns=event.receive_monotonic_ns,\n        payload_bytes=event.payload_bytes,\n        raw_queue_size=event.raw_queue_size,\n        exchange_event_time_ms=event.event_time_ms,\n        market=market,\n    )\n    row.update(\n        {\n            \"exchange_trade_time_ms\": event.trade_time_ms,\n            \"side\": event.side,\n            \"price\": event.price,\n            \"quantity\": event.quantity,\n            \"note\": compact_note,\n        }\n    )\n    return CsvBatch((row,), event.receive_monotonic_ns)\n\n\ndef partial_depth_batch(\n    event: PartialDepthEvent,\n    symbol: str,\n    sequencer: EventSequencer,\n    note: str | None,\n    *,\n\n=== ForceOrderEvent: que campos guarda ===\nMAPEO2_OK\n"
+  }
+}
