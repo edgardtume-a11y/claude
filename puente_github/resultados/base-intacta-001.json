@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "base-intacta-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T09:31:16Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== 1) ¿la BASE menciona liquidaciones? (no deberia) ===\n/home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/src/binance_collector/collector.py:0\n/home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/src/binance_collector/parquet_store.py:0\n/home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/src/binance_collector/models.py:0\n  (tres ceros = la base esta intacta)\n\n=== 2) fechas de modificacion de la base ===\n  2026-08-13_00:00 /home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/src/binance_collector/collector.py\n  2026-08-13_00:00 /home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/src/binance_collector/models.py\n  2026-08-27_00:24 /home/trading/jean-flow-v2.4.1/555/binance_phase1_collector/src/binance_collector/parquet_store.py\n  (si son de antes de hoy 08:32, nadie las toco)\n\n=== 3) que cambio EXACTAMENTE en el staging, respecto al gate 4 ===\n  collector.py: 89 lineas cambiadas\n  parquet_store.py: 0 lineas cambiadas\n  models.py: 25 lineas cambiadas\n  audit.py: 6 lineas cambiadas\n  dual_main.py: SIN CAMBIOS\n\n=== 4) el diff de parquet_store (la lista cerrada) ===\n\n=== 5) el mapeo de columnas de la liquidacion ===\nVERIFICAR_BASE_OK\n"
+  }
+}
