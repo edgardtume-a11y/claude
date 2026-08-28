@@ -1,0 +1,9 @@
+{
+  "id": "resp24-ver-002",
+  "ok": true,
+  "procesado_utc": "2026-08-28T03:09:56Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "estado: EN MARCHA\nhora UTC: 03:09:56\n\n--- partes generadas ---\n-rw-r--r-- 1 trading trading 825M Aug 28 03:09 /home/trading/respaldo_24_27/RESPALDO_COMPLETO_20260828T030804Z_parte01.zip\n-rw-r--r-- 1 trading trading 606M Aug 28 03:09 /home/trading/respaldo_24_27/RESPALDO_COMPLETO_20260828T030804Z_parte02.zip\n-rw-r--r-- 1 trading trading 130M Aug 28 03:09 /home/trading/respaldo_24_27/RESPALDO_COMPLETO_20260828T030804Z_parte03.zip.escribiendo\n\n/dev/root       193G   61G  132G  32% /\n\n--- ultimas 30 lineas ---\n  [32000] 1.08 GiB, parte 1, 48s\n  [33000] 1.15 GiB, parte 1, 48s\n  [34000] 1.20 GiB, parte 1, 49s\n  [35000] 1.21 GiB, parte 1, 49s\n  [36000] 1.22 GiB, parte 1, 49s\n  [37000] 1.22 GiB, parte 1, 49s\n  [38000] 1.22 GiB, parte 1, 49s\n  [39000] 1.23 GiB, parte 1, 49s\n  [40000] 1.23 GiB, parte 1, 49s\n  [41000] 1.24 GiB, parte 1, 49s\n  [42000] 1.25 GiB, parte 1, 49s\n  [43000] 1.26 GiB, parte 1, 49s\n  [44000] 1.27 GiB, parte 1, 49s\n  [45000] 1.29 GiB, parte 1, 50s\n  [46000] 1.31 GiB, parte 1, 50s\n  [47000] 1.32 GiB, parte 1, 50s\n  [48000] 1.44 GiB, parte 1, 54s\n  [49000] 1.46 GiB, parte 1, 54s\n  [50000] 1.48 GiB, parte 1, 55s\n  [51000] 1.61 GiB, parte 1, 61s\n  [52000] 1.62 GiB, parte 1, 61s\n>>> cerrada RESPALDO_COMPLETO_20260828T030804Z_parte01.zip: 825.0 MB\n\n>>> abriendo RESPALDO_COMPLETO_20260828T030804Z_parte02.zip\n  [53000] 2.45 GiB, parte 2, 88s\n>>> cerrada RESPALDO_COMPLETO_20260828T030804Z_parte02.zip: 605.3 MB\n\n>>> abriendo RESPALDO_COMPLETO_20260828T030804Z_parte03.zip\n  [54000] 3.94 GiB, parte 3, 109s\n  [55000] 3.95 GiB, parte 3, 110s\nVER_24_OK\n"
+  }
+}
