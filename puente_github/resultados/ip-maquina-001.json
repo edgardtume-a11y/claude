@@ -1,0 +1,9 @@
+{
+  "id": "ip-maquina-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T04:47:29Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "IP PUBLICO : 34.180.96.105\nIP INTERNO : 10.146.0.2\nMAQUINA    : jean-flow-02-tokyo\nZONA       : asia-northeast1-a\nPROYECTO   : jean-flow-01\n\nUSUARIO PARA CONECTAR: trading\nPUERTO: 22    PROTOCOLO: SFTP\n\n=== claves autorizadas para trading (huellas y comentario) ===\n256 SHA256:FkULaCj4xeCp3kGS5keP2RSpingEYskO+G5wB1q6jVk trading (ED25519)\n3072 SHA256:hEbtU8o6Jhl2X4zIQQLgwlgDBdRKSpWWmtU0jmCwScQ trading@jean-flow-01.asia-southeast1-a.c.jean-flow-01.internal (RSA)\n3072 SHA256:uG5dbqPHUuC2bAsvuuwi4WeFZSk5yc5WV4KuJ5wtoVU trading@cs-895995892790-default (RSA)\n\n=== ¿alguna parece venir de un Windows? ===\ntrading@cs-895995892790-default\ntrading@jean-flow-01.asia-southeast1-a.c.jean-flow-01.internal\nIP_OK\n"
+  }
+}
