@@ -1,0 +1,22 @@
+{
+  "id": "fase2-debate-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T05:07:40Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-28T05:07:39Z",
+    "duplicate": false,
+    "execution_models": [],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-828aa26180cdc75b3b63af0c6f9258cbbac59e94",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "preflight_primary",
+    "requested_model": "gemini-3.7-flash",
+    "status": "pending",
+    "updated_at": "2026-08-28T05:07:39Z"
+  }
+}
