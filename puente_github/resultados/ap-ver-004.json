@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "ap-ver-004",
+  "ok": true,
+  "procesado_utc": "2026-08-28T14:39:08Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "staging: /home/trading/jean-flow-exec/staging_runs/20260828T143727Z_auditparquet\n  menciones de parquet/pyarrow en audit.py del overlay: 0\n  _iterar_filas o equivalente: 0\n  test_audit_parquet.py: NO\n  DictReader (debe seguir existiendo): 2\n  fecha audit.py: 2026-08-28 08:45:09   ahora: 14:39:08\n  ¿toco la BASE? (debe ser 0): 0\nAP_OK\n"
+  }
+}
