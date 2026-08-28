@@ -1,0 +1,22 @@
+{
+  "id": "conversor-raiz-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T02:14:56Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-28T02:14:56Z",
+    "duplicate": false,
+    "execution_models": [],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-1c8d86474ffcb0c5399894ec19a999b65759fda3",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "preflight_primary",
+    "requested_model": "gemini-3.7-flash",
+    "status": "pending",
+    "updated_at": "2026-08-28T02:14:56Z"
+  }
+}
