@@ -1,0 +1,5 @@
+{
+  "id": "resp24-ver-012",
+  "accion": "ejecutar_script_repo",
+  "script": "resp24_ver.sh"
+}
