@@ -1,0 +1,9 @@
+{
+  "id": "parar-incr-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T05:09:54Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== 1) parando los procesos ===\n  obrero detenido\n  vigilante detenido\n  ninguno vivo\n\n=== 2) quitandolo del reloj hasta que este arreglado ===\n  quitado. reloj ahora:\n\n=== 3) lo generado por la corrida fallida ===\n24G\t/home/trading/respaldo_incremental/20260828T050014Z\n4.0K\t/home/trading/respaldo_incremental/incremental.log\n\n=== 4) borrando SOLO la salida del incremental fallido ===\n    (es basura por construccion: copias de un respaldo que ya existe)\n  hecho\n\n=== 5) COMPROBACION: lo que NO se toco ===\n  respaldo completo : 35 partes\n  capturas parquet  : 74\n  capturas antiguas : 60 csv\n\n=== 6) disco recuperado ===\n/dev/root       193G   92G  102G  48% /\nPARAR_OK\n"
+  }
+}
