@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "vb2-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T14:54:45Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "CORRIENDO\n\n=== los errores ===\n--- pq_journal_spot.err (84 bytes) ---\nAUDIT FAIL: 'utf-8' codec can't decode byte 0xb5 in position 19: invalid start byte\n--- pq_journal_usdm.err (84 bytes) ---\nAUDIT FAIL: 'utf-8' codec can't decode byte 0xb5 in position 19: invalid start byte\n--- pq_identity.err (0 bytes) ---\n--- csv_journal_spot.err ( bytes) ---\n--- csv_journal_usdm.err ( bytes) ---\n--- csv_identity.err ( bytes) ---\n\n=== el log completo desde el paso 2 ===\n== 2) auditor NUEVO sobre PARQUET ==\n  journal_spot rc=2\n  journal_usdm rc=2\nVB2_OK\n"
+  }
+}
