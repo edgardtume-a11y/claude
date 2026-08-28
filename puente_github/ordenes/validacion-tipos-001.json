@@ -1,0 +1,5 @@
+{
+  "id": "validacion-tipos-001",
+  "accion": "ejecutar_script_repo",
+  "script": "ver_validacion_tipos.sh"
+}
