@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "vbm-004",
+  "ok": true,
+  "procesado_utc": "2026-08-28T20:38:27Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "CORRIENDO\nficheros disponibles: 10\n\n ficheros          bytes          filas  pico_RSS_MB     segundos\n        1      536896697          39134         69.1           24\n        2     1073808887          75536         78.7           48\n        4     2147916615         146594         97.8           96\n        7     3759122355         265037        131.0          169\nVBM_OK\n"
+  }
+}
