@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "vb-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T11:44:43Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "TERMINADO\nCSV que quedan: 0\nParquet: 60\n812M\t/home/trading/restore_stage_20260825/ubuntu\nRESUMEN DE CONVERSION:\n  Ficheros procesados : 60\n  Fallos              : 0\n  GiB antes           : 21.3352 GiB\n  GiB despues         : 0.3269 GiB\n  GiB liberados       : 21.3352 GiB\n  Factor medio        : 65.27x\nlineas BORRADO: 60\n/dev/root       193G   71G  123G  37% /\nVB_OK\n"
+  }
+}
