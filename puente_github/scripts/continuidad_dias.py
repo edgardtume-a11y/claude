@@ -74,38 +74,89 @@ def _fila_util(fila):
     return v not in ("", "None")
 
 
-def bordes_csv(ruta):
-    """(primera, ultima) fila con ingest_seq. Una sola pasada, sin cargar todo."""
-    primera = ultima = None
+def _cabecera_csv(ruta):
+    with open(ruta, "r", encoding="utf-8", newline="") as fh:
+        return next(csv.reader(fh))
+
+
+def _primera_csv(ruta):
+    """Primera fila util. Se lee desde arriba y se para en cuanto aparece."""
     with open(ruta, "r", encoding="utf-8", newline="") as fh:
         for fila in csv.DictReader(fh):
-            if not _fila_util(fila):
+            if _fila_util(fila):
+                return {k: fila.get(k, "") for k in COLUMNAS}
+    return None
+
+
+def _ultima_csv(ruta, cola=1 << 20):
+    """Ultima fila util, leyendo solo el final del fichero.
+
+    Un segmento son 512 MB: recorrerlo entero para ver su ultima linea costaria
+    minutos por fichero, y en 7 dias eso son horas. Se lee la cola y se sube
+    hacia atras. Si en el ultimo MB no hubiera ninguna fila util -- no deberia
+    pasar, son cientos de miles de filas -- se amplia la ventana.
+    """
+    cabecera = _cabecera_csv(ruta)
+    tam = os.path.getsize(ruta)
+    while cola <= max(tam, 1):
+        with open(ruta, "rb") as fh:
+            fh.seek(max(0, tam - cola))
+            bruto = fh.read().decode("utf-8", "ignore")
+        # la primera linea del trozo puede venir cortada por la mitad
+        lineas = bruto.splitlines()[1:] if tam > cola else bruto.splitlines()[1:]
+        for linea in reversed(lineas):
+            if not linea.strip():
                 continue
-            if primera is None:
-                primera = {k: fila.get(k, "") for k in COLUMNAS}
-            ultima = {k: fila.get(k, "") for k in COLUMNAS}
-    return primera, ultima
+            try:
+                valores = next(csv.reader([linea]))
+            except Exception:
+                continue
+            if len(valores) != len(cabecera):
+                continue          # linea cortada o con salto embebido: se salta
+            fila = dict(zip(cabecera, valores))
+            if _fila_util(fila):
+                return {k: fila.get(k, "") for k in COLUMNAS}
+        if cola >= tam:
+            break
+        cola *= 8
+    return None
+
+
+def bordes_csv(ruta):
+    """(primera, ultima) sin recorrer el fichero entero."""
+    return _primera_csv(ruta), _ultima_csv(ruta)
 
 
 def bordes_parquet(ruta):
-    """Igual, pero por lotes: un segmento son ~1.3 millones de filas."""
+    """Igual, leyendo solo el primer y el ultimo grupo de filas."""
     if pq is None:
         raise RuntimeError("pyarrow no esta disponible y hay ficheros .parquet")
     fichero = pq.ParquetFile(ruta)
-    primera = ultima = None
-    for lote in fichero.iter_batches():
-        nombres = lote.schema.names
-        cols = {c: lote.column(nombres.index(c)).to_pylist()
-                for c in COLUMNAS if c in nombres}
-        n = lote.num_rows
+    n_grupos = fichero.num_row_groups
+
+    def _filas(indice):
+        tabla = fichero.read_row_group(indice)
+        nombres = tabla.column_names
+        cols = {c: tabla.column(c).to_pylist() for c in COLUMNAS if c in nombres}
+        n = tabla.num_rows
         for i in range(n):
-            fila = {c: ("" if cols.get(c, [None] * n)[i] is None
-                        else str(cols[c][i])) for c in COLUMNAS}
-            if not _fila_util(fila):
-                continue
-            if primera is None:
+            yield {c: ("" if cols.get(c, [None] * n)[i] is None
+                       else str(cols[c][i])) for c in COLUMNAS}
+
+    primera = ultima = None
+    for g in range(n_grupos):
+        for fila in _filas(g):
+            if _fila_util(fila):
                 primera = fila
-            ultima = fila
+                break
+        if primera is not None:
+            break
+    for g in range(n_grupos - 1, -1, -1):
+        for fila in _filas(g):
+            if _fila_util(fila):
+                ultima = fila          # se queda con la ultima util del grupo
+        if ultima is not None:
+            break
     return primera, ultima
 
 
@@ -114,17 +165,24 @@ def bordes(ruta):
 
 
 def resumen_tramo(nombre, ficheros):
-    """El primer y el ultimo evento del tramo entero, y sus invariantes."""
-    primera = ultima = None
+    """El primer y el ultimo evento del tramo.
+
+    Solo hacen falta DOS ficheros: el primero y el ultimo del tramo. Los de en
+    medio ya los comprueba `journal`, que certifica la continuidad dentro del
+    grupo; repetirlos aqui costaria minutos por dia sin anadir nada.
+    """
+    primera, _ = bordes(ficheros[0])
+    _, ultima = bordes(ficheros[-1])
+    # si el primer o el ultimo segmento no tuviera eventos utiles, se busca hacia dentro
+    i = 1
+    while primera is None and i < len(ficheros):
+        primera, _ = bordes(ficheros[i]); i += 1
+    j = len(ficheros) - 2
+    while ultima is None and j >= 0:
+        _, ultima = bordes(ficheros[j]); j -= 1
     sesiones, esquemas = set(), set()
-    for f in ficheros:
-        p, u = bordes(f)
-        if p is None:
-            continue                      # segmento sin eventos con ingest_seq
-        if primera is None:
-            primera = p
-        ultima = u
-        for fila in (p, u):
+    for fila in (primera, ultima):
+        if fila:
             sesiones.add(fila.get("capture_session_id", ""))
             esquemas.add(fila.get("schema_version", ""))
     return {"tramo": nombre, "ficheros": len(ficheros),
