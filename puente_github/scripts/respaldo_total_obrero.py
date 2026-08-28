@@ -36,8 +36,25 @@ DESTINO_DIR = "/home/trading/respaldo_completo"
 PARTE_MB = 2048
 RAIZ = "/"
 
-# no son ficheros: son ventanas al estado del nucleo
-EXCLUIR_RAICES = ("/proc", "/sys", "/dev", "/run", "/lost+found", DESTINO_DIR)
+# Exclusiones fijas. Dos grupos, por dos motivos distintos:
+#
+# 1) Pseudo-sistemas del nucleo: no son ficheros, son ventanas al estado del
+#    kernel. Copiarlos no significa nada y algunos bloquean al leerlos.
+#
+# 2) SALIDAS DE OTROS RESPALDOS. Esto se aprendio por las malas el 28/08: el
+#    primer incremental empezo a respaldar el respaldo completo, porque sus 35
+#    partes tenian fecha posterior a la marca y entraban en la ventana. Copio
+#    24 GB de nada antes de que se detectara.
+#    Un respaldo que incluye otros respaldos no anade informacion: duplica. Y
+#    en un incremental es peor, porque cada corrida respaldaria la anterior,
+#    creciendo sin limite hasta llenar el disco.
+RESPALDOS = (
+    "/home/trading/respaldo_24_27",
+    "/home/trading/respaldo_incremental",
+    "/home/trading/respaldo_completo",
+)
+EXCLUIR_RAICES = ("/proc", "/sys", "/dev", "/run", "/lost+found",
+                  DESTINO_DIR) + RESPALDOS
 
 YA_COMPRIMIDOS = frozenset((
     ".zip", ".gz", ".tgz", ".xz", ".zst", ".bz2", ".7z", ".rar", ".lz4",
@@ -51,6 +68,13 @@ def excluido(ruta):
     for pre in EXCLUIR_RAICES:
         if ruta == pre or ruta.startswith(pre.rstrip("/") + "/"):
             return True
+    # guarda por nombre: cualquier parte de un respaldo, este donde este.
+    # Las rutas fijas de arriba cubren lo conocido; esto cubre lo que alguien
+    # cree manana en otro sitio.
+    base = os.path.basename(ruta)
+    if base.startswith(("RESPALDO_COMPLETO_", "INCREMENTAL_",
+                        "RESPALDO_JEAN_FLOW_")):
+        return True
     return False
 
 
@@ -162,7 +186,8 @@ def main():
 
     globals()["DESTINO_DIR"] = args.destino_dir
     globals()["EXCLUIR_RAICES"] = (
-        "/proc", "/sys", "/dev", "/run", "/lost+found", args.destino_dir)
+        "/proc", "/sys", "/dev", "/run", "/lost+found",
+        args.destino_dir) + RESPALDOS
     os.makedirs(args.destino_dir, exist_ok=True)
     libre = os.statvfs(args.destino_dir)
     libre_gb = libre.f_bavail * libre.f_frsize / 2**30
