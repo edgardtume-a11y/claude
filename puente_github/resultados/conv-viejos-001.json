@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "conv-viejos-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T11:35:54Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== guardas antes de lanzar ===\n  captura activa: ninguna\n  conversion previa: ninguna viva\n  libres: 102 GiB\n\n=== lanzando (sin --borrar) ===\n  pid: 139995\n\n=== primeras lineas del log (20 s despues) ===\nLANZADO_OK\n"
+  }
+}
