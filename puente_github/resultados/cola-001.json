@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "cola-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T13:06:04Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== estado de los dos encargos ===\n  jfr-82c86db0d3b4f3589da579fe0a1bbdd3f5453c0d:\n    \n  jfr-713eed782f1b08d3950d74d19af3f21978d3d6ae:\n    \n\n=== donde guarda los trabajos ===\n/opt/jean-flow-gemini/lib\n\n=== los ficheros de trabajo mas recientes ===\n\n=== procesos ===\n    649    22:42:15 /usr/bin/python3 /opt/jean-flow-gemini/lib/gemini_job_runner.py\n 152421       00:00 bash /home/trading/puente_github_repo/puente_github/scripts/cola_gemini.sh\nCOLA_OK\n"
+  }
+}
