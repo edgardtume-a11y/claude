@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "ver-guardian-002",
+  "ok": true,
+  "procesado_utc": "2026-08-28T11:32:50Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "=== 1) que fichero corre de verdad ===\nUser=trading\nExecStart=/usr/bin/python3 /home/trading/puente_github_watcher.py\nRestart=always\nRestartSec=10\n\n  92446    04:28:36 /usr/bin/python3 /home/trading/puente_github_watcher.py\n\n=== 2) los numeros que gobiernan la latencia del puente ===\n4:Revisa el repositorio cada POLL_SECONDS. Procesa ordenes JSON nuevas de\n38:POLL_SECONDS = 5\n92:def sh(args, cwd=None, timeout=120):\n93:    return subprocess.run(args, cwd=cwd, timeout=timeout,\n108:    s.settimeout(30)\n195:                       timeout=300)\n213:    time.sleep(8)\n234:                       text=True, timeout=120)\n272:            \"https://github.com/%s.git\" % REPO_SLUG, REPO_DIR], timeout=300)\n292:        time.sleep(5)\n346:        time.sleep(POLL_SECONDS)\n\n=== 3) tamano y fecha ===\n-rwxr-xr-x 1 trading trading 13885 Aug 28 07:03 /home/trading/puente_github_watcher.py\n7b73fcd2899e5785\n\n=== 4) ¿como reinicia el servicio? (para no suicidarse otra vez) ===\n  no existe reiniciar_guardian.sh\nVER_GUARDIAN_OK\n"
+  }
+}
