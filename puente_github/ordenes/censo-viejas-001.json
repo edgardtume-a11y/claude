@@ -1,0 +1,5 @@
+{
+  "id": "censo-viejas-001",
+  "accion": "ejecutar_script_repo",
+  "script": "censo_capturas_viejas.sh"
+}
