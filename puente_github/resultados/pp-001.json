@@ -1,0 +1,10 @@
+{
+  "estado": "completed",
+  "id": "pp-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T23:32:07Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "staging de prueba: /home/trading/prueba_paralelo\n  capture -> /home/trading/jean-flow-exec/staging_runs/20260828T155419Z_tokyo_postmask_gate_30m/capture\n  overlay -> /home/trading/jean-flow-exec/staging_runs/20260828T143727Z_auditparquet/overlay\n\n=== ejecutando ===\nsegmentos: spot=4 usdm=10\nPYTHONPATH=/home/trading/prueba_paralelo/overlay/src\njournal_spot=0\n  codigo de salida del guion: 124\n\n=== los informes de tu gate, INTACTOS ===\n-rw-r--r-- 1 trading trading 61 Aug 28 17:09 /home/trading/jean-flow-exec/staging_runs/20260828T155419Z_tokyo_postmask_gate_30m/audit/return_codes.json\n{\"journal_spot\":0,\"journal_usdm\":0,\"identity\":0,\"metrics\":2}\n  (fecha 17:09, la de esta tarde: no se ha tocado)\n\n=== ¿coincide con lo que dio la auditoria original? ===\n  original: {\"journal_spot\":0,\"journal_usdm\":0,\"identity\":0,\"metrics\":2}\n  paralelo: \n=== ¿y los informes son los mismos? ===\n  journal_spot: distinto  original=9dfb0fa5f19ba42d paralelo=ee5357622137cb7c\n  journal_usdm: distinto  original=bc688b6c4ff0e732 paralelo=e3b0c44298fc1c14\n  identity: distinto  original=8ffff6be551f533a paralelo=e3b0c44298fc1c14\n  metrics: distinto  original=be1796960041b587 paralelo=c6424c41b860fb72\n  (nota: 'files' guarda las rutas, y aqui son enlaces, asi que\n   alguna diferencia en ese campo seria esperable y no un fallo)\nPP_OK\n"
+  }
+}
