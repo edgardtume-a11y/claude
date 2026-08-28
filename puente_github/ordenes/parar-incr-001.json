@@ -1,0 +1,5 @@
+{
+  "id": "parar-incr-001",
+  "accion": "ejecutar_script_repo",
+  "script": "parar_incremental.sh"
+}
