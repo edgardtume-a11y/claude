@@ -1,0 +1,9 @@
+{
+  "id": "crear-respaldo-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T00:31:37Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "destino: /home/trading/RESPALDO_JEAN_FLOW_20260828T003137Z.zip\nlanzado pid=50807\nregistro: /home/trading/respaldo_maestro.log\nCREAR_RESPALDO_OK\n"
+  }
+}
