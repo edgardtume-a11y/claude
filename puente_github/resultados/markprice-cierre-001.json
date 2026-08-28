@@ -1,0 +1,23 @@
+{
+  "estado": "completed",
+  "id": "markprice-cierre-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T12:56:44Z",
+  "resultado": {
+    "attempted_models": [
+      "gemini-3.7-flash"
+    ],
+    "created_at": "2026-08-28T12:56:44Z",
+    "duplicate": false,
+    "execution_models": [],
+    "fallback_model": "gemini-3.6-flash",
+    "fallback_used": false,
+    "id": "jfr-713eed782f1b08d3950d74d19af3f21978d3d6ae",
+    "model": "gemini-3.7-flash",
+    "ok": true,
+    "phase": "preflight_primary",
+    "requested_model": "gemini-3.7-flash",
+    "status": "pending",
+    "updated_at": "2026-08-28T12:56:44Z"
+  }
+}
