@@ -1,0 +1,9 @@
+{
+  "id": "rescate-001",
+  "ok": true,
+  "procesado_utc": "2026-08-28T03:08:52Z",
+  "resultado": {
+    "returncode": 0,
+    "salida": "estado: EN MARCHA\nhora UTC: 03:08:52\n\n--- partes generadas ---\n(ninguna todavia)\n-rw-r--r-- 1 trading trading 512M Aug 28 03:08 /home/trading/respaldo_24_27/RESPALDO_COMPLETO_20260828T030804Z_parte01.zip.escribiendo\n\n/dev/root       193G   60G  133G  32% /\n\n--- ultimas 30 lineas ---\n  [5000] 0.06 GiB, parte 1, 2s\n  [6000] 0.17 GiB, parte 1, 8s\n  [7000] 0.40 GiB, parte 1, 18s\n  [8000] 0.40 GiB, parte 1, 19s\n  [9000] 0.40 GiB, parte 1, 19s\n  [10000] 0.40 GiB, parte 1, 19s\n  [11000] 0.40 GiB, parte 1, 19s\n  [12000] 0.40 GiB, parte 1, 19s\n  [13000] 0.40 GiB, parte 1, 19s\n  [14000] 0.40 GiB, parte 1, 19s\n  [15000] 0.40 GiB, parte 1, 19s\n  [16000] 0.41 GiB, parte 1, 19s\n  [17000] 0.42 GiB, parte 1, 20s\n  [18000] 0.43 GiB, parte 1, 20s\n  [19000] 0.45 GiB, parte 1, 21s\n  [20000] 0.47 GiB, parte 1, 21s\n  [21000] 0.47 GiB, parte 1, 21s\n  [22000] 0.48 GiB, parte 1, 22s\n  [23000] 0.49 GiB, parte 1, 22s\n  [24000] 0.51 GiB, parte 1, 23s\n  [25000] 0.52 GiB, parte 1, 24s\n  [26000] 1.00 GiB, parte 1, 46s\n  [27000] 1.05 GiB, parte 1, 47s\n  [28000] 1.05 GiB, parte 1, 48s\n  [29000] 1.06 GiB, parte 1, 48s\n  [30000] 1.07 GiB, parte 1, 48s\n  [31000] 1.07 GiB, parte 1, 48s\n  [32000] 1.08 GiB, parte 1, 48s\n  [33000] 1.15 GiB, parte 1, 48s\n  [34000] 1.20 GiB, parte 1, 49s\nVER_24_OK\n"
+  }
+}
