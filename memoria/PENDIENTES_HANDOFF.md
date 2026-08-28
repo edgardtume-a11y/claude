@@ -1,239 +1,87 @@
-# PENDIENTES — Handoff para cualquier IA (actualizado 28/08/2026 ~05:45 UTC)
+# Dónde está JEAN FLOW y qué falta
 
-Lee primero: memoria/MEMORIA_JORNADA_27AGO2026.md y _PARTE2.md, y el contexto en Notion
-(página 19 + Memoria operativa). Vía de trabajo: PUENTE GITHUB (tutoriales/TUTORIAL_PUENTE_GITHUB.md).
+**Actualizado:** 28/08/2026, 14:45 UTC (09:45 Perú)
 
-## En curso ahora mismo
-1. **Gate 3 y gate 4 CERRADOS.** Nada grabando. La máquina está libre.
-   - Gate 3 (4 h 45, sin uvloop): 3/4 auditorías PASS, **metrics FALLA** por
-     `usdm.book_apply` 6.282 ms y `usdm.book_pipeline_total` 7.399 ms (límite 5.0).
-     Identidad perfecta: 1 432 500/1 432 500, ratio 1.0, 0 conflictos.
-     Staging: `.../20260827T143004Z_tokyo_n2_capture_gate3_2h` (sesión c37b7c55…), 18 GB.
-   - Gate 4 (30 min, CON uvloop + `gc.freeze`): **4/4 auditorías PASS**, primera vez
-     que `metrics` certifica. Identidad 89 767/89 767, ratio 1.0, cierre rc=0, 0 parciales.
-     Staging: `.../20260827T195636Z_tokyo_n2_gate4_mejoras_30m` (sesión f4349129…), 1.1 GB.
-   - Veredicto completo: `operaciones/VEREDICTO_AB_GATE4.md`. **El cambio se conserva.**
+---
 
-2. **Diálogo del amor** (`filosofia/QUE_ES_EL_AMOR.md`): la ronda 2 de Claude está
-   escrita y publicada; **falta recoger la respuesta de Gemini** (job en
-   `puente_github/resultados/filo-amor-r2.json`), anexarla y contrarreplicar.
-   Continúa hasta que el operador diga basta.
+## 1. Lo que espera una decisión o una acción tuya
 
-## ✅ BLOQUEADOR DE DISCO — RESUELTO esta noche
-3. **32 GB → 638 MB.** Disco libre de 119 GB a **150 GB**. 74 ficheros
-   convertidos a Parquet+zstd y sus CSV borrados tras verificarlos.
-   **0 fallos.** Seis minutos. Factores 49× a 76× (futuros comprime mejor
-   que spot: 74-76× frente a 58-60×).
-   - Los 7 días pasan de **628 GiB a ~9.6 GiB**: caben **quince veces**.
-   - **Reversible y probado:** se reconstruyó un CSV desde un Parquet del
-     gate 3 —1 340 365 filas, sesión c37b7c55…— y el auditor lo **certificó**
-     (`causal_replay: PASS`, `journal_integrity: PASS`, rc=0).
-   - Detalle: `operaciones/CONVERSION_PARQUET_RESULTADO.md`.
-   - Herramientas: `herramientas/convertir_parquet.py` (en la máquina),
-     `puente_github/scripts/reconstruir_csv.py` (la vuelta atrás).
+| | Qué | Por qué importa |
+|---|---|---|
+| 1 | **Orden para el gate de 6 h** | Es donde se prueba el rotador **en vivo** —lo único que falta demostrar— y donde se comprueba que llegan liquidaciones y precios de marca de verdad |
+| 2 | **Autorizar RDC** | `sudo systemctl restart desktop-commander-remote` y meter el código en `mcp.desktopcommander.app/device/verify`. Lleva las órdenes de ~5 s a ~1 s |
+| 3 | **Decidir cómo se certifican los 7 días** | Ver `planes/BLOQUEADOR_AUDITOR_NO_LEE_PARQUET.md`. Estoy construyendo la opción B; la decisión de usarla es tuya |
+| 4 | **Bajarte los respaldos** | Siguen sólo en la VM. Primero `RESPALDO_JEAN_FLOW_20260828T003137Z.zip` (625.83 MB); luego `respaldo_24_27/` (35 partes, 31.86 GiB) |
+| 5 | **Mirar el saldo de Google** | Límite del calendario nº 8: cada lunes, parar por debajo de ~30 USD |
+| 6 | **Recortar el PAT de GitHub** a Contents RW | Hoy tiene más permisos de los que usa |
 
-## ⚠️ Lo que hay que saber tras el borrado
-4. **El auditor NO lee Parquet.** `grep -c parquet audit.py` = 0; igual
-   `reconstruct.py`. Para re-auditar cualquier captura antigua hay que
-   reconstruir el CSV primero con `reconstruir_csv.py`. Funciona y tarda
-   segundos, pero **es un paso que antes no existía**. Mejora natural:
-   enseñar al auditor a leer Parquet.
-5. **La reconstrucción no es byte a byte:** difiere en comillas de cabecera y
-   fin de línea (~0.25 % del tamaño). El dato es idéntico y el auditor
-   certifica. El manifiesto guarda el sha256 de cada CSV original.
+---
 
-## Hallazgos que cambian el plan
-4. **Dos de las tres mejoras de la auditoría cruzada YA existían** en el código
-   (`planes/AUDITORIA_MEJORAS_CORREGIDA.md`):
-   - M1 (umbrales del GC): ya estaba en `latency.py`, con `(50000, 100, 100)` y
-     `sys.setswitchinterval(0.001)`. Solo faltaba `gc.freeze()` — ya añadido.
-   - M2 (troceo del writer): ya estaba, con 64 filas. Y su otra mitad es
-     **inaplicable**: el writer es `threading.Thread`, no una tarea asyncio.
-     **M2 ANULADA.**
-   - M3 (uvloop): era la única real. Aplicada y verificada.
-   Lección: una auditoría hecha sin leer el código produce recomendaciones
-   plausibles y falsas. El revisor debe leer el archivo ANTES de encargar.
+## 2. Lo que está hecho y certificado
 
-5. **`event_loop_lag` es la próxima grieta.** Peor p99: 19.8 ms (gate 3) → 19.0 ms
-   (gate 4), contra un límite de auditoría de 20 ms. uvloop apenas lo movió (−4 %,
-   frente a −23/−29 % de las demás). **Pasa con un 5 % de margen.** En un gate de
-   24 h es lo primero que va a romper. Falta entender de dónde salen esos 19 ms.
+- **Gate 4 certificado 4/4** (27/08). Códigos de retorno `0,0,0,0`
+- **Liquidaciones forzadas** (`FORCE_ORDER`) — revisadas y aprobadas
+- **Precio de marca y financiación** (`MARK_PRICE`) — revisados y aprobados. **31 pruebas pasan**
+- **Rotador de Parquet** — escrito, revisado (13 salvaguardas) y probado en laboratorio
+- **Conversor de Parquet** — 60 ficheros, 0 fallos, factor 65×
+- **Reversibilidad demostrada** byte a byte: `sha256` idéntico y auditor certificando el CSV reconstruido
+- **Disco:** 123 GB libres (37% usado). Eran 102 GB esta mañana
 
-6. **El A/B secuencial no puede demostrar causalidad.** El gate 4 corrió con el
-   mercado un 32-44 % más flojo (aunque `depth_diff_messages` —el caudal que
-   gobierna las métricas que mejoraron— fue idéntico al 0.1 %). Indicio fuerte,
-   no prueba. La prueba concluyente es la de Gemini: **dos procesos en paralelo
-   sobre el mismo flujo, misma hora, 48 h**. Requiere orden del operador y
-   resolver antes el bloqueador de disco (dos capturas de 48 h ≈ 360 GiB).
+**El staging bueno para los 7 días es `20260828T122455Z_markprice`.** Lleva
+liquidaciones *y* precio de marca. Los anteriores quedan superados.
 
-## Después del veredicto del gate 3
-3. **Respaldo total** (orden del operador): ejecutar puente_github/scripts/respaldo_total.sh
-   vía ejecutar_script_repo (tiene guarda anti-captura-activa). Genera
-   /home/trading/respaldo_jean_flow_<TS>.tar.gz. Luego guiar al operador para descargarlo:
-   WinSCP (necesita llave SSH en su Windows — guiarlo paso a paso) o botón Descargar del SSH del navegador.
-4. **Parquet conversor definitivo** vía flujo Gemini (etapa 1 aprobada: pyarrow 25.0.1,
-   ida-y-vuelta idéntica, compresión 71,9×). Contrato: convertir staging completo,
-   verificación fila a fila, JAMÁS borrar CSV originales sin orden expresa.
-5. **Escalera**: 6h → Parquet certificado → 24h → 7 días. NINGÚN lanzamiento sin orden del operador.
+---
 
-## Tareas menores pendientes
-6. Copiar a Notion cuando reviva: manual puerta universal, bloques 16R/16S en página 19
-   (id 3c9c3f63-ec67-810c-9377-cb3387a73fe4), filas en Memoria operativa
-   (collection 73f962a0-c400-4a0d-a637-c7485ae6b935; Etiquetas válidas: sistema/contexto/decisión/pendiente/fuente/handoff/plantilla; Tipo válidos: Contexto actual/Decisión/Pendiente/Fuente/Hallazgo/Handoff).
-7. Recordar al operador: recortar permisos del PAT puente-tokio a solo Contents RW (quedó amplio).
-8. El operador generará una infografía del nuevo flujo con IA de imágenes (prompt ya entregado);
-   cuando la comparta, subirla a GitHub (entregables/) y a Notion.
-9. Renovación del PAT (expiración ~30-90 días desde 27/08) — procedimiento en el tutorial.
-10. Idea de negocio del operador pendiente de responder desde temprano: "¿puedo crear mi
-    empresa de alquilar un VPS con mi código para que las empresas graben sus datos?" — darle
-    una respuesta seria de viabilidad cuando haya un momento tranquilo.
+## 3. Lo que estoy haciendo ahora
 
-## ⬇️ PENDIENTE DEL OPERADOR — DESCARGAR RESPALDOS
+**Que el auditor sepa leer Parquet** (opción B del bloqueador). Gemini escribe
+el lector en el staging `20260828T143727Z_auditparquet`; el banco de pruebas ya
+está escrito y esperando.
 
-**Los respaldos están hechos y verificados, pero SIGUEN SOLO EN LA MÁQUINA.**
-Mientras no estén en el PC del operador, no protegen de nada: si la máquina se
-pierde, se pierden con ella.
+La prueba es la que decide: el gate 4 **ya no tiene CSV** —sólo Parquet—, pero
+sí tiene sus informes certificados. Si el auditor nuevo reproduce esos informes
+leyendo Parquet, y también leyendo un CSV reconstruido, la capacidad queda
+demostrada sin cambiar ningún criterio.
 
-### 1. El reducido — bájalo primero
-```
-/home/trading/RESPALDO_JEAN_FLOW_20260828T003137Z.zip
-```
-**625.83 MB** · 5 209 ficheros · integridad verificada · sha256 `b06e15dc…7590b`
+El número que decide es `replay.sha256` = `1d749fd5d6c741b1...`, el hash
+canónico del libro de spot. Si una sola fila cambiara, cambia.
 
-Contiene TODO el trabajo del operador: código del colector (3 668 ficheros),
-capturas ya en Parquet (1 044), puente (478), router, los 5 servicios de
-systemd, y la lista de paquetes y librerías para rehacer la máquina desde cero.
+---
 
-**Es una sola descarga de minutos.** Prioridad máxima.
+## 4. Trabajo listo, en orden de valor
 
-### 2. El completo — cuando haya tiempo
-```
-/home/trading/respaldo_24_27/RESPALDO_COMPLETO_20260828T030804Z_parteNN.zip
-```
-**35 partes · 31.86 GiB · 116 831 ficheros · 0 partes rotas**
+1. **Paralelizar la auditoría.** Las cuatro fases son de sólo lectura y escriben
+   a ficheros distintos; hoy corren en serie y la máquina usa 1 de 8 núcleos.
+   No toca `audit.py`: es el guion que lo llama. **Medir antes de suponer.**
+2. **Interés abierto.** No existe como flujo de websocket: sólo REST. Meter
+   HTTP en un colector de websockets es un cambio de otra naturaleza, con
+   límites de peticiones y un fallo posible en el camino caliente. Se decide
+   aparte.
+3. **Probar el rotador con una captura de verdad al lado.** Necesita el gate.
 
-Disco entero. De los 31.86 GiB, unos **14 GiB son lastre incompresible**: el
-respaldo antiguo de 7.1 GB, un `.part` de 1.5 GB, otro zip de 1.4 GB,
-`import_backup` (830 MB) y `/snap` (3.2 GB). El resto sí comprimió — los 21 GiB
-de capturas viejas quedaron en ~500 MB.
+---
 
-Cada parte es un zip **independiente**: se abre sola, no necesita a las demás.
-Orden sugerido: **la 35 primero** (280 MB, trae el `INVENTARIO_COMPLETO.txt`
-con qué hay en cada parte) y **la 32 la última** (7.1 GB, es el respaldo antiguo
-entero).
+## 5. Cosas que hemos aprendido y que cuestan si se olvidan
 
-### 3. Cómo descargarlos
-WinSCP ya está operativo: `34.180.96.105`, usuario `trading`, puerto 22, con la
-llave del PC del operador ya autorizada (huella `yROLUuGO…`).
-Activar **Opciones → Preferencias → Transferencia en segundo plano** para que la
-cola siga sola y reanude si se corta.
+| | Lección |
+|---|---|
+| **El guardián real** | Es `/home/trading/puente_github_watcher.py`, **no** la copia del repositorio |
+| **120 segundos** | El ejecutor del puente corta ahí. Lo que dure más se lanza despegado (`nohup`) y se consulta con órdenes cortas |
+| **La cola de Gemini es serie** | Un encargo urgente **no adelanta** a uno atascado. Hay que dar por muerto el primero |
+| **Trocear desde el principio** | Tres encargos largos han caducado con el trabajo casi hecho. Tres cortos valen más que uno de 80 minutos |
+| **Nadie se reinicia a sí mismo** | Un proceso no ejecuta su propio `systemctl restart` desde dentro de la tarea. Costó 18 minutos de guardián muerto |
+| **El `PYTHONPATH` es el de la captura** | Cualquier herramienta que importe módulos del colector usa `<run>/overlay/src`, no la base. La base es el punto de partida de los overlays, no lo que corre |
+| **Medir antes de optimizar** | El "problema de los 19 ms" no existía: salía de no excluir el calentamiento, que `audit.py` ya excluía. Dos hipótesis construidas sobre un número sin comprobar |
+| **Leer antes de encargar** | M1 y M2 ya estaban en el código. `parquet_store.py` ya existía, con 641 líneas sin usar |
 
-### ⚠️ Ambos contienen credenciales
-Token del puente, llave de GitHub, credenciales del agente. **No subir a GitHub
-ni compartir con terceros sin limpiarlos antes.**
+---
 
-### 4. Respaldos incrementales
-`/home/trading/respaldo_incremental/` recoge solo lo nuevo desde el respaldo
-completo (marca: 28/08 03:08:04 UTC). El reloj automático cada 4 h quedó
-**DESACTIVADO** tras detectarse que el incremental se respaldaba a sí mismo
-(copió 24 GB de nada). Ya corregido con doble exclusión —por ruta y por
-nombre—; **volver a programarlo solo después de ver una corrida limpia.**
+## 6. Seguridad — sigue vigente
 
-## Trabajo técnico pendiente (por orden de valor)
-11. **Enganchar `parquet_store.py` a la rotación en vivo.** Es la pieza que
-    falta para que el gate de 7 días se comprima solo mientras graba. **No hay
-    que escribirlo**: ya existe (641 líneas) con `discover_closed_csv`,
-    `SegmentBusy` y bloqueo exclusivo. Hay que **probarlo e integrarlo**.
-    Regla: jamás borrar un CSV que el colector pueda tener abierto.
-12. **Diagnóstico de los 19 ms** — **H1 REFUTADA, medida hecha.**
-    El banco corrió los cuatro escenarios al ritmo real (112 800 filas/min):
-    sonda sola, `writerows(64)`, `writerows(8)` y texto en Python + `write()`.
-    **Los cuatro dan p99 = 1.000 ms.** El escritor NO es la causa: ni la llamada
-    en C, ni el lote, ni el GIL. Ver `planes/H1_REFUTADA_GIL.md`.
-    **Nueva hipótesis H5 (por comprobar): el bucle no está bloqueado, está
-    saturado.** El retraso se pega justo por debajo de un intervalo de sonda
-    (19 de 20 ms), que es la firma de una cola de trabajo permanente, no de un
-    bloqueo. Explica que uvloop ayudara un 4 % aquí y un 23-29 % en el resto:
-    acelera cada operación pero no reduce cuántas hay.
-    **Cómo comprobarla, sin tocar el motor:** correlacionar ventana a ventana
-    `event_loop_lag` p99 contra `websocket_messages` y `depth_diff_messages`.
-    **Si se confirma, el arreglo es un proceso por mercado** — el mismo camino
-    ya previsto para las memecoins, que pasaría de idea de futuro a solución
-    del problema presente.
-13. **Afinidad de CPU + `SO_RCVBUF`** (T3). Ninguna de las dos aparece en el
-    código. Con A/B obligatorio: tocar el planificador puede empeorar.
-14. **Auditorías spot y usdm en paralelo** (T4). Hoy corren en fila:
-    17 min → ~11. En el gate de 24 h serán horas.
-15. **Bajar el tope de `ejecutar_script_repo` de 600 s a ~120 s** para que
-    nada largo bloquee la cola del puente
-    (`operaciones/LECCION_PUENTE_SERIAL.md`).
-16. **Permisos de lo que escribe el autor.** Gemini creó `banco_gil.py` como
-    root con modo 700: el revisor no puede leerlo ni ejecutarlo. Si al autor
-    se le agota el tiempo, el trabajo se pierde entero en vez de poder
-    rematarlo. Todo lo que escriba debe quedar `trading:trading` y legible.
-
-## Decisiones que esperan al operador
-17. **¿A/B en paralelo de 48 h?** Dos procesos sobre el mismo flujo, misma
-    hora, uno con uvloop y otro sin. Es lo único que zanjaría si uvloop mejora
-    de verdad o fue el mercado flojo. **Ahora sí cabe en disco.**
-18. **¿Promover el parche de uvloop a la instalación base?** Hoy solo vive en
-    el staging del gate 4 y en `parches/uvloop_gcfreeze_dual_main.patch`.
-
-## Reglas que nunca cambian
-- Producción automática, purga de CSV y Cloud Storage: PROHIBIDOS sin orden expresa.
-- Un solo orquestador por tarea. Claves idempotentes en toda orden.
-- Todo cambio de código: contrato → Gemini → revisión independiente → registro.
-- Secretos jamás en GitHub/Notion/chats.
-
-## Notas del operador (volcado 27/08 ~15:45 UTC)
-- **Marca candidata**: QUANTFLOW / Lorvellan Flow / Lorvellan Fund (por decidir).
-- **Verificado hoy**: el sistema SÍ captura el libro de órdenes completo (la auditoría journal
-  lo reconstruye tick a tick con resultado 0) — es la misma materia prima de Bookmap/ATAS/
-  ExoCharts/Volume Profile/DOM. La visualización sería con herramientas aparte, no bloqueante.
-- **Túnel Cloudflare + puente UNRESTRICTED**: se CONSERVAN — son la puerta HTTPS universal (vía #1).
-- **ArcticDB** (open source de Man Group): candidata para la capa de datos de ENTRENAMIENTO
-  (complemento/alternativa a Parquet en fase 2). Evaluar cuando toque el pipeline de features.
-- **Futuro lejano**: migrar a AWS Tokio (misma nube que Binance) → sub-milisegundo. Anotado en plan ultra.
-- **Memecoins multi-símbolo**: diseño ya registrado (N streams, grabar también perdedoras,
-  Parquet prerrequisito, ventana deslizante 4-8 semanas). Después de certificar BTC.
-- **Fase 4 (bot)**: "baja frecuencia casera" — candidatos Nautilus Trader (serio) / Freqtrade (fácil),
-  Binance Testnet para paper trading, kill switch + API keys sin permiso de retiro.
-- **Principio del operador**: cambio agresivo propuesto por una IA se contrasta con otra IA
-  hasta converger — pilar del sistema de orquestación.
-- **Proyecto aparte** (otra sesión/repo): plataforma de cursos de Derecho como plantilla
-  reutilizable para toda la carrera — el operador quiere construirla con Claude.
-- **Pendiente delicado (usuario, no urgente)**: cambio de correo en la facturación de Google
-  (quitar el de Edgard) — hacerlo con cuidado: primero agregar el nuevo administrador,
-  verificar, recién quitar el viejo. NO tocar durante certificaciones.
-- Lista de permisos allowlist para sesiones Claude ya registrada en settings (RDC lectura+proceso, Notion lectura).
-
-## ⭐ SUPER PENDIENTE — Mejoras de latencia y tecnologías (auditoría cruzada 27/08)
-Documentos fuente: planes/AUDITORIA_TECNICA_CRUZADA.md y planes/CONTRATO_MEJORA_LATENCIA_V1.md.
-Requisito: NO aplicar mientras haya captura activa. El gate 3 es la línea base del A/B.
-
-### Prioridad 1 — Aplicar tras el veredicto del gate 3 (vía flujo Gemini + A/B obligatorio)
-1. **M1 domar el GC**: `gc.set_threshold(50_000, 50, 50)` + `gc.freeze()` tras init.
-   NUNCA `gc.disable()` (crecimiento de RAM en corridas de 7 días). Verificar RSS < 4 GB.
-2. **M2 yield troceado en el writer**: bloques de ~50 items o cuota de 1 ms +
-   `await asyncio.sleep(0)` obligatorio entre tandas. Ataca directamente writer_yield_p99.
-3. **M3 uvloop + afinidad de CPU**: `uvloop.install()` antes de `asyncio.run()` +
-   `os.sched_setaffinity`. Validar con el método de Gemini (dos workers en paralelo, 48 h).
-
-### Prioridad 2 — Tecnologías a incorporar (por fase)
-- Fase 1 (colector): **uvloop**, **msgspec** (reemplazo de orjson con structs preasignados).
-- Fase 2 (entrenamiento): **Polars** (lectura Parquet columnar multi-hilo), luego **Optuna**.
-- Si M1-M3 no bastan: **Cython / PyO3** para las mutaciones del libro L2 (submilisegundos)
-  y **jemalloc/mimalloc** contra la fragmentación de heap.
-- Multi-símbolo (memecoins): **ArcticDB** con versionado de datasets.
-- Fase 4 (bot): **Nautilus Trader** — descartado para el colector, candidato para el ejecutor.
-- Opcional/discrepancia registrada: **DuckDB** (Gemini lo ve redundante con Polars+Parquet;
-  Claude lo mantiene útil para consultas exploratorias del operador sin programar).
-
-### Prioridad 3 — Respaldo completo v2
-Ver planes/PLAN_RESPALDO_COMPLETO.md: estructura de 4 carpetas (proyecto/servicios/
-instaladores/RESTAURAR.md) + estrategia de 3 capas (GitHub / .tar.gz / imagen de máquina).
-
-### Prioridad 4 — Costos
-planes/PLAN_OPTIMIZACION_COSTOS.md: apagar la VM entre gates ahorra ~70%
-(US$ 260/mes → ~US$ 22-87/mes). Postular a Google for Startups. El operador descartó
-explícitamente la vía de múltiples cuentas (riesgo de suspensión total).
+- **Producción automática, purga de CSV y Cloud Storage: prohibidos sin orden expresa**
+- **Ninguna captura se lanza sin orden del operador**
+- **Nada se toca mientras hay una captura activa**
+- **Los dos respaldos contienen credenciales.** No subirlos a GitHub ni
+  compartirlos sin limpiarlos antes
+- La clave SSH privada se subió al chat. Recomendé rotarla; decidiste dejarlo.
+  Queda anotado: sigue siendo aconsejable, y es tu decisión
