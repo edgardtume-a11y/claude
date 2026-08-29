@@ -1,87 +1,93 @@
 # Dónde está JEAN FLOW y qué falta
 
-**Actualizado:** 28/08/2026, 14:45 UTC (09:45 Perú)
+**Actualizado:** 29/08/2026, 00:35 UTC (28/08, 19:35 Perú)
+**Documento maestro:** `planes/RUTA_7_DIAS.md` — la ruta completa en orden de
+ejecución. Lo de aquí abajo es el estado; aquello es el procedimiento.
 
 ---
 
-## 1. Lo que espera una decisión o una acción tuya
+## 1. Lo que espera al operador
 
-| | Qué | Por qué importa |
+| | Qué | Estado |
 |---|---|---|
-| 1 | **Orden para el gate de 6 h** | Es donde se prueba el rotador **en vivo** —lo único que falta demostrar— y donde se comprueba que llegan liquidaciones y precios de marca de verdad |
-| 2 | **Autorizar RDC** | `sudo systemctl restart desktop-commander-remote` y meter el código en `mcp.desktopcommander.app/device/verify`. Lleva las órdenes de ~5 s a ~1 s |
-| 3 | **Decidir cómo se certifican los 7 días** | Ver `planes/BLOQUEADOR_AUDITOR_NO_LEE_PARQUET.md`. Estoy construyendo la opción B; la decisión de usarla es tuya |
-| 4 | **Bajarte los respaldos** | Siguen sólo en la VM. Primero `RESPALDO_JEAN_FLOW_20260828T003137Z.zip` (625.83 MB); luego `respaldo_24_27/` (35 partes, 31.86 GiB) |
-| 5 | **Mirar el saldo de Google** | Límite del calendario nº 8: cada lunes, parar por debajo de ~30 USD |
-| 6 | **Recortar el PAT de GitHub** a Contents RW | Hoy tiene más permisos de los que usa |
+| 1 | **Orden para la prueba comparativa** (1 h sobre `20260828T143727Z_auditparquet`) | Es el **Paso 0** y no se puede saltar |
+| 2 | **Bajarse los respaldos** | Siguen sólo en la VM. Un fallo de disco se lleva todo |
+| 3 | **Saldo de Google** | Límite del calendario nº 8: cada lunes, parar por debajo de ~30 USD |
+| 4 | **Recortar el PAT de GitHub** a Contents RW | Hoy tiene más permisos de los que usa |
+| 5 | **Decidir los límites de latencia** | Sólo después del Paso 0 |
+
+**RDC ya está autorizado y funcionando** — el gate de hoy se lanzó por ahí.
+Ese bloqueador desapareció.
 
 ---
 
-## 2. Lo que está hecho y certificado
+## 2. Lo que se construyó y probó hoy (28/08)
 
-- **Gate 4 certificado 4/4** (27/08). Códigos de retorno `0,0,0,0`
-- **Liquidaciones forzadas** (`FORCE_ORDER`) — revisadas y aprobadas
-- **Precio de marca y financiación** (`MARK_PRICE`) — revisados y aprobados. **31 pruebas pasan**
-- **Rotador de Parquet** — escrito, revisado (13 salvaguardas) y probado en laboratorio
-- **Conversor de Parquet** — 60 ficheros, 0 fallos, factor 65×
-- **Reversibilidad demostrada** byte a byte: `sha256` idéntico y auditor certificando el CSV reconstruido
-- **Disco:** 123 GB libres (37% usado). Eran 102 GB esta mañana
+| | Prueba |
+|---|---|
+| **21,34 GB liberados** | 60 ficheros, factor 65×, 0 fallos, borrado sólo tras reverificar |
+| **Liquidaciones forzadas** (`FORCE_ORDER`) | revisado; base intacta; esquema intacto |
+| **Precio de marca y financiación** (`MARK_PRICE`) | revisado; comprobado que no se duplica entre sockets |
+| **El auditor lee Parquet** | reproduce el informe certificado del gate 4 con el **mismo hash canónico del libro** |
+| **Auditoría en paralelo** | **2,35×** (577 s → 245 s); guion escrito y validado: mismos códigos, mismos informes |
+| **Continuidad entre días** | probada contra datos rotos: detecta huecos y solapamientos con el número exacto de eventos |
+| **El puente** | de 30 s a **4-5 s** por orden, medido |
+| Pruebas del colector | **33 pasan** |
 
-**El staging bueno para los 7 días es `20260828T122455Z_markprice`.** Lleva
-liquidaciones *y* precio de marca. Los anteriores quedan superados.
-
----
-
-## 3. Lo que estoy haciendo ahora
-
-**Que el auditor sepa leer Parquet** (opción B del bloqueador). Gemini escribe
-el lector en el staging `20260828T143727Z_auditparquet`; el banco de pruebas ya
-está escrito y esperando.
-
-La prueba es la que decide: el gate 4 **ya no tiene CSV** —sólo Parquet—, pero
-sí tiene sus informes certificados. Si el auditor nuevo reproduce esos informes
-leyendo Parquet, y también leyendo un CSV reconstruido, la capacidad queda
-demostrada sin cambiar ningún criterio.
-
-El número que decide es `replay.sha256` = `1d749fd5d6c741b1...`, el hash
-canónico del libro de spot. Si una sola fila cambiara, cambia.
+**El staging bueno es `20260828T143727Z_auditparquet`.** Lleva todo.
+La instalación base **nunca se toca**.
 
 ---
 
-## 4. Trabajo listo, en orden de valor
+## 3. Lo que se descubrió hoy y no sabíamos
 
-1. **Paralelizar la auditoría.** Las cuatro fases son de sólo lectura y escriben
-   a ficheros distintos; hoy corren en serie y la máquina usa 1 de 8 núcleos.
-   No toca `audit.py`: es el guion que lo llama. **Medir antes de suponer.**
-2. **Interés abierto.** No existe como flujo de websocket: sólo REST. Meter
-   HTTP en un colector de websockets es un cambio de otra naturaleza, con
-   límites de peticiones y un fallo posible en el camino caliente. Se decide
-   aparte.
-3. **Probar el rotador con una captura de verdad al lado.** Necesita el gate.
+1. **El auditor no cabía en memoria para 7 días.** Gasta 58 MB + 290 MB por
+   millón de filas; `identity` habría pedido ~28 GB de 32, y las tres fases en
+   paralelo ~55 GB. **De ahí sale certificar día a día.**
+   (`planes/MEMORIA_AUDITOR_7DIAS.md`)
+2. **El gate 4 certificó en un mercado dormido.** El gate del operador de hoy,
+   con los trades ×9-12 y BTC cayendo 554 USD en 16 minutos, **no certificó**:
+   7 umbrales de latencia. Como línea base para una semana, el gate 4 era
+   optimista. (`operaciones/GATE_POSTMASK_FALLO_ANALISIS.md`)
+3. **22 resincronizaciones del libro en una hora** de mercado movido. El dato
+   está íntegro —era el sistema curándose— pero **ninguna ventana de
+   características puede cruzar una frontera de época.**
+   (`operaciones/INVARIANTES_LIBRO_NO_ERAN_FALLO.md`)
 
 ---
 
-## 5. Cosas que hemos aprendido y que cuestan si se olvidan
+## 4. Sin resolver
+
+1. **Interés abierto.** Sólo por REST, no por websocket. Meter HTTP en un
+   colector de websockets es un cambio de otra naturaleza. **No capturado.**
+2. **El rotador nunca ha corrido junto a una captura viva.** Es el Paso 1.
+3. **Los respaldos siguen sólo en la VM.**
+
+---
+
+## 5. Cosas que cuestan si se olvidan
 
 | | Lección |
 |---|---|
-| **El guardián real** | Es `/home/trading/puente_github_watcher.py`, **no** la copia del repositorio |
-| **120 segundos** | El ejecutor del puente corta ahí. Lo que dure más se lanza despegado (`nohup`) y se consulta con órdenes cortas |
-| **La cola de Gemini es serie** | Un encargo urgente **no adelanta** a uno atascado. Hay que dar por muerto el primero |
-| **Trocear desde el principio** | Tres encargos largos han caducado con el trabajo casi hecho. Tres cortos valen más que uno de 80 minutos |
-| **Nadie se reinicia a sí mismo** | Un proceso no ejecuta su propio `systemctl restart` desde dentro de la tarea. Costó 18 minutos de guardián muerto |
-| **El `PYTHONPATH` es el de la captura** | Cualquier herramienta que importe módulos del colector usa `<run>/overlay/src`, no la base. La base es el punto de partida de los overlays, no lo que corre |
-| **Medir antes de optimizar** | El "problema de los 19 ms" no existía: salía de no excluir el calentamiento, que `audit.py` ya excluía. Dos hipótesis construidas sobre un número sin comprobar |
-| **Leer antes de encargar** | M1 y M2 ya estaban en el código. `parquet_store.py` ya existía, con 641 líneas sin usar |
+| **El guardián real** | `/home/trading/puente_github_watcher.py`, no la copia del repositorio |
+| **120 segundos** | El puente corta ahí. Lo que dure más va despegado (`nohup`) y se consulta con órdenes cortas |
+| **La cola de Gemini es serie** | Un encargo urgente no adelanta a uno atascado |
+| **Trocear los encargos** | Tres largos han caducado con el trabajo casi hecho |
+| **Nadie se reinicia a sí mismo** | Costó 18 minutos de guardián muerto |
+| **El `PYTHONPATH` es el de la captura** | Nunca el de la base: no conoce `FORCE_ORDER` ni `MARK_PRICE` |
+| **Comprobar la edad de cada respuesta** | Un id `monitor-<HHMM>` colisiona cada 24 h y devuelve el dato de ayer sin dar error |
+| **Sospechar primero de la prueba** | Hoy falló el arnés tres veces, no lo que se probaba |
+| **Juzgar por el informe** | No por el nombre de un contador |
+| **Releer lo propio antes de encargar** | Acoté un encargo fuera de donde estaba el problema, y el dato lo tenía yo escrito |
 
 ---
 
-## 6. Seguridad — sigue vigente
+## 6. Seguridad — vigente
 
 - **Producción automática, purga de CSV y Cloud Storage: prohibidos sin orden expresa**
 - **Ninguna captura se lanza sin orden del operador**
 - **Nada se toca mientras hay una captura activa**
 - **Los dos respaldos contienen credenciales.** No subirlos a GitHub ni
-  compartirlos sin limpiarlos antes
-- La clave SSH privada se subió al chat. Recomendé rotarla; decidiste dejarlo.
-  Queda anotado: sigue siendo aconsejable, y es tu decisión
+  compartirlos sin limpiarlos
+- La clave SSH privada se subió al chat. Recomendé rotarla; el operador decidió
+  dejarlo. Queda anotado: sigue siendo aconsejable, y es su decisión
