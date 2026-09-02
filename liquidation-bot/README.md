@@ -22,6 +22,26 @@ propio stream de liquidaciones ejecutadas — es el dato de origen que esos
 posts terminan graficando. El bot arma su propio mapa desde la fuente,
 en vivo.
 
+## Que trae cada alerta
+
+Cada alerta de Telegram no es solo "se liquido tanta plata": junta la
+liquidacion con el funding rate (y open interest cuando el exchange lo
+expone en bulk) del mismo simbolo, sacado en vivo de la API oficial —
+el mismo tipo de contexto que muestran los posts de liquidacion en
+Binance Square o un dashboard de CoinGlass, pero generado por el bot
+mismo a partir de datos propios, no copiado de ahi.
+
+```
+🔥 LIQUIDACION — BINANCE BTCUSDT
+🔴 LONG liquidado
+💰 $122,000 @ 61000
+📊 funding +0.0180%
+```
+
+`market_structure.py` refresca esto cada `MARKET_SNAPSHOT_INTERVAL_SECONDS`
+(default 5 min) para el top `MARKET_TOP_N` de monedas por volumen
+(default 100), en Binance y Bybit.
+
 ## Cobertura por exchange
 
 | Exchange | Estado | Como |

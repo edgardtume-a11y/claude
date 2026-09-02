@@ -20,7 +20,16 @@ class Config:
     symbols_whitelist: list[str] = field(
         default_factory=lambda: _split_symbols(os.getenv("SYMBOLS_WHITELIST", ""))
     )
-    bybit_top_n_symbols: int = int(os.getenv("BYBIT_TOP_N_SYMBOLS", "50"))
+    bybit_top_n_symbols: int = int(os.getenv("BYBIT_TOP_N_SYMBOLS", "100"))
+
+    # Shared ranking for the funding-rate / open-interest poller (CoinGlass-
+    # style market structure data). Independent from bybit_top_n_symbols
+    # above, which only controls which symbols Bybit subscribes to for raw
+    # liquidation events.
+    market_top_n: int = int(os.getenv("MARKET_TOP_N", "100"))
+    market_snapshot_interval_seconds: float = float(
+        os.getenv("MARKET_SNAPSHOT_INTERVAL_SECONDS", "300")
+    )
 
     single_event_alert_usd: float = float(os.getenv("SINGLE_EVENT_ALERT_USD", "250000"))
     cluster_alert_usd: float = float(os.getenv("CLUSTER_ALERT_USD", "750000"))

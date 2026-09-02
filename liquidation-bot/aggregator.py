@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from alerts.telegram import TelegramNotifier
 from config import Config
 from exchanges.base import LiquidationEvent
+from market_structure import MarketStructureCache
 from storage import Storage
 
 log = logging.getLogger("liqbot.aggregator")
@@ -37,10 +38,17 @@ class Aggregator:
     than either alone), keyed by (symbol, side).
     """
 
-    def __init__(self, config: Config, storage: Storage, notifier: TelegramNotifier):
+    def __init__(
+        self,
+        config: Config,
+        storage: Storage,
+        notifier: TelegramNotifier,
+        market: MarketStructureCache | None = None,
+    ):
         self.config = config
         self.storage = storage
         self.notifier = notifier
+        self.market = market
         # (symbol, side) -> deque of recent bucketed events, oldest first
         self._buffers: dict[tuple[str, str], deque[_Bucketed]] = defaultdict(deque)
         # cooldown key -> monotonic time when it's allowed to fire again
@@ -88,19 +96,41 @@ class Aggregator:
         log.info("alert: %s", text.splitlines()[0])
         await self.notifier.send(text)
 
-    @staticmethod
-    def _format_single(event: LiquidationEvent) -> str:
-        side_label = "LONG liquidado" if event.side == "LONG_LIQUIDATED" else "SHORT liquidado"
-        return (
-            f"🔥 <b>Liquidacion grande</b> — {event.exchange.upper()} {event.symbol}\n"
-            f"{side_label} · ${event.value_usd:,.0f} @ {event.price:g}"
-        )
+    def _market_lines(self, exchange: str, symbol: str) -> list[str]:
+        """Funding rate / open interest, formatted like the context line
+        under a CoinGlass or Binance-Square liquidation post. Empty when we
+        have no snapshot yet (first ~5 min after startup) or the field isn't
+        available for that exchange (see MarketStructureCache docstring)."""
+        if not self.market:
+            return []
+        snap = self.market.get(exchange, symbol)
+        if not snap:
+            return []
+        parts = []
+        if snap.funding_rate is not None:
+            parts.append(f"funding {snap.funding_rate * 100:+.4f}%")
+        if snap.open_interest_usd is not None:
+            parts.append(f"OI ${snap.open_interest_usd:,.0f}")
+        return [f"📊 {' · '.join(parts)}"] if parts else []
 
-    @staticmethod
-    def _format_cluster(event: LiquidationEvent, cluster_value: float, window: float) -> str:
+    def _format_single(self, event: LiquidationEvent) -> str:
+        side_emoji = "🔴" if event.side == "LONG_LIQUIDATED" else "🟢"
+        side_label = "LONG liquidado" if event.side == "LONG_LIQUIDATED" else "SHORT liquidado"
+        lines = [
+            f"🔥 <b>LIQUIDACION</b> — {event.exchange.upper()} {event.symbol}",
+            f"{side_emoji} {side_label}",
+            f"💰 ${event.value_usd:,.0f} @ {event.price:g}",
+            *self._market_lines(event.exchange, event.symbol),
+        ]
+        return "\n".join(lines)
+
+    def _format_cluster(self, event: LiquidationEvent, cluster_value: float, window: float) -> str:
+        side_emoji = "🔴" if event.side == "LONG_LIQUIDATED" else "🟢"
         side_label = "LONGS" if event.side == "LONG_LIQUIDATED" else "SHORTS"
-        return (
-            f"🧱 <b>Muro de liquidaciones</b> — {event.symbol}\n"
-            f"{side_label} por ${cluster_value:,.0f} concentrados cerca de {event.price:g} "
-            f"en los ultimos {window:.0f}s"
-        )
+        lines = [
+            f"🧱 <b>MURO DE LIQUIDACIONES</b> — {event.symbol}",
+            f"{side_emoji} {side_label} por ${cluster_value:,.0f} cerca de {event.price:g}",
+            f"⏱ ultimos {window:.0f}s (todas las exchanges trackeadas)",
+            *self._market_lines(event.exchange, event.symbol),
+        ]
+        return "\n".join(lines)

@@ -53,7 +53,7 @@ def test_single_large_liquidation_alerts_once():
         agg, notifier = _make_aggregator(single_event_alert_usd=100_000, cluster_alert_usd=10_000_000)
         await agg.handle(_event(price=150_000, qty=1.0))  # 150k >= 100k threshold
         assert len(notifier.sent) == 1
-        assert "Liquidacion grande" in notifier.sent[0]
+        assert "LIQUIDACION" in notifier.sent[0]
 
         # same key again immediately -> cooldown should suppress it
         await agg.handle(_event(price=150_000, qty=1.0))
@@ -84,7 +84,7 @@ def test_cluster_of_small_liquidations_triggers_wall_alert():
             await agg.handle(_event(side=SHORT_LIQUIDATED, price=60_010, qty=1.0, exchange="binance"))
             await agg.handle(_event(side=SHORT_LIQUIDATED, price=59_990, qty=0.0, exchange="bybit"))
 
-        assert any("Muro de liquidaciones" in msg for msg in notifier.sent)
+        assert any("MURO DE LIQUIDACIONES" in msg for msg in notifier.sent)
 
     asyncio.run(run())
 

@@ -11,6 +11,7 @@ from exchanges.base import ExchangeConnector, LiquidationEvent
 from exchanges.binance import BinanceConnector
 from exchanges.bybit import BybitConnector
 from exchanges.okx import OKXConnector
+from market_structure import MarketStructureCache
 from storage import Storage
 
 log = logging.getLogger("liqbot.main")
@@ -49,6 +50,9 @@ async def main() -> None:
     queue: "asyncio.Queue[LiquidationEvent]" = asyncio.Queue(maxsize=10_000)
     storage = Storage(config.db_path)
     connectors = _build_connectors(queue)
+    market = MarketStructureCache(
+        top_n=config.market_top_n, interval_seconds=config.market_snapshot_interval_seconds
+    )
 
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
@@ -59,13 +63,15 @@ async def main() -> None:
             pass  # e.g. Windows without proactor signal support
 
     async with TelegramNotifier(config.telegram_bot_token, config.telegram_chat_id) as notifier:
-        aggregator = Aggregator(config, storage, notifier)
+        aggregator = Aggregator(config, storage, notifier, market=market)
         await notifier.send(
             "🤖 Liquidation bot arrancado — trackeando "
-            f"{', '.join(c.name for c in connectors)}"
+            f"{', '.join(c.name for c in connectors)} "
+            f"(top {config.market_top_n} monedas por volumen para funding/OI)"
         )
 
         tasks = [asyncio.create_task(c.run(), name=f"connector:{c.name}") for c in connectors]
+        tasks.append(asyncio.create_task(market.run(), name="market-structure"))
         tasks.append(asyncio.create_task(_consume(queue, aggregator), name="consumer"))
 
         await stop.wait()
