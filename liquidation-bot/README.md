@@ -1,7 +1,8 @@
 # liquidation-bot
 
 Bot local que escucha los feeds **oficiales** de liquidaciones de varios exchanges
-en tiempo real, guarda todo en SQLite, y avisa por Telegram cuando ve:
+en tiempo real, guarda todo en SQLite, y avisa **en la consola al instante**
+(y por Telegram si lo configurás) cuando ve:
 
 - una **liquidacion individual grande** (`SINGLE_EVENT_ALERT_USD`), o
 - un **"muro"**: varias liquidaciones del mismo lado (longs o shorts),
@@ -60,13 +61,17 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Completa `.env`:
+Con `.env` tal cual viene de `.env.example` (vacio) el bot YA funciona: las
+alertas salen por consola, sin configurar nada mas.
+
+Telegram es opcional, para tambien recibir el aviso en el celular:
 1. Cread un bot con [@BotFather](https://t.me/BotFather) en Telegram -> `TELEGRAM_BOT_TOKEN`.
 2. Mandale un mensaje a tu bot, despues consulta
    `https://api.telegram.org/bot<TOKEN>/getUpdates` para sacar tu `chat_id`
    (o usa [@userinfobot](https://t.me/userinfobot)) -> `TELEGRAM_CHAT_ID`.
-3. Ajusta los umbrales (`SINGLE_EVENT_ALERT_USD`, `CLUSTER_ALERT_USD`, etc.)
-   segun que tan seguido queres que te avise.
+
+Ajusta los umbrales (`SINGLE_EVENT_ALERT_USD`, `CLUSTER_ALERT_USD`, etc.)
+segun que tan seguido queres que te avise.
 
 ## Correr
 

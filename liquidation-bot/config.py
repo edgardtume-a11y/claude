@@ -40,17 +40,9 @@ class Config:
     db_path: str = os.getenv("DB_PATH", "liquidations.db")
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
-    def validate(self) -> None:
-        missing = []
-        if not self.telegram_bot_token:
-            missing.append("TELEGRAM_BOT_TOKEN")
-        if not self.telegram_chat_id:
-            missing.append("TELEGRAM_CHAT_ID")
-        if missing:
-            raise SystemExit(
-                "Falta configurar en .env: " + ", ".join(missing) + "\n"
-                "Copia .env.example a .env y completa los valores."
-            )
+    @property
+    def telegram_configured(self) -> bool:
+        return bool(self.telegram_bot_token and self.telegram_chat_id)
 
 
 config = Config()
