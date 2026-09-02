@@ -9,7 +9,7 @@
 ## ⚠️ LO PRIMERO: la VM de Tokio está APAGADA
 
 Verificado el 1/09: `jean-flow-02-tokyo` lleva **77 horas fuera de línea** (desde el
-29/08 ~09:00 UTC). El PC Windows `AS40569324` sí está en línea.
+29/08 18:46 UTC — es decir, 8 h DESPUÉS de que los grabadores terminaran, así que esa grabación probablemente sí se completó). El PC `AS40569324` estaba en línea el 1/09; el 2/09 el conector Remote Desktop Commander se desconectó y hay que reautorizarlo en claude.ai → Conectores.
 
 Consecuencia: **todo lo que corría en la VM se detuvo con ella.** Nada de lo de
 abajo se ha podido verificar desde entonces. Antes de asumir cualquier estado,
@@ -19,9 +19,9 @@ Lo que corría cuando se apagó:
 
 | proceso | qué hacía | fin previsto | estado real |
 |---|---|---|---|
-| `registrar_libro.py` | 100 niveles de libro, spot+fut, 1/s | 10:31 UTC 29/08 | **desconocido** |
-| `registrar_trades.py` | operaciones de futuros con agresor | 10:54 UTC 29/08 | **desconocido** |
-| `operar.py` | robot direccional en papel, 200k USD | 10:32 UTC 29/08 | **desconocido** |
+| `registrar_libro.py` | 100 niveles de libro, spot+fut, 1/s | 10:31 UTC 29/08 | probablemente completado (VM viva hasta 18:46) |
+| `registrar_trades.py` | operaciones de futuros con agresor | 10:54 UTC 29/08 | probablemente completado (VM viva hasta 18:46) |
+| `operar.py` | robot direccional en papel, 200k USD | 10:32 UTC 29/08 | probablemente completado (VM viva hasta 18:46) |
 
 Los archivos deberían estar en `/home/trading/basis/` si el disco sobrevivió.
 
