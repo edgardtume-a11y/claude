@@ -16,6 +16,7 @@ from exchanges.bybit import BybitConnector
 from exchanges.okx import OKXConnector
 from market_structure import MarketStructureCache
 from storage import Storage
+from web.server import DashboardServer
 
 log = logging.getLogger("liqbot.main")
 
@@ -32,11 +33,13 @@ def _build_connectors(queue: "asyncio.Queue[LiquidationEvent]") -> list[Exchange
 async def _consume(
     queue: "asyncio.Queue[LiquidationEvent]",
     aggregator: Aggregator,
+    dashboard: DashboardServer,
 ) -> None:
     while True:
         event = await queue.get()
         try:
             await aggregator.handle(event)
+            await dashboard.broadcast(event)
         except Exception:  # noqa: BLE001 - one bad event must never kill the loop
             log.exception("failed handling event: %s", event)
         finally:
@@ -90,15 +93,19 @@ async def main() -> None:
             config.market_top_n,
         )
 
+        dashboard = DashboardServer(storage, host=config.web_host, port=config.web_port)
+        await dashboard.start()
+
         tasks = [asyncio.create_task(c.run(), name=f"connector:{c.name}") for c in connectors]
         tasks.append(asyncio.create_task(market.run(), name="market-structure"))
-        tasks.append(asyncio.create_task(_consume(queue, aggregator), name="consumer"))
+        tasks.append(asyncio.create_task(_consume(queue, aggregator, dashboard), name="consumer"))
 
         await stop.wait()
         log.info("shutting down...")
         for t in tasks:
             t.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
+        await dashboard.stop()
 
     storage.close()
 

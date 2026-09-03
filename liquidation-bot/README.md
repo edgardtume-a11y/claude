@@ -23,6 +23,25 @@ propio stream de liquidaciones ejecutadas — es el dato de origen que esos
 posts terminan graficando. El bot arma su propio mapa desde la fuente,
 en vivo.
 
+## Panel web (Windows, doble clic)
+
+1. Copiar la carpeta `liquidation-bot` a donde quieras (ej. `D:\liquidation-bot`).
+2. Doble clic en **`INICIAR_LIQUIDACIONES.cmd`**. La primera vez crea el
+   entorno Python (~1 min); despues arranca al toque.
+3. Se abre solo el navegador en **http://127.0.0.1:8080** con:
+   - feed en vivo de cada liquidacion (hora, exchange, moneda, lado, precio, USD),
+   - totales de la ventana (1 h / 4 h / 24 h): total, longs, shorts, la mas grande,
+   - ranking de monedas con barra long/short,
+   - filtros por moneda, exchange, minimo en USD y ventana de tiempo.
+4. Para detener: cerrar la ventana negra (o Ctrl+C).
+
+Binance transmite liquidaciones de TODOS sus pares de futuros USDⓈ-M (~500),
+asi que el panel los cubre a todos sin configurar nada. El servidor escucha
+solo en `127.0.0.1`: nadie fuera de esta PC puede abrirlo.
+
+Requisitos: Python 3.12 instalado (el `.cmd` usa `py`). Sin Windows, corre
+`python3 main.py` y abri la misma URL.
+
 ## Que trae cada alerta
 
 Cada alerta de Telegram no es solo "se liquido tanta plata": junta la

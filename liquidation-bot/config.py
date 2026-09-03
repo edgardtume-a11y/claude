@@ -40,6 +40,10 @@ class Config:
     db_path: str = os.getenv("DB_PATH", "liquidations.db")
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
+    # Local web dashboard. 127.0.0.1 = only this PC can open it.
+    web_host: str = os.getenv("WEB_HOST", "127.0.0.1")
+    web_port: int = int(os.getenv("WEB_PORT", "8080"))
+
     @property
     def telegram_configured(self) -> bool:
         return bool(self.telegram_bot_token and self.telegram_chat_id)
